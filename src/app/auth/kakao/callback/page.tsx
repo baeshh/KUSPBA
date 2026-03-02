@@ -22,16 +22,19 @@ function CallbackContent() {
       return;
     }
 
+    const redirectUri = `${window.location.origin}/auth/kakao/callback`;
     fetch("/api/auth/kakao", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ code }),
+      body: JSON.stringify({ code, redirectUri }),
     })
-      .then((res) => {
+      .then(async (res) => {
         if (res.ok) {
           setStatus("success");
           router.push("/");
         } else {
+          const data = await res.json().catch(() => ({}));
+          console.error("Kakao auth error:", data);
           setStatus("error");
         }
       })

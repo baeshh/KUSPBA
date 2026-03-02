@@ -2,11 +2,11 @@ import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(request: NextRequest) {
   try {
-    const { code } = await request.json();
-    const origin = request.headers.get("origin") || request.nextUrl.origin;
+    const { code, redirectUri: clientRedirectUri } = await request.json();
     const redirectUri =
       process.env.NEXT_PUBLIC_KAKAO_REDIRECT_URI ||
-      `${origin}/auth/kakao/callback`;
+      clientRedirectUri ||
+      `${request.headers.get("origin") || request.nextUrl.origin}/auth/kakao/callback`;
     const restApiKey = process.env.KAKAO_REST_API_KEY;
 
     if (!code || !restApiKey) {
@@ -30,7 +30,10 @@ export async function POST(request: NextRequest) {
     if (!tokenRes.ok) {
       const err = await tokenRes.text();
       console.error("Kakao token error:", err);
-      return NextResponse.json({ error: "Token exchange failed" }, { status: 400 });
+      return NextResponse.json(
+        { error: "Token exchange failed", details: err },
+        { status: 400 }
+      );
     }
 
     const tokenData = await tokenRes.json();

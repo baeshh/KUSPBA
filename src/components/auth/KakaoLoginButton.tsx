@@ -25,10 +25,11 @@ export function KakaoLoginButton() {
     if (!ready || typeof window === "undefined" || !window.Kakao) {
       return;
     }
-    const redirectUri =
-      typeof window !== "undefined"
-        ? `${window.location.origin}/auth/kakao/callback`
-        : "";
+    const redirectUri = `${window.location.origin}/auth/kakao/callback`;
+    // 디버그: 콘솔에서 실제 사용되는 redirect URI 확인
+    if (process.env.NODE_ENV === "development") {
+      console.log("[Kakao] redirectUri:", redirectUri);
+    }
     window.Kakao.Auth.authorize({ redirectUri });
   }, [ready]);
 
