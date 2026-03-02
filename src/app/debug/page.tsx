@@ -60,7 +60,10 @@ export default function DebugPage() {
           ↑ 위 &quot;사용되는 Redirect URI&quot; 값을 카카오 디벨로퍼스에 그대로 등록하세요.
         </p>
         <p className="mt-2 text-amber-700">
-          플랫폼 → Web → Redirect URI에 추가
+          플랫폼 → Web → Redirect URI에 추가 (REST API 키 섹션)
+        </p>
+        <p className="mt-2 text-sm text-amber-600">
+          현재 REST API 방식 사용 중 → JavaScript SDK 도메인 불필요
         </p>
       </div>
       <a href="/" className="text-blue-600 underline">
