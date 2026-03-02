@@ -53,6 +53,34 @@ npm run dev
 
 `.env.example`을 참고하여 `.env` 파일을 생성하세요.
 
+## 배포 (GitHub Actions + Vercel)
+
+`main` 브랜치에 push하면 자동으로 Vercel에 배포됩니다.
+
+### 1. Vercel 프로젝트 연결
+
+```bash
+cd /Users/baesh/Desktop/KUSPBA
+npx vercel
+```
+
+프롬프트에 따라 로그인 후 프로젝트를 생성/연결하면 `.vercel` 폴더가 생깁니다.  
+`.vercel/project.json`에서 `orgId`, `projectId` 값을 확인하세요.
+
+### 2. GitHub Secrets 설정
+
+저장소 Settings → Secrets and variables → Actions에서 다음 시크릿을 추가하세요:
+
+| Name | Description |
+|------|-------------|
+| `VERCEL_TOKEN` | [Vercel Dashboard](https://vercel.com/account/tokens) → Create Token |
+| `VERCEL_ORG_ID` | `.vercel/project.json`의 orgId |
+| `VERCEL_PROJECT_ID` | `.vercel/project.json`의 projectId |
+
+### 3. 배포
+
+`main` 브랜치에 push하면 프로덕션 배포, PR 생성 시 프리뷰 배포가 됩니다.
+
 ## 개발 일정 (예시)
 
 - 1주차: 디자인 + 구조 설계 ✅
