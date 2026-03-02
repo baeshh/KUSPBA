@@ -23,7 +23,7 @@ export default function HomePage() {
         </p>
         <div className="flex justify-center gap-3">
           <Link
-            href="/#programs"
+            href="/seminars"
             className="inline-flex items-center justify-center rounded-full bg-[#1D1D1F] px-6 py-3 text-[15px] font-semibold text-white transition-colors hover:bg-black"
           >
             진행 중인 세미나 보기
@@ -47,9 +47,17 @@ export default function HomePage() {
             </p>
           </div>
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {MOCK_SEMINARS.map((seminar) => (
+            {MOCK_SEMINARS.slice(0, 3).map((seminar) => (
               <ProgramCard key={seminar.id} {...seminar} />
             ))}
+          </div>
+          <div className="mt-12 text-center">
+            <Link
+              href="/seminars"
+              className="inline-flex items-center justify-center rounded-full bg-[#1D1D1F] px-6 py-3 text-[15px] font-semibold text-white transition-colors hover:bg-black"
+            >
+              진행 중인 세미나 목록 보기 →
+            </Link>
           </div>
         </div>
       </section>
@@ -62,11 +70,14 @@ export default function HomePage() {
               학과 단위로 KUSPBA와 함께하세요
             </h2>
             <p className="mb-6 max-w-[500px] text-base opacity-90">
-              타 대학 제약/바이오 학과 학생들과의 탄탄한 네트워크. 학과 단위
-              가입은 별도 문의를 통해 수동 등록으로 진행됩니다.
+              타 대학 제약/바이오 학과 학생들과의 탄탄한 네트워크.
+              <br />
+              학과 단위 가입은 별도 문의를 통해 수동 등록으로 진행됩니다.
             </p>
             <a
-              href="#"
+              href="https://pf.kakao.com/_XHhSn"
+              target="_blank"
+              rel="noopener noreferrer"
               className="inline-flex items-center justify-center rounded-full bg-white px-7 py-3.5 text-[15px] font-semibold text-[#427A72] transition-colors hover:bg-[#F5F5F7]"
             >
               💬 카카오톡으로 가입 문의하기

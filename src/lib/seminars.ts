@@ -1,9 +1,16 @@
 export type SeminarStatus = "recruiting" | "closed" | "ended";
 
+export type SeminarType =
+  | "직무 세미나"
+  | "네트워킹"
+  | "실무 프로젝트"
+  | "공모전";
+
 export interface SeminarDetail {
   id: string;
   title: string;
   status: SeminarStatus;
+  type: SeminarType;
   applicationPeriod: string;
   imageUrl: string;
   eventDate: string;
@@ -20,6 +27,7 @@ export const MOCK_SEMINARS: SeminarDetail[] = [
     id: "1",
     title: "2026 상반기 제약/바이오 직무 탐색 세미나",
     status: "recruiting",
+    type: "직무 세미나",
     applicationPeriod: "2026.03.10 - 03.25",
     imageUrl:
       "https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&q=80&w=1000",
@@ -41,6 +49,7 @@ export const MOCK_SEMINARS: SeminarDetail[] = [
     id: "2",
     title: "[일대일 멘토링] 현직자와 함께하는 진로 설계",
     status: "recruiting",
+    type: "네트워킹",
     applicationPeriod: "2026.03.15 - 03.30",
     imageUrl:
       "https://images.unsplash.com/photo-1532094349884-543bc11b234d?auto=format&fit=crop&q=80&w=1000",
@@ -58,6 +67,7 @@ export const MOCK_SEMINARS: SeminarDetail[] = [
     id: "3",
     title: "기업 연계 실전 프로젝트 1기",
     status: "ended",
+    type: "실무 프로젝트",
     applicationPeriod: "2026.01.01 - 01.31",
     imageUrl:
       "https://images.unsplash.com/photo-1542744173-8e7e53415bb0?auto=format&fit=crop&q=80&w=1000",
@@ -66,6 +76,36 @@ export const MOCK_SEMINARS: SeminarDetail[] = [
     capacity: "15명",
     fee: "무료",
     description: ["기업 연계 프로젝트 1기 모집이 마감되었습니다."],
+    program: [],
+  },
+  {
+    id: "4",
+    title: "2025 KUSPBA 제약바이오 산업 해커톤",
+    status: "ended",
+    type: "공모전",
+    applicationPeriod: "2025.11.01 - 11.20",
+    imageUrl:
+      "https://images.unsplash.com/photo-1582719478250-c894090bdcb1?auto=format&fit=crop&q=80&w=800",
+    eventDate: "2025년 12월",
+    location: "서울",
+    capacity: "80명",
+    fee: "무료",
+    description: ["2025 KUSPBA 제약바이오 산업 해커톤이 마감되었습니다."],
+    program: [],
+  },
+  {
+    id: "5",
+    title: "제약 R&D 직무 특강 (온라인)",
+    status: "ended",
+    type: "직무 세미나",
+    applicationPeriod: "2025.09.10 - 09.25",
+    imageUrl:
+      "https://images.unsplash.com/photo-1532094349884-543bc11b234d?auto=format&fit=crop&q=80&w=800",
+    eventDate: "2025년 9월",
+    location: "온라인",
+    capacity: "100명",
+    fee: "무료",
+    description: ["제약 R&D 직무 특강이 마감되었습니다."],
     program: [],
   },
 ];

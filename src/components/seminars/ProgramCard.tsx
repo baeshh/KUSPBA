@@ -8,6 +8,8 @@ interface ProgramCardProps {
   applicationPeriod: string;
   status: SeminarStatus;
   imageUrl?: string;
+  type?: string;
+  variant?: "default" | "list";
 }
 
 export function ProgramCard({
@@ -16,14 +18,18 @@ export function ProgramCard({
   applicationPeriod,
   status,
   imageUrl = "https://images.unsplash.com/photo-1582719478250-c894090bdcb1?auto=format&fit=crop&q=80&w=600",
+  type,
+  variant = "default",
 }: ProgramCardProps) {
   const isClosed = status === "closed" || status === "ended";
 
   return (
     <Link href={`/seminars/${id}`}>
       <article
-        className={`flex flex-col overflow-hidden rounded-[20px] border border-black/5 bg-white transition-all duration-300 hover:-translate-y-1 hover:shadow-lg ${
-          isClosed ? "opacity-70" : ""
+        className={`flex h-full flex-col overflow-hidden rounded-[20px] border border-black/[0.08] bg-white transition-all duration-300 ${
+          isClosed
+            ? "opacity-80"
+            : "cursor-pointer hover:-translate-y-1 hover:shadow-[0_12px_24px_rgba(0,0,0,0.06)]"
         }`}
       >
         <div className="relative h-[200px] w-full bg-[#E8F0EE]">
@@ -31,7 +37,7 @@ export function ProgramCard({
             src={imageUrl}
             alt={title}
             fill
-            className={`object-cover ${isClosed ? "grayscale" : ""}`}
+            className={`object-cover ${isClosed ? "grayscale opacity-80" : ""}`}
             sizes="(max-width: 768px) 100vw, 33vw"
           />
         </div>
@@ -45,14 +51,31 @@ export function ProgramCard({
           >
             {isClosed ? "마감" : "모집 중"}
           </span>
-          <h3 className="mb-2 text-xl font-semibold leading-snug">{title}</h3>
-          <p className="mb-5 text-sm text-[#86868B]">신청기간: {applicationPeriod}</p>
-          <div
-            className={`mt-auto text-sm font-semibold ${
-              isClosed ? "text-[#A1A1A6]" : "text-[#427A72]"
-            }`}
-          >
-            {isClosed ? "신청이 마감되었습니다" : "자세히 보기 →"}
+          <h3 className={`mb-2 text-xl font-semibold leading-snug ${isClosed ? "opacity-60" : ""}`}>
+            {title}
+          </h3>
+          <p className={`mb-5 text-sm text-[#86868B] ${isClosed ? "opacity-60" : ""}`}>
+            신청: {applicationPeriod}
+          </p>
+          <div className="mt-auto flex items-center justify-between">
+            {variant === "list" && type ? (
+              <>
+                <span className={`text-[13px] text-[#86868B] ${isClosed ? "opacity-60" : ""}`}>
+                  {type}
+                </span>
+                <span
+                  className={`text-sm font-semibold ${isClosed ? "text-[#A1A1A6] font-medium" : "text-[#427A72]"}`}
+                >
+                  {isClosed ? "마감됨" : "상세보기 →"}
+                </span>
+              </>
+            ) : (
+              <span
+                className={`text-sm font-semibold ${isClosed ? "text-[#A1A1A6] font-medium" : "text-[#427A72]"}`}
+              >
+                {isClosed ? "신청이 마감되었습니다" : "자세히 보기 →"}
+              </span>
+            )}
           </div>
         </div>
       </article>

@@ -23,7 +23,7 @@ export function Header() {
             협회 소개
           </Link>
           <Link
-            href="/#programs"
+            href="/seminars"
             className="text-sm font-medium text-[#86868B] transition-colors hover:text-[#1D1D1F]"
           >
             세미나/교육
