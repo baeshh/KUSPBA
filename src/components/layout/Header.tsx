@@ -1,15 +1,23 @@
 import Link from "next/link";
+import Image from "next/image";
 
 export function Header() {
   return (
     <header className="fixed top-0 left-0 right-0 z-50 h-[60px] border-b border-black/5 bg-[rgba(251,251,253,0.85)] backdrop-blur-xl">
       <div className="mx-auto flex h-full max-w-[1200px] items-center justify-between px-6">
-        <Link href="/" className="text-xl font-bold tracking-tight text-[#1D1D1F]">
-          KUSPBA
+        <Link href="/" className="flex items-center">
+          <Image
+            src="/logo.png"
+            alt="KUSPBA"
+            width={120}
+            height={32}
+            className="h-8 w-auto"
+            priority
+          />
         </Link>
         <nav className="flex items-center gap-8">
           <Link
-            href="/#about"
+            href="/about"
             className="text-sm font-medium text-[#86868B] transition-colors hover:text-[#1D1D1F]"
           >
             협회 소개

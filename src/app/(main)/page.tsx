@@ -1,33 +1,6 @@
 import Link from "next/link";
 import { ProgramCard } from "@/components/seminars/ProgramCard";
-
-// TODO: API에서 실제 데이터 fetch로 교체
-const MOCK_SEMINARS = [
-  {
-    id: "1",
-    title: "2026 상반기 제약/바이오 직무 탐색 세미나",
-    applicationPeriod: "2026.03.10 - 03.25",
-    status: "recruiting" as const,
-    imageUrl:
-      "https://images.unsplash.com/photo-1582719478250-c894090bdcb1?auto=format&fit=crop&q=80&w=600",
-  },
-  {
-    id: "2",
-    title: "[일대일 멘토링] 현직자와 함께하는 진로 설계",
-    applicationPeriod: "2026.03.15 - 03.30",
-    status: "recruiting" as const,
-    imageUrl:
-      "https://images.unsplash.com/photo-1532094349884-543bc11b234d?auto=format&fit=crop&q=80&w=600",
-  },
-  {
-    id: "3",
-    title: "기업 연계 실전 프로젝트 1기",
-    applicationPeriod: "2026.01.01 - 01.31",
-    status: "ended" as const,
-    imageUrl:
-      "https://images.unsplash.com/photo-1542744173-8e7e53415bb0?auto=format&fit=crop&q=80&w=600",
-  },
-];
+import { MOCK_SEMINARS } from "@/lib/seminars";
 
 export default function HomePage() {
   return (
@@ -40,7 +13,7 @@ export default function HomePage() {
           >
             우리는 머뭅니다.
             <br />
-            당신이 머물지 않도록.
+            당신이 멈추지 않도록.
           </span>
         </h1>
         <p className="mx-auto mb-10 max-w-[600px] text-xl leading-relaxed text-[#86868B]">
@@ -56,7 +29,7 @@ export default function HomePage() {
             진행 중인 세미나 보기
           </Link>
           <Link
-            href="/#about"
+            href="/about"
             className="inline-flex items-center justify-center rounded-full border border-black/15 px-6 py-3 text-[15px] font-semibold transition-colors hover:bg-black/[0.03]"
           >
             협회 알아보기
