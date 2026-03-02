@@ -1,5 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
+import { KakaoLoginButton } from "@/components/auth/KakaoLoginButton";
 
 export function Header() {
   return (
@@ -34,13 +35,7 @@ export function Header() {
           >
             학과 제휴
           </Link>
-          <button
-            type="button"
-            className="inline-flex items-center justify-center rounded-full bg-[#FEE500] px-[18px] py-2 text-sm font-semibold text-black transition-colors hover:bg-[#E6CF00]"
-          >
-            <span className="mr-1.5 font-extrabold">K</span>
-            카카오 로그인
-          </button>
+          <KakaoLoginButton />
         </nav>
       </div>
     </header>
