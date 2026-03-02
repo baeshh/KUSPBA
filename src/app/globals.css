@@ -1,0 +1,32 @@
+@import "tailwindcss";
+
+/* KUSPBA 디자인 토큰 */
+:root {
+  --bg-base: #fbfbfd;
+  --bg-surface: #ffffff;
+  --text-primary: #1d1d1f;
+  --text-secondary: #86868b;
+  --text-tertiary: #a1a1a6;
+  --brand-teal: #427a72;
+  --brand-blue: #4a6c82;
+  --brand-light: #e8f0ee;
+  --kakao-yellow: #fee500;
+}
+
+@theme inline {
+  --color-background: var(--bg-base);
+  --color-foreground: var(--text-primary);
+  --font-sans: "Pretendard Variable", -apple-system, BlinkMacSystemFont,
+    "SF Pro KR", sans-serif;
+}
+
+body {
+  background-color: var(--bg-base);
+  color: var(--text-primary);
+  font-family: "Pretendard Variable", -apple-system, BlinkMacSystemFont,
+    "SF Pro KR", sans-serif;
+  line-height: 1.5;
+  letter-spacing: -0.02em;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
