@@ -24,4 +24,11 @@ jobs:
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
-            bash /home/ubuntu/apps/kuspba/deploy.sh
+            set -euxo pipefail
+            cd /home/ubuntu/apps/kuspba
+            pwd
+            git status -sb
+            git pull origin main
+            npm ci
+            npm run build
+            pm2 restart all --update-env
