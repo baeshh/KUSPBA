@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 
 const revealClass = "home-reveal";
 
@@ -121,16 +122,17 @@ export default function HomePage() {
             className="flex h-[300px] w-[300px] items-center justify-center rounded-[42px] border border-white/90 bg-gradient-to-br from-white/80 to-white/30 shadow-[0_30px_60px_rgba(0,0,0,0.08)] backdrop-blur-xl transition-transform duration-100 md:h-[340px] md:w-[340px]"
             style={{ transform: "rotateX(15deg) rotateY(-15deg)" }}
           >
-            <div
-              aria-label="KUSPBA 로고"
-              className="h-[80px] w-[180px] rounded-2xl opacity-95"
-              style={{
-                backgroundImage: "url('/kuspba-capsule-logo-source.png')",
-                backgroundRepeat: "no-repeat",
-                backgroundSize: "1024px 893px",
-                backgroundPosition: "-610px -345px",
-              }}
-            />
+            <div className="relative h-[70px] w-[120px]">
+              <Image
+                src="/logo.png"
+                alt="KUSPBA 로고"
+                fill
+                sizes="120px"
+                className="object-contain"
+                style={{ mixBlendMode: "screen" }}
+                priority
+              />
+            </div>
           </div>
         </div>
       </section>
