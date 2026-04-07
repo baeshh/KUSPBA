@@ -17,29 +17,21 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v5
 
-      - name: Deploy to EC2
+      - name: Debug secrets
+        run: |
+          echo "HOST set: ${{ secrets.SSH_HOST != '' }}"
+          echo "USER set: ${{ secrets.SSH_USER != '' }}"
+          echo "KEY set: ${{ secrets.SSH_PRIVATE_KEY != '' }}"
+
+      - name: Test SSH connection
         uses: appleboy/ssh-action@v1.2.5
         with:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
-            bash -lc '
-              set -euxo pipefail
-              export NVM_DIR="$HOME/.nvm"
-              if [ -s "$NVM_DIR/nvm.sh" ]; then
-                . "$NVM_DIR/nvm.sh"
-              fi
-
-              cd /home/ubuntu/apps/kuspba
-              pwd
-              command -v git
-              command -v node
-              command -v npm
-              command -v pm2
-              git status -sb
-              git pull --ff-only origin main
-              npm ci
-              npm run build
-              pm2 restart all --update-env
-            '
+            whoami
+            hostname
+            pwd
+            ls -la /home/ubuntu/apps/kuspba
+            bash /home/ubuntu/apps/kuspba/deploy.sh
