@@ -122,18 +122,13 @@ export default function HomePage() {
             className="flex h-[300px] w-[300px] items-center justify-center rounded-[42px] border border-white/90 bg-gradient-to-br from-white/80 to-white/30 shadow-[0_30px_60px_rgba(0,0,0,0.08)] backdrop-blur-xl transition-transform duration-100 md:h-[340px] md:w-[340px]"
             style={{ transform: "rotateX(15deg) rotateY(-15deg)" }}
           >
-            <div className="relative h-[150px] w-[150px] overflow-hidden md:h-[176px] md:w-[176px]">
+            <div className="relative h-[224px] w-[224px] md:h-[248px] md:w-[248px]">
               <Image
                 src="/logo.png"
                 alt="KUSPBA 로고"
                 fill
-                sizes="176px"
+                sizes="248px"
                 className="object-contain"
-                style={{
-                  mixBlendMode: "screen",
-                  transform: "scale(2.35)",
-                  filter: "contrast(1.08)",
-                }}
                 priority
               />
             </div>
