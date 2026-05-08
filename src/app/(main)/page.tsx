@@ -133,7 +133,7 @@ export default function HomePage() {
         style={{ background: "#C1E0E4" }}
       />
 
-      <section className="hero-wrap relative mx-auto flex min-h-[860px] max-w-[1200px] flex-col items-center gap-10 px-6 pb-[250px] pt-[170px] lg:flex-row">
+      <section className="hero-wrap relative mx-auto flex max-w-[1200px] flex-col items-center gap-10 px-6 pb-16 pt-[120px] lg:min-h-[860px] lg:flex-row lg:pb-[250px] lg:pt-[170px]">
         <button
           type="button"
           onClick={handlePrevHeroSlide}
@@ -212,12 +212,12 @@ export default function HomePage() {
               </svg>
             </button>
           </div>
-          <h1 className="mb-6 break-keep text-[52px] font-black leading-[1.12] tracking-[-0.04em] text-[#222] md:text-[64px]">
+          <h1 className="mb-6 break-keep text-[42px] font-black leading-[1.12] tracking-[-0.04em] text-[#222] md:text-[52px] lg:text-[64px]">
             {currentHeroSlide.titleLine1}
             <br />
-            <span className="whitespace-nowrap">{currentHeroSlide.titleLine2}</span>
+            <span className="md:whitespace-nowrap">{currentHeroSlide.titleLine2}</span>
           </h1>
-          <p className="mb-10 text-lg font-medium leading-relaxed text-[#555] md:text-xl">
+          <p className="mb-10 text-base font-medium leading-relaxed text-[#555] md:text-lg lg:text-xl">
             {currentHeroSlide.descriptionLine1}
             <br />
             {currentHeroSlide.descriptionLine2}
@@ -237,13 +237,13 @@ export default function HomePage() {
             </Link>
           </div>
         </div>
-        <div className="relative flex h-[420px] flex-[0.85] items-center justify-center">
+        <div className="relative flex h-[330px] w-full flex-[0.85] items-center justify-center md:h-[420px]">
           <div
             id="cube3d"
-            className="flex h-[300px] w-[300px] items-center justify-center rounded-[42px] border border-white/90 bg-gradient-to-br from-white/80 to-white/30 shadow-[0_30px_60px_rgba(0,0,0,0.08)] backdrop-blur-xl transition-transform duration-100 md:h-[340px] md:w-[340px]"
+            className="flex h-[260px] w-[260px] items-center justify-center rounded-[34px] border border-white/90 bg-gradient-to-br from-white/80 to-white/30 shadow-[0_30px_60px_rgba(0,0,0,0.08)] backdrop-blur-xl transition-transform duration-100 md:h-[300px] md:w-[300px] md:rounded-[42px] lg:h-[340px] lg:w-[340px]"
             style={{ transform: "rotateX(15deg) rotateY(-15deg)" }}
           >
-            <div className="relative h-[224px] w-[224px] md:h-[248px] md:w-[248px]">
+            <div className="relative h-[186px] w-[186px] md:h-[224px] md:w-[224px] lg:h-[248px] lg:w-[248px]">
               <Image
                 src="/logo.png"
                 alt="KUSPBA 로고"
@@ -256,7 +256,7 @@ export default function HomePage() {
           </div>
         </div>
 
-        <div className="absolute bottom-8 left-0 right-0 px-6">
+        <div className="mt-8 w-full px-0 lg:absolute lg:bottom-8 lg:left-0 lg:right-0 lg:mt-0 lg:px-6">
           <div className="mb-5 text-center">
             <p className="mb-2 text-lg font-bold text-[#8ABFB2]">Partner Schools</p>
             <h3 className="text-[28px] font-black tracking-[-0.03em] text-[#222] md:text-[32px]">
@@ -293,7 +293,7 @@ export default function HomePage() {
         />
         <div className={revealClass}>
           <p className="mb-3 text-xl font-bold text-[#8ABFB2]">Our Vision</p>
-          <h2 className="mb-8 whitespace-nowrap text-[32px] font-black tracking-[-0.03em] text-[#222] md:text-[40px]">
+          <h2 className="mb-8 text-[28px] font-black tracking-[-0.03em] text-[#222] md:whitespace-nowrap md:text-[40px]">
             &ldquo;제약&middot;바이오 인재와 산업을 잇는 가장 단단한 토대가 되는 것&rdquo;
           </h2>
 
@@ -318,25 +318,38 @@ export default function HomePage() {
             {
               title: "연결 (Connect)",
               desc: "개인과 개인을 잇고, 학문과 산업을 연결하여, 세상으로 나아가는 발판을 만듭니다.",
+              image: "/core-value-connect.png",
             },
             {
               title: "개척 (Pioneer)",
               desc: "주체적인 도전정신으로 우리의 역량을 산업 전체의 에너지로 확장합니다.",
+              image: "/core-value-pioneer.png",
             },
             {
               title: "토대 (Foundation)",
               desc: "학생과 산업 사이, 구성원이 어느 방향으로든 나아갈 수 있는 신뢰의 기반을 만듭니다.",
+              image: "/core-value-foundation.png",
             },
           ].map((value, idx) => (
             <div
               key={value.title}
-              className="rounded-[30px] border border-white bg-white/80 p-9 shadow-[0_20px_40px_rgba(0,0,0,0.03)] backdrop-blur-2xl transition hover:-translate-y-2 hover:border-[#C1E4D7] hover:shadow-[0_25px_50px_rgba(0,0,0,0.06)]"
-              style={{ marginTop: idx * 32 }}
+              className="overflow-hidden rounded-[30px] border border-white bg-white/80 p-7 shadow-[0_20px_40px_rgba(0,0,0,0.03)] backdrop-blur-2xl transition hover:-translate-y-2 hover:border-[#C1E4D7] hover:shadow-[0_25px_50px_rgba(0,0,0,0.06)] md:p-8"
+              style={{ marginTop: 0 }}
             >
               <h3 className="mb-3 text-[26px] font-extrabold tracking-[-0.03em] text-[#222]">
                 {value.title}
               </h3>
               <p className="text-[16px] leading-relaxed text-[#555]">{value.desc}</p>
+              <div className="relative mt-8 aspect-[4/3] overflow-hidden rounded-[22px] bg-[#F8F9FA] shadow-inner">
+                <Image
+                  src={value.image}
+                  alt={`${value.title} 활동 이미지`}
+                  fill
+                  sizes="(max-width: 768px) 100vw, 360px"
+                  className="object-cover"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/10 via-transparent to-white/5" />
+              </div>
             </div>
           ))}
         </div>
