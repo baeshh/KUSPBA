@@ -31,15 +31,15 @@ export default function AboutPage() {
 
       <section className="mb-20">
         <h1 className="mb-6 text-[48px] font-bold leading-tight tracking-[-0.03em] max-md:text-[36px]">
-          세상과 산업을 잇는
+          인재와 산업을 잇는
           <br />
           <span className="bg-gradient-to-br from-[#427A72] to-[#4A6C82] bg-clip-text text-transparent">
             우리의 첫걸음
           </span>
         </h1>
         <p className="text-xl leading-relaxed text-[#86868B]">
-          전국 유일의 대학생제약바이오산업협회 KUSPBA는 제약 바이오 산업과
-          사회를 연결하고, 더 나은 미래를 위한 첫걸음을 설계하기 위해
+          전국 유일의 대학생제약바이오산업협회 KUSPBA는 제약&middot;바이오 인재와
+          산업을 연결하고, 더 나은 미래를 위한 첫걸음을 설계하기 위해
           모였습니다.
         </p>
       </section>
@@ -49,7 +49,7 @@ export default function AboutPage() {
           Our Message
         </span>
         <h2 className="mb-6 text-3xl font-bold">
-          &quot;우리는 머뭅니다. 당신이 멈추지 않도록.&quot;
+          &quot;우리는 머뭅니다, 당신이 멈추지 않도록.&quot;
         </h2>
         <p className="mb-6 text-lg leading-relaxed text-[#86868B]">
           우리는 거대한 흐름 앞에서도 정의롭고 떳떳하게 사회를 직시합니다.
@@ -65,6 +65,63 @@ export default function AboutPage() {
 
       <section className="mb-24">
         <span className="mb-4 block text-sm font-bold uppercase tracking-wider text-[#427A72]">
+          Chairperson Message
+        </span>
+        <div className="grid gap-8 rounded-[28px] border border-black/[0.08] bg-white p-8 md:grid-cols-[0.8fr_1.2fr] md:p-10">
+          <div className="flex items-center justify-center rounded-[20px] border border-dashed border-black/15 bg-[#F8F9FA] p-6">
+            <div className="text-center">
+              <p className="text-sm font-semibold text-[#86868B]">협회장 사진 영역</p>
+              <p className="mt-2 text-xs text-[#A1A1A6]">사진 업데이트 예정</p>
+            </div>
+          </div>
+
+          <div>
+            <h3 className="mb-4 text-2xl font-bold tracking-[-0.02em] text-[#1D1D1F]">
+              협회장 소개 및 인삿말
+            </h3>
+            <p className="text-[16px] leading-relaxed text-[#555]">
+              안녕하세요,
+              <br />
+              한국대학생제약바이오산업협회(KUSPBA) 협회장 박찬희입니다.
+              <br />
+              <br />
+              &ldquo;걷는 자에게 절망은 없습니다.&rdquo;
+              <br />
+              앞으로 나아가겠다는 선택을 한 순간, 우리는 이미 멈춰 있지 않습니다.
+              <br />
+              <br />
+              KUSPBA는 그 길 위에서,
+              <br />
+              대학생이 산업으로 나아갈 수 있도록 돕는 디딤돌 같은 존재가 되고자 합니다.
+              <br />
+              <br />
+              제약&middot;바이오산업은 높은 전문성과 복잡한 구조를 가진 분야이지만,
+              <br />
+              대학생이 이를 실제로 이해하고 진입할 수 있는 경로는 여전히 제한적입니다.
+              <br />
+              협회는 이 간극을 연결하고,
+              <br />
+              단순한 경험을 넘어 지속 가능한 기회와 성장의 구조를 만들어가고 있습니다.
+              <br />
+              <br />
+              또한 협회원 한 사람 한 사람이 협회 안에서 경험을 공유하고,
+              <br />
+              하나의 정체성과 연결을 만들어갈 수 있도록 노력하고 있습니다.
+              <br />
+              <br />
+              앞으로도 KUSPBA는 변하지 않는 방향성과 함께,
+              <br />
+              여러분이 흔들림 없이 나아갈 수 있도록 그 자리를 지키겠습니다.
+              <br />
+              <br />
+              감사합니다.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section className="mb-24">
+        <span className="mb-4 block text-sm font-bold uppercase tracking-wider text-[#427A72]">
           Core Values
         </span>
         <h2 className="mb-10 text-3xl font-bold">
@@ -73,11 +130,11 @@ export default function AboutPage() {
         <div className="grid gap-6 md:grid-cols-3">
           <div className="rounded-[24px] border border-black/[0.08] bg-white p-8">
             <h3 className="mb-3 text-xl font-bold text-[#1D1D1F]">
-              연결 (Connect)
+              연결 (Connection)
             </h3>
             <p className="m-0 text-[15px] leading-relaxed text-[#86868B]">
-              산업과 학문, 세대와 세대, 사람과 사람을 잇습니다. 타 대학 관련
-              학과 학생들과 교류하며 생동감 있는 네트워크를 구축합니다.
+              개인과 개인을 잇고, 학문과 산업을 연결하여, 세상으로 나아가는
+              발판을 만듭니다.
             </p>
           </div>
           <div className="rounded-[24px] border border-black/[0.08] bg-white p-8">
@@ -85,8 +142,8 @@ export default function AboutPage() {
               개척 (Pioneer)
             </h3>
             <p className="m-0 text-[15px] leading-relaxed text-[#86868B]">
-              주체적인 도전정신으로 산업의 경계를 넓힙니다. 대학생만이 가질 수
-              있는 상상력으로 산업과 사회를 새롭게 해석합니다.
+              주체적인 도전정신으로 내부의 역량을 산업 전체의 에너지로
+              확장합니다.
             </p>
           </div>
           <div className="rounded-[24px] border border-black/[0.08] bg-white p-8">
@@ -94,8 +151,8 @@ export default function AboutPage() {
               토대 (Foundation)
             </h3>
             <p className="m-0 text-[15px] leading-relaxed text-[#86868B]">
-              산업의 미래를 떠받치고 변화의 불씨가 됩니다. 누군가 내일을
-              건너는 튼튼한 발판이 되도록 스스로를 단단히 다집니다.
+              학생과 산업 사이, 구성원이 어느 방향으로든 나아갈 수 있는 신뢰의
+              기반을 만듭니다.
             </p>
           </div>
         </div>
@@ -113,8 +170,8 @@ export default function AboutPage() {
             우리는 단숨에 도달하기보다는 비약 없는 <strong>연결</strong>을
             선택합니다.
             <br />
-            청년과 전문가 사이, 아직 좁혀지지 않은 간극에 작지만 결정적인
-            &apos;디딤돌&apos;을 놓습니다.
+            대학생들과 산업 사이, 아직 메워지지 않은 그 간극에 &lsquo;우리는&rsquo;
+            디딤돌을 놓습니다.
           </p>
           <div className="mt-10 flex items-center justify-center gap-4 rounded-2xl bg-[#FBFBFD] p-5 md:gap-6">
             <Image

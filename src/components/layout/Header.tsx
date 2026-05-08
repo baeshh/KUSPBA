@@ -21,19 +21,25 @@ export function Header() {
             href="/about"
             className="text-sm font-medium text-[#86868B] transition-colors hover:text-[#1D1D1F]"
           >
-            협회 소개
+            협회소개
           </Link>
           <Link
             href="/seminars"
             className="text-sm font-medium text-[#86868B] transition-colors hover:text-[#1D1D1F]"
           >
-            세미나/교육
+            KUSPBA 프로그램
           </Link>
           <Link
             href="/#inquiry"
             className="text-sm font-medium text-[#86868B] transition-colors hover:text-[#1D1D1F]"
           >
-            학과 제휴
+            협회원 및 학과가입
+          </Link>
+          <Link
+            href="/#notice-board"
+            className="text-sm font-medium text-[#86868B] transition-colors hover:text-[#1D1D1F]"
+          >
+            공지사항/게시판
           </Link>
           <KakaoLoginButton />
         </nav>
