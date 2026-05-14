@@ -6,16 +6,10 @@ import Link from "next/link";
 import Image from "next/image";
 
 const revealClass = "home-reveal";
-const partnerSchools = [
-  "고려대학교 약학대학",
-  "서울대학교 약학대학",
-  "연세대학교 생명공학과",
-  "성균관대학교 약학대학",
-  "중앙대학교 약학대학",
-  "경희대학교 약학대학",
-  "이화여자대학교 약학대학",
-  "동국대학교 바이오시스템대학",
-];
+const partnerLogos = Array.from({ length: 24 }, (_, i) => {
+  const n = String(i + 1).padStart(2, "0");
+  return `/partners/partner-${n}.png`;
+});
 const heroSlides = [
   {
     titleLine1: "우리는 머뭅니다.",
@@ -133,7 +127,7 @@ export default function HomePage() {
         style={{ background: "#C1E0E4" }}
       />
 
-      <section className="hero-wrap relative mx-auto flex max-w-[1200px] flex-col items-center gap-10 px-6 pb-16 pt-[120px] lg:min-h-[860px] lg:flex-row lg:pb-[250px] lg:pt-[170px]">
+      <section className="hero-wrap relative mx-auto flex max-w-[1200px] flex-col items-center gap-10 px-6 pb-16 pt-[120px] lg:flex-row lg:pb-20 lg:pt-[170px]">
         <button
           type="button"
           onClick={handlePrevHeroSlide}
@@ -252,31 +246,6 @@ export default function HomePage() {
                 className="object-contain"
                 priority
               />
-            </div>
-          </div>
-        </div>
-
-        <div className="mt-8 w-full px-0 lg:absolute lg:bottom-8 lg:left-0 lg:right-0 lg:mt-0 lg:px-6">
-          <div className="mb-5 text-center">
-            <p className="mb-2 text-lg font-bold text-[#8ABFB2]">Partner Schools</p>
-            <h3 className="text-[28px] font-black tracking-[-0.03em] text-[#222] md:text-[32px]">
-              협력 학교 배너
-            </h3>
-          </div>
-
-          <div className="overflow-hidden rounded-[24px] border border-black/5 bg-white px-2 py-5 shadow-[0_12px_24px_rgba(0,0,0,0.04)]">
-            <div className="school-marquee-track">
-              {[...partnerSchools, ...partnerSchools].map((school, idx) => (
-                <div
-                  key={`${school}-${idx}`}
-                  className="mx-2 flex min-w-[240px] items-center gap-3 rounded-[14px] border border-black/5 bg-[#F8F9FA] px-5 py-3"
-                >
-                  <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-white text-xs font-black text-[#373737] shadow-sm">
-                    학
-                  </span>
-                  <span className="text-sm font-bold text-[#373737]">{school}</span>
-                </div>
-              ))}
             </div>
           </div>
         </div>
@@ -482,6 +451,35 @@ export default function HomePage() {
             💬 카카오톡으로 제휴 문의하기
           </a>
         </div>
+
+        <div id="partner-departments" className="mt-10 md:mt-12">
+          <div className="mb-6 text-center md:mb-8">
+            <p className="mb-2 text-lg font-bold text-[#8ABFB2]">Partner Departments</p>
+            <h2 className="text-[28px] font-black tracking-[-0.03em] text-[#222] md:text-[32px]">
+              협력 학과 배너
+            </h2>
+          </div>
+
+          <div className="overflow-hidden rounded-[24px] border border-[#C1E4D7]/70 bg-gradient-to-r from-white via-[#F7FFFC] to-white px-2 py-5 shadow-[0_14px_30px_rgba(138,191,178,0.18)]">
+            <div className="partner-marquee-track flex w-max items-center">
+              {[...partnerLogos, ...partnerLogos].map((src, idx) => (
+                <div
+                  key={`${src}-${idx}`}
+                  className="mx-2 flex h-[78px] w-[98px] shrink-0 items-center justify-center rounded-[18px] bg-white p-2 shadow-sm ring-1 ring-black/5 md:mx-3 md:h-[92px] md:w-[118px] md:p-3"
+                >
+                  <Image
+                    src={src}
+                    alt={`협력 대학 로고 ${(idx % partnerLogos.length) + 1}`}
+                    width={92}
+                    height={92}
+                    sizes="92px"
+                    className="h-full w-full object-contain"
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
       </section>
 
       <style jsx global>{`
@@ -500,12 +498,10 @@ export default function HomePage() {
             min-height: auto;
           }
         }
-        .school-marquee-track {
-          display: flex;
-          width: max-content;
-          animation: school-marquee-left 24s linear infinite;
+        .partner-marquee-track {
+          animation: partner-marquee-left 40s linear infinite;
         }
-        @keyframes school-marquee-left {
+        @keyframes partner-marquee-left {
           0% {
             transform: translateX(0);
           }
