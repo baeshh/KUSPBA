@@ -10,41 +10,156 @@ const partnerLogos = Array.from({ length: 24 }, (_, i) => {
   const n = String(i + 1).padStart(2, "0");
   return `/partners/partner-${n}.png`;
 });
-const heroSlides = [
+type HeroSlide = {
+  titleLine1: string;
+  titleLine2: string;
+  descriptionLine1: string;
+  descriptionLine2?: string;
+  /** 긴 카피용: 제목 크기 축소 */
+  compact?: boolean;
+  /** 우측 비주얼. 없으면 협회 로고 */
+  imageSrc?: string;
+  imageAlt?: string;
+};
+
+const heroSlides: HeroSlide[] = [
   {
-    titleLine1: "우리는 머뭅니다.",
+    titleLine1: "우리는 머뭅니다,",
     titleLine2: "당신이 멈추지 않도록.",
-    descriptionLine1: "학생과 현업을 잇는 가장 단단하고 세련된 디딤돌.",
-    descriptionLine2: "지금 KUSPBA와 함께 제약바이오의 미래를 그리세요.",
+    descriptionLine1:
+      "학생과 현업을 잇는 가장 단단한 디딤돌, 지금 KUSPBA와 함께하세요.",
   },
   {
-    titleLine1: "연결은 기회가 됩니다.",
-    titleLine2: "기회는 커리어가\u00A0됩니다.",
-    descriptionLine1: "한 번의 프로그램 참여가 진로의 방향을 바꿀 수 있습니다.",
-    descriptionLine2: "KUSPBA는 그 전환점이 되는 경험을 만듭니다.",
+    // 배너2 — 사진2
+    titleLine1: "직무를 함께 공부하는",
+    titleLine2: "KUSPBA 디딤돌 프로젝트",
+    descriptionLine1: "산업을 이해하고 진로를 구체화하는 12주 스터디",
+    compact: true,
+    imageSrc: "/hero/banner-2.png",
+    imageAlt: "KUSPBA 디딤돌 프로젝트",
   },
   {
-    titleLine1: "혼자 고민하지 말고,",
-    titleLine2: "함께 성장하세요.",
-    descriptionLine1: "현직자, 선배, 동료와 함께 더 빠르게 앞으로 나아갑니다.",
-    descriptionLine2: "KUSPBA에서 실무와 네트워크를 동시에 경험해보세요.",
+    // 배너3 — 사진3
+    titleLine1: "산업을 더 가까이에서",
+    titleLine2: "KUSPBA 직무 세미나",
+    descriptionLine1: "다양한 직무와 산업 현장을 배우는 시간",
+    compact: true,
+    imageSrc: "/hero/banner-3.png",
+    imageAlt: "KUSPBA 직무 세미나",
+  },
+  {
+    // 배너4 — 사진4
+    titleLine1: "관심 있는 대학생이라면,",
+    titleLine2: "KUSPBA에 참여하세요!",
+    descriptionLine1: "전국 대학(원)생과 함께하는 산업 네트워크",
+    compact: true,
+    imageSrc: "/hero/banner-4.png",
+    imageAlt: "KUSPBA 협회원 모집",
+  },
+  {
+    // 배너5 — 사진5
+    titleLine1: "나에게 맞는 직무는?",
+    titleLine2: "KUSPBA 직무 MBTI",
+    descriptionLine1: "16가지 직무 중 나에게 맞는 진로를 찾아보세요.",
+    compact: true,
+    imageSrc: "/hero/banner-5.png",
+    imageAlt: "KUSPBA 직무 MBTI",
   },
 ];
 
+const HERO_AUTO_INTERVAL_MS = 5000;
+
+function HeroArrowIcon({ direction }: { direction: "prev" | "next" }) {
+  // tip·모서리를 viewBox 안쪽에 충분히 두어 렌더/overflow 클리핑에 잘리지 않게 함
+  const points =
+    direction === "prev" ? "6,12 22,3 22,21" : "26,12 10,3 10,21";
+
+  return (
+    <svg
+      viewBox="0 0 32 24"
+      className="block h-full w-full"
+      fill="currentColor"
+      overflow="visible"
+      aria-hidden
+    >
+      <polygon points={points} />
+    </svg>
+  );
+}
+
+const heroArrowBtnClass =
+  "inline-flex items-center justify-center rounded-full text-[#6E5A52] transition-all duration-200 ease-out hover:bg-[#5C4942]/10 hover:text-[#5C4942] active:scale-75 active:bg-[#5C4942]/18 active:text-[#5C4942]";
+
 export default function HomePage() {
   const [activeHeroSlide, setActiveHeroSlide] = useState(0);
+  const [heroTimerKey, setHeroTimerKey] = useState(0);
+  const [heroSlideDir, setHeroSlideDir] = useState<"prev" | "next">("next");
+  const [openCoreValue, setOpenCoreValue] = useState<string | null>(null);
+
+  const coreValues = [
+    {
+      id: "connection",
+      title: "연결 (Connection)",
+      desc: "개인과 개인을 잇고, 학문과 산업을 연결하여,\n세상으로 나아가는 발판을 만듭니다.",
+      image: "/core-value-connect.png",
+    },
+    {
+      id: "pioneer",
+      title: "개척 (Pioneer)",
+      desc: "주체적인 도전 정신으로 우리의 역량을\n산업 전체의 에너지로 확장합니다.",
+      image: "/core-value-pioneer.png",
+    },
+    {
+      id: "foundation",
+      title: "토대 (Foundation)",
+      desc: "학생과 산업 사이,\n구성원이 어느 방향으로든 나아갈 수 있는 신뢰의 기반을 만듭니다.",
+      image: "/core-value-foundation.png",
+    },
+  ] as const;
+
+  const activeCoreValue =
+    coreValues.find((value) => value.id === openCoreValue) ?? null;
+
+  useEffect(() => {
+    if (!openCoreValue) return;
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setOpenCoreValue(null);
+    };
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    window.addEventListener("keydown", onKeyDown);
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener("keydown", onKeyDown);
+    };
+  }, [openCoreValue]);
 
   const handlePrevHeroSlide = () => {
+    setHeroSlideDir("prev");
     setActiveHeroSlide((prev) =>
       prev === 0 ? heroSlides.length - 1 : prev - 1,
     );
+    setHeroTimerKey((key) => key + 1);
   };
 
   const handleNextHeroSlide = () => {
+    setHeroSlideDir("next");
     setActiveHeroSlide((prev) =>
       prev === heroSlides.length - 1 ? 0 : prev + 1,
     );
+    setHeroTimerKey((key) => key + 1);
   };
+
+  useEffect(() => {
+    const timer = window.setInterval(() => {
+      setHeroSlideDir("next");
+      setActiveHeroSlide((prev) =>
+        prev === heroSlides.length - 1 ? 0 : prev + 1,
+      );
+    }, HERO_AUTO_INTERVAL_MS);
+
+    return () => window.clearInterval(timer);
+  }, [heroTimerKey]);
 
   useEffect(() => {
     const onScroll = () => {
@@ -107,7 +222,7 @@ export default function HomePage() {
   const currentHeroSlide = heroSlides[activeHeroSlide];
 
   return (
-    <div className="relative overflow-x-hidden bg-white text-[#373737]">
+    <div className="relative bg-white text-[#373737]">
       <div
         id="dynamicBg"
         className="pointer-events-none fixed inset-0 -z-30 opacity-0 transition-opacity duration-100"
@@ -127,44 +242,25 @@ export default function HomePage() {
         style={{ background: "#C1E0E4" }}
       />
 
-      <section className="hero-wrap relative mx-auto flex max-w-[1200px] flex-col items-center gap-10 px-6 pb-16 pt-[120px] lg:flex-row lg:pb-20 lg:pt-[170px]">
+      {/* hero는 overflow-x-hidden 밖에 두어 좌우 화살표가 잘리지 않게 함 */}
+      <section className="hero-wrap relative mx-auto flex max-w-[1200px] flex-col items-center gap-10 overflow-visible px-6 pb-16 pt-[120px] lg:flex-row lg:px-16 lg:pb-20 lg:pt-[170px]">
         <button
           type="button"
           onClick={handlePrevHeroSlide}
           aria-label="이전 멘트 보기"
-          className="absolute -left-8 top-1/2 hidden -translate-y-1/2 text-[#8A8A8A] transition hover:text-[#222] lg:block"
+          className={`${heroArrowBtnClass} absolute left-5 top-1/2 z-20 hidden h-12 w-12 -translate-y-1/2 p-2 hover:-translate-x-0.5 hover:-translate-y-1/2 active:-translate-x-1 active:-translate-y-1/2 lg:flex`}
         >
-          <svg
-            viewBox="0 0 24 24"
-            className="h-9 w-9"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1.8"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <path d="M15 18l-6-6 6-6" />
-          </svg>
+          <HeroArrowIcon direction="prev" />
         </button>
         <button
           type="button"
           onClick={handleNextHeroSlide}
           aria-label="다음 멘트 보기"
-          className="absolute -right-8 top-1/2 hidden -translate-y-1/2 text-[#8A8A8A] transition hover:text-[#222] lg:block"
+          className={`${heroArrowBtnClass} absolute right-5 top-1/2 z-20 hidden h-12 w-12 -translate-y-1/2 p-2 hover:translate-x-0.5 hover:-translate-y-1/2 active:translate-x-1 active:-translate-y-1/2 lg:flex`}
         >
-          <svg
-            viewBox="0 0 24 24"
-            className="h-9 w-9"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1.8"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <path d="M9 18l6-6-6-6" />
-          </svg>
+          <HeroArrowIcon direction="next" />
         </button>
-        <div className="min-w-0 flex-[1.15] lg:pr-14">
+        <div className="min-w-0 flex-[1.15] lg:pl-12 lg:pr-14">
           <span className="mb-6 inline-block rounded-full bg-[#C1E4D7] px-4 py-1.5 text-[13px] font-extrabold text-[#222]">
             전국 유일 대학생제약바이오산업협회
           </span>
@@ -173,50 +269,52 @@ export default function HomePage() {
               type="button"
               onClick={handlePrevHeroSlide}
               aria-label="이전 멘트 보기"
-              className="text-[#8A8A8A] transition hover:text-[#222]"
+              className={`${heroArrowBtnClass} relative z-20 h-10 w-10 p-1.5 hover:-translate-x-0.5 active:-translate-x-1`}
             >
-              <svg
-                viewBox="0 0 24 24"
-                className="h-8 w-8"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.8"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M15 18l-6-6 6-6" />
-              </svg>
+              <HeroArrowIcon direction="prev" />
             </button>
             <button
               type="button"
               onClick={handleNextHeroSlide}
               aria-label="다음 멘트 보기"
-              className="text-[#8A8A8A] transition hover:text-[#222]"
+              className={`${heroArrowBtnClass} relative z-20 h-10 w-10 p-1.5 hover:translate-x-0.5 active:translate-x-1`}
             >
-              <svg
-                viewBox="0 0 24 24"
-                className="h-8 w-8"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.8"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M9 18l6-6-6-6" />
-              </svg>
+              <HeroArrowIcon direction="next" />
             </button>
           </div>
-          <h1 className="mb-6 break-keep text-[42px] font-black leading-[1.12] tracking-[-0.04em] text-[#222] md:text-[52px] lg:text-[64px]">
-            {currentHeroSlide.titleLine1}
-            <br />
-            <span className="md:whitespace-nowrap">{currentHeroSlide.titleLine2}</span>
-          </h1>
-          <p className="mb-10 text-base font-medium leading-relaxed text-[#555] md:text-lg lg:text-xl">
-            {currentHeroSlide.descriptionLine1}
-            <br />
-            {currentHeroSlide.descriptionLine2}
-          </p>
-          <div className="flex flex-wrap gap-3">
+          <div
+            key={`${activeHeroSlide}-${heroSlideDir}`}
+            data-dir={heroSlideDir}
+            className="hero-slide-copy"
+          >
+            <h1
+              className={`mb-4 max-w-[22em] break-keep font-black leading-[1.2] tracking-[-0.04em] text-[#222] md:mb-5 ${
+                currentHeroSlide.compact
+                  ? "text-[28px] md:text-[36px] lg:text-[42px]"
+                  : "text-[36px] md:text-[48px] lg:text-[56px]"
+              }`}
+            >
+              {currentHeroSlide.titleLine1}
+              <br />
+              {currentHeroSlide.titleLine2}
+            </h1>
+            <p
+              className={`mb-8 max-w-[34em] break-keep font-medium leading-snug text-[#555] md:mb-10 ${
+                currentHeroSlide.compact
+                  ? "text-[15px] md:text-base lg:text-lg"
+                  : "text-base md:text-lg lg:text-xl"
+              }`}
+            >
+              {currentHeroSlide.descriptionLine1}
+              {currentHeroSlide.descriptionLine2 ? (
+                <>
+                  <br />
+                  {currentHeroSlide.descriptionLine2}
+                </>
+              ) : null}
+            </p>
+          </div>
+          <div className="flex flex-wrap items-center gap-3">
             <Link
               href="/seminars"
               className="inline-flex items-center justify-center rounded-full bg-[#373737] px-8 py-3.5 text-[15px] font-bold text-white transition hover:-translate-y-0.5 hover:bg-[#222]"
@@ -229,28 +327,52 @@ export default function HomePage() {
             >
               KUSPBA와 함께하기
             </Link>
+            <Link
+              href="#"
+              className="inline-flex items-center justify-center rounded-full bg-[#C1E4D7] px-4 py-2 text-[13px] font-extrabold text-[#222] transition hover:-translate-y-0.5 hover:bg-[#b3dccf]"
+            >
+              나의 직무 MBTI는?
+            </Link>
           </div>
         </div>
         <div className="relative flex h-[330px] w-full flex-[0.85] items-center justify-center md:h-[420px]">
-          <div
-            id="cube3d"
-            className="flex h-[260px] w-[260px] items-center justify-center rounded-[34px] border border-white/90 bg-gradient-to-br from-white/80 to-white/30 shadow-[0_30px_60px_rgba(0,0,0,0.08)] backdrop-blur-xl transition-transform duration-100 md:h-[300px] md:w-[300px] md:rounded-[42px] lg:h-[340px] lg:w-[340px]"
-            style={{ transform: "rotateX(15deg) rotateY(-15deg)" }}
-          >
-            <div className="relative h-[186px] w-[186px] md:h-[224px] md:w-[224px] lg:h-[248px] lg:w-[248px]">
+          {currentHeroSlide.imageSrc ? (
+            <div
+              key={`hero-visual-${activeHeroSlide}-${heroSlideDir}`}
+              data-dir={heroSlideDir}
+              className="hero-slide-visual relative h-[260px] w-full max-w-[420px] overflow-hidden rounded-[28px] border border-black/5 bg-[#F3F4F6] shadow-[0_24px_50px_rgba(0,0,0,0.1)] md:h-[320px] md:rounded-[34px] lg:h-[360px]"
+            >
               <Image
-                src="/logo.png"
-                alt="KUSPBA 로고"
+                src={currentHeroSlide.imageSrc}
+                alt={currentHeroSlide.imageAlt ?? "KUSPBA 배너 이미지"}
                 fill
-                sizes="248px"
-                className="object-contain"
-                priority
+                sizes="(max-width: 768px) 90vw, 420px"
+                className="object-cover"
+                priority={activeHeroSlide <= 1}
               />
             </div>
-          </div>
+          ) : (
+            <div
+              id="cube3d"
+              className="flex h-[260px] w-[260px] items-center justify-center rounded-[34px] border border-white/90 bg-gradient-to-br from-white/80 to-white/30 shadow-[0_30px_60px_rgba(0,0,0,0.08)] backdrop-blur-xl transition-transform duration-100 md:h-[300px] md:w-[300px] md:rounded-[42px] lg:h-[340px] lg:w-[340px]"
+              style={{ transform: "rotateX(15deg) rotateY(-15deg)" }}
+            >
+              <div className="relative h-[186px] w-[186px] md:h-[224px] md:w-[224px] lg:h-[248px] lg:w-[248px]">
+                <Image
+                  src="/logo.png"
+                  alt="KUSPBA 로고"
+                  fill
+                  sizes="248px"
+                  className="object-contain"
+                  priority
+                />
+              </div>
+            </div>
+          )}
         </div>
       </section>
 
+      <div className="overflow-x-hidden">
       <section className="relative mx-auto max-w-[1000px] px-6 py-24 text-center md:py-36">
         <div
           id="paraWave"
@@ -266,8 +388,8 @@ export default function HomePage() {
             &ldquo;제약&middot;바이오 인재와 산업을 잇는 가장 단단한 토대가 되는 것&rdquo;
           </h2>
 
-          <p className="mb-3 mt-14 text-xl font-bold text-[#8ABFB2]">Our Mission</p>
-          <p className="text-lg leading-relaxed text-[#555] md:text-[22px]">
+          <p className="mb-3 mt-24 text-xl font-bold text-[#8ABFB2] md:mt-32">Our Mission</p>
+          <p className="text-lg font-bold leading-relaxed text-[#555] md:text-[22px]">
             &ldquo;우리는 제약&middot;바이오 인재들이 지식의 고립을 넘어 서로를 연결하고,
             <br />
             함께 성장하도록 실질적인 기회를 만듭니다&rdquo;
@@ -277,51 +399,73 @@ export default function HomePage() {
 
       <section className="mx-auto max-w-[1200px] px-6 pb-28 md:pb-40">
         <div className="mb-12 text-center">
-          <p className="mb-3 text-xl font-bold text-[#8ABFB2]">Core Value(핵심가치)</p>
+          <p className="mb-3 text-xl font-bold text-[#8ABFB2]">Core Value</p>
           <h2 className="text-[36px] font-black tracking-[-0.03em] text-[#222] md:text-[44px]">
-            연결, 개척, 토대로 만드는 성장의 방향
+            우리가 선택한 세 가지 태도
           </h2>
         </div>
         <div className="grid gap-6 md:grid-cols-3 md:gap-8">
-          {[
-            {
-              title: "연결 (Connect)",
-              desc: "개인과 개인을 잇고, 학문과 산업을 연결하여, 세상으로 나아가는 발판을 만듭니다.",
-              image: "/core-value-connect.png",
-            },
-            {
-              title: "개척 (Pioneer)",
-              desc: "주체적인 도전정신으로 우리의 역량을 산업 전체의 에너지로 확장합니다.",
-              image: "/core-value-pioneer.png",
-            },
-            {
-              title: "토대 (Foundation)",
-              desc: "학생과 산업 사이, 구성원이 어느 방향으로든 나아갈 수 있는 신뢰의 기반을 만듭니다.",
-              image: "/core-value-foundation.png",
-            },
-          ].map((value, idx) => (
-            <div
-              key={value.title}
-              className="overflow-hidden rounded-[30px] border border-white bg-white/80 p-7 shadow-[0_20px_40px_rgba(0,0,0,0.03)] backdrop-blur-2xl transition hover:-translate-y-2 hover:border-[#C1E4D7] hover:shadow-[0_25px_50px_rgba(0,0,0,0.06)] md:p-8"
-              style={{ marginTop: 0 }}
+          {coreValues.map((value) => (
+            <button
+              key={value.id}
+              type="button"
+              onClick={() => setOpenCoreValue(value.id)}
+              className="group overflow-hidden rounded-[30px] border border-white bg-white/80 p-7 text-left shadow-[0_20px_40px_rgba(0,0,0,0.03)] backdrop-blur-2xl transition hover:-translate-y-2 hover:border-[#C1E4D7] hover:shadow-[0_25px_50px_rgba(0,0,0,0.06)] md:p-8"
             >
               <h3 className="mb-3 text-[26px] font-extrabold tracking-[-0.03em] text-[#222]">
                 {value.title}
               </h3>
-              <p className="text-[16px] leading-relaxed text-[#555]">{value.desc}</p>
-              <div className="relative mt-8 aspect-[4/3] overflow-hidden rounded-[22px] bg-[#F8F9FA] shadow-inner">
+              <p className="whitespace-pre-line text-[16px] leading-relaxed text-[#555]">
+                {value.desc}
+              </p>
+              <div className="relative mt-6 aspect-[4/3] overflow-hidden rounded-[22px] bg-[#F8F9FA] shadow-inner md:mt-8">
                 <Image
                   src={value.image}
                   alt={`${value.title} 활동 이미지`}
                   fill
                   sizes="(max-width: 768px) 100vw, 360px"
-                  className="object-cover"
+                  className="object-cover transition duration-300 group-hover:scale-[1.03]"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/10 via-transparent to-white/5" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-white/5" />
+                <span className="absolute bottom-3 right-3 rounded-full bg-white/90 px-3 py-1.5 text-xs font-extrabold text-[#373737] shadow-sm">
+                  크게 보기
+                </span>
               </div>
-            </div>
+            </button>
           ))}
         </div>
+
+        {activeCoreValue && (
+          <div
+            className="fixed inset-0 z-[80] flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm md:p-10"
+            role="dialog"
+            aria-modal="true"
+            aria-label={`${activeCoreValue.title} 사진 크게 보기`}
+            onClick={() => setOpenCoreValue(null)}
+          >
+            <button
+              type="button"
+              onClick={() => setOpenCoreValue(null)}
+              aria-label="사진 닫기"
+              className="absolute right-5 top-5 z-10 inline-flex h-11 w-11 items-center justify-center rounded-full bg-white text-2xl font-black text-[#222] shadow-lg transition hover:bg-[#C1E4D7] md:right-8 md:top-8"
+            >
+              ×
+            </button>
+            <div
+              className="relative h-[min(78vh,720px)] w-full max-w-[980px] overflow-hidden rounded-[24px] bg-black shadow-2xl"
+              onClick={(event) => event.stopPropagation()}
+            >
+              <Image
+                src={activeCoreValue.image}
+                alt={`${activeCoreValue.title} 확대 이미지`}
+                fill
+                sizes="980px"
+                className="object-contain"
+                priority
+              />
+            </div>
+          </div>
+        )}
       </section>
 
       <section className="bg-[#F8F9FA] px-6 py-24 md:py-36">
@@ -332,31 +476,69 @@ export default function HomePage() {
               학생과 산업을 연결하는 디딤돌
             </h2>
             <p className="text-lg text-[#555] md:text-xl">
-              모든 프로그램은 KUSPBA의 핵심가치에서 시작됩니다
+              모든 프로그램은 KUSPBA의 핵심가치에서 시작됩니다.
             </p>
           </div>
           <div className="grid gap-6 md:grid-cols-3 md:gap-8">
             {[
               {
                 tag: "모집 중",
-                title: "연결 : 직무세미나, 봉사활동",
-                desc: "직무 세미나 통해 교실 밖 산업 현장과 연결하고,\n사회 공헌활동을 통해 나와 세상을 연결합니다.",
-                href: "/seminars",
+                category: "연결",
+                programs: ["직무세미나", "봉사활동"],
+                href: "/seminars" as string | undefined,
+                body: (
+                  <>
+                    <strong className="font-extrabold text-[#222]">직무 세미나</strong>를
+                    통해 교실 밖 산업 현장과 연결하고,
+                    <br />
+                    사회{" "}
+                    <strong className="font-extrabold text-[#222]">공헌 활동</strong>을
+                    통해 나와 세상을 연결합니다.
+                  </>
+                ),
               },
               {
                 tag: "모집 중",
-                title: "개척 : 현장실습, 해커톤, 연합학술제",
-                desc: "현장실습과 해커톤으로 대학생의 시선에서 산업을 해석하고,\n연합학술제를 통해 학계의 새로운 가능성을 직접 넓혀갑니다.",
-                href: "/seminars",
+                category: "개척",
+                programs: ["현장실습", "해커톤", "연합학술제"],
+                href: "/seminars" as string | undefined,
+                body: (
+                  <>
+                    <strong className="font-extrabold text-[#222]">현장실습</strong>과{" "}
+                    <strong className="font-extrabold text-[#222]">해커톤</strong>으로
+                    <br />
+                    대학생의 시선에서 산업을 해석하고,
+                    <br />
+                    <strong className="font-extrabold text-[#222]">연합학술제</strong>를
+                    통해
+                    <br />
+                    학계의 새로운 가능성을 직접 넓혀갑니다.
+                  </>
+                ),
               },
               {
                 tag: "준비 중",
-                title: "토대 : 디딤돌 프로젝트",
-                desc: "디딤돌 프로젝트를 통해\n산업의 언어를 배우고,\n지식의 기반을 쌓아가,\n나만의 디딤돌을 만들어갑니다.",
+                category: "토대",
+                programs: ["디딤돌 프로젝트"],
+                href: undefined,
+                body: (
+                  <>
+                    <strong className="font-extrabold text-[#222]">
+                      디딤돌 프로젝트
+                    </strong>
+                    를 통해
+                    <br />
+                    산업의 언어를 배우고,
+                    <br />
+                    지식의 기반을 쌓아가,
+                    <br />
+                    나만의 디딤돌을 만들어갑니다.
+                  </>
+                ),
               },
             ].map((program, idx) => (
               <article
-                key={program.title}
+                key={program.category}
                 className={`${revealClass} flex min-h-[360px] flex-col rounded-[30px] border border-white bg-white p-8 shadow-[0_10px_30px_rgba(0,0,0,0.04)] transition hover:-translate-y-2 hover:border-[#C1E0E4] hover:shadow-[0_20px_45px_rgba(0,0,0,0.08)] ${idx === 2 ? "bg-white/60" : ""}`}
               >
                 <span
@@ -364,11 +546,23 @@ export default function HomePage() {
                 >
                   {program.tag}
                 </span>
-                <h3 className="mb-4 mt-6 whitespace-pre-line text-[26px] font-extrabold leading-tight tracking-[-0.03em] text-[#222]">
-                  {program.title}
-                </h3>
-                <p className="mb-8 flex-grow whitespace-pre-line text-[16px] leading-relaxed text-[#555]">
-                  {program.desc}
+                <div className="mb-5 mt-5 min-h-[88px]">
+                  <h3 className="text-[28px] font-extrabold tracking-[-0.03em] text-[#222]">
+                    {program.category}
+                  </h3>
+                  <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1">
+                    {program.programs.map((name) => (
+                      <span
+                        key={name}
+                        className="text-[18px] font-bold tracking-[-0.02em] text-[#555]"
+                      >
+                        {name}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+                <p className="mb-8 flex-grow text-[16px] leading-relaxed text-[#555]">
+                  {program.body}
                 </p>
                 {program.href ? (
                   <Link href={program.href} className="text-sm font-extrabold text-[#373737]">
@@ -380,6 +574,14 @@ export default function HomePage() {
               </article>
             ))}
           </div>
+          <div className="mt-8 flex justify-end md:mt-10">
+            <Link
+              href="/seminars"
+              className="inline-flex items-center justify-center rounded-full bg-[#373737] px-6 py-3 text-[14px] font-bold text-white transition hover:-translate-y-0.5 hover:bg-[#222] md:px-8 md:text-[15px]"
+            >
+              이외 프로그램도 여기서 확인하세요!
+            </Link>
+          </div>
         </div>
       </section>
 
@@ -390,7 +592,7 @@ export default function HomePage() {
             든든한 빌더, 디딤이
           </h2>
           <p className="mb-12 text-lg leading-relaxed text-[#555] md:text-xl">
-            청록색 과잠을 입고 제약&middot;바이오 산업의 징검다리가 되기 위해
+            청록색 과잠을 입고 제약&middot;바이오산업의 징검다리가 되기 위해
             <br />
             오늘도 열심히 머무는 KUSPBA의 마스코트랍니다.
           </p>
@@ -415,15 +617,20 @@ export default function HomePage() {
           </div>
 
           <div className="mx-auto mt-12 max-w-[760px] rounded-[28px] border border-black/5 bg-[#F8F9FA] px-8 py-10 shadow-[0_12px_24px_rgba(0,0,0,0.04)]">
-            <h3 className="mb-6 text-[30px] font-black tracking-[-0.03em] text-[#222] md:text-[34px]">
+            <h3 className="mb-3 text-[30px] font-black tracking-[-0.03em] text-[#222] md:text-[34px]">
               KUSPBA 협회원으로 들어오세요!
             </h3>
-            <Link
-              href="/seminars"
+            <p className="mb-6 text-base font-medium leading-relaxed text-[#555] md:text-lg">
+              당신이 멈추지 않도록, 우리가 자리를 지키고 있습니다.
+            </p>
+            <a
+              href="https://form.naver.com/response/IyBsxyQhmyRLIPvVLidJWw"
+              target="_blank"
+              rel="noopener noreferrer"
               className="inline-flex items-center justify-center rounded-full bg-[#373737] px-8 py-3.5 text-[15px] font-bold text-white transition hover:-translate-y-0.5 hover:bg-[#222]"
             >
               협회원 가입하기
-            </Link>
+            </a>
           </div>
         </div>
       </section>
@@ -509,7 +716,60 @@ export default function HomePage() {
             transform: translateX(-50%);
           }
         }
+        .hero-slide-copy {
+          animation: hero-slide-in-next 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+        .hero-slide-copy[data-dir="prev"] {
+          animation-name: hero-slide-in-prev;
+        }
+        .hero-slide-visual {
+          animation: hero-visual-in-next 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+        .hero-slide-visual[data-dir="prev"] {
+          animation-name: hero-visual-in-prev;
+        }
+        @keyframes hero-slide-in-next {
+          from {
+            opacity: 0;
+            transform: translateX(18px);
+          }
+          to {
+            opacity: 1;
+            transform: translateX(0);
+          }
+        }
+        @keyframes hero-slide-in-prev {
+          from {
+            opacity: 0;
+            transform: translateX(-18px);
+          }
+          to {
+            opacity: 1;
+            transform: translateX(0);
+          }
+        }
+        @keyframes hero-visual-in-next {
+          from {
+            opacity: 0;
+            transform: translateX(24px) scale(0.98);
+          }
+          to {
+            opacity: 1;
+            transform: translateX(0) scale(1);
+          }
+        }
+        @keyframes hero-visual-in-prev {
+          from {
+            opacity: 0;
+            transform: translateX(-24px) scale(0.98);
+          }
+          to {
+            opacity: 1;
+            transform: translateX(0) scale(1);
+          }
+        }
       `}</style>
+      </div>
     </div>
   );
 }

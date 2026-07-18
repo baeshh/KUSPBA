@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { prisma } from "@/lib/db";
 
 export async function POST(request: NextRequest) {
   try {
@@ -48,15 +49,31 @@ export async function POST(request: NextRequest) {
     }
 
     const userData = await userRes.json();
+    const kakaoId = String(userData.id);
+    const nickname = userData.kakao_account?.profile?.nickname || "카카오 사용자";
+    const email = userData.kakao_account?.email || null;
 
-    const response = NextResponse.json({
-      id: userData.id,
-      nickname: userData.kakao_account?.profile?.nickname,
-      profileImage: userData.kakao_account?.profile?.profile_image_url,
-      email: userData.kakao_account?.email,
+    await prisma.user.upsert({
+      where: { kakaoId },
+      update: {
+        name: nickname,
+        email,
+      },
+      create: {
+        kakaoId,
+        name: nickname,
+        email,
+      },
     });
 
-    response.cookies.set("kakao_user", JSON.stringify(userData.id), {
+    const response = NextResponse.json({
+      id: kakaoId,
+      nickname,
+      profileImage: userData.kakao_account?.profile?.profile_image_url,
+      email,
+    });
+
+    response.cookies.set("kakao_user", kakaoId, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "lax",

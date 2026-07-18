@@ -1,6 +1,7 @@
 "use client";
 
 import { Suspense, useEffect, useState } from "react";
+import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 
 function CallbackContent() {
@@ -14,12 +15,12 @@ function CallbackContent() {
     const error = searchParams.get("error");
 
     if (error) {
-      setStatus("error");
+      queueMicrotask(() => setStatus("error"));
       return;
     }
 
     if (!code) {
-      setStatus("error");
+      queueMicrotask(() => setStatus("error"));
       return;
     }
 
@@ -63,12 +64,12 @@ function CallbackContent() {
             </pre>
           )}
           <p className="mb-4 text-xs text-[#86868B]">
-            <a href="/debug" className="text-[#427A72] underline">/debug</a>에서 Redirect URI를 확인한 뒤,
+            <Link href="/debug" className="text-[#427A72] underline">/debug</Link>에서 Redirect URI를 확인한 뒤,
             카카오 디벨로퍼스(플랫폼 → Web → Redirect URI)에 동일하게 등록했는지 확인해 주세요.
           </p>
           <div className="flex gap-4 justify-center">
-            <a href="/debug" className="text-[#427A72] font-semibold underline">디버그 확인</a>
-            <a href="/" className="text-[#427A72] font-semibold underline">메인으로 돌아가기</a>
+            <Link href="/debug" className="text-[#427A72] font-semibold underline">디버그 확인</Link>
+            <Link href="/" className="text-[#427A72] font-semibold underline">메인으로 돌아가기</Link>
           </div>
         </div>
       )}

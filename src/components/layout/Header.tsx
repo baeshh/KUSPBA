@@ -36,17 +36,19 @@ export function Header() {
           >
             KUSPBA 프로그램
           </Link>
-          <Link
-            href="/#inquiry"
+          <a
+            href="https://form.naver.com/response/IyBsxyQhmyRLIPvVLidJWw"
+            target="_blank"
+            rel="noopener noreferrer"
             className="text-sm font-medium text-[#86868B] transition-colors hover:text-[#1D1D1F]"
           >
             협회원 및 학과가입
-          </Link>
+          </a>
           <Link
-            href="/#notice-board"
+            href="/notices"
             className="text-sm font-medium text-[#86868B] transition-colors hover:text-[#1D1D1F]"
           >
-            공지사항/게시판
+            공지사항
           </Link>
           <KakaoLoginButton />
         </nav>
@@ -92,19 +94,21 @@ export function Header() {
             >
               KUSPBA 프로그램
             </Link>
-            <Link
-              href="/#inquiry"
+            <a
+              href="https://form.naver.com/response/IyBsxyQhmyRLIPvVLidJWw"
+              target="_blank"
+              rel="noopener noreferrer"
               onClick={closeMobileMenu}
               className="rounded-md px-2 py-2 text-sm font-medium text-[#555] transition hover:bg-black/5 hover:text-[#1D1D1F]"
             >
               협회원 및 학과가입
-            </Link>
+            </a>
             <Link
-              href="/#notice-board"
+              href="/notices"
               onClick={closeMobileMenu}
               className="rounded-md px-2 py-2 text-sm font-medium text-[#555] transition hover:bg-black/5 hover:text-[#1D1D1F]"
             >
-              공지사항/게시판
+              공지사항
             </Link>
             <div className="pt-2">
               <KakaoLoginButton />

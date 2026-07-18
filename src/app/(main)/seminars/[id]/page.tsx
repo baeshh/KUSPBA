@@ -1,8 +1,16 @@
 import Link from "next/link";
 import Image from "next/image";
 import { notFound } from "next/navigation";
-import { getSeminarById } from "@/lib/seminars";
 import { ApplicationForm } from "@/components/seminars/ApplicationForm";
+import { prisma } from "@/lib/db";
+import { getMemberGradeLabels } from "@/lib/member-grades";
+import {
+  formatSeminarPrice,
+  getSeminarPriceByGrade,
+  hasSeminarGradePrices,
+  SEMINAR_MEMBER_GRADES,
+  serializeSeminarList,
+} from "@/lib/seminars";
 
 interface SeminarDetailPageProps {
   params: Promise<{ id: string }>;
@@ -10,7 +18,7 @@ interface SeminarDetailPageProps {
 
 export async function generateMetadata({ params }: SeminarDetailPageProps) {
   const { id } = await params;
-  const seminar = getSeminarById(id);
+  const seminar = await prisma.seminar.findUnique({ where: { id } });
   return {
     title: seminar ? `${seminar.title} | KUSPBA` : "세미나 상세 | KUSPBA",
   };
@@ -18,13 +26,21 @@ export async function generateMetadata({ params }: SeminarDetailPageProps) {
 
 export default async function SeminarDetailPage({ params }: SeminarDetailPageProps) {
   const { id } = await params;
-  const seminar = getSeminarById(id);
+  const seminarRecord = await prisma.seminar.findUnique({ where: { id } });
 
-  if (!seminar) {
+  if (!seminarRecord) {
     notFound();
   }
 
+  const [seminar] = serializeSeminarList([seminarRecord]);
+  const gradeLabels = await getMemberGradeLabels();
   const isClosed = seminar.status === "closed" || seminar.status === "ended";
+  const hasGradePrices = hasSeminarGradePrices(seminar.prices);
+  const gradePrices = SEMINAR_MEMBER_GRADES.map((grade) => ({
+    grade,
+    label: gradeLabels[grade],
+    amount: getSeminarPriceByGrade(seminar.prices, grade),
+  }));
 
   return (
     <main className="mx-auto max-w-[1200px] px-6 pb-20 pt-[120px]">
@@ -87,7 +103,23 @@ export default async function SeminarDetailPage({ params }: SeminarDetailPagePro
                 <span className="w-20 shrink-0 font-semibold text-[#86868B]">
                   참가비
                 </span>
-                <span className="font-medium">{seminar.fee}</span>
+                <div className="flex-1">
+                  {hasGradePrices ? (
+                    <div className="grid gap-2 sm:grid-cols-2">
+                      {gradePrices.map((price) => (
+                        <div
+                          key={price.grade}
+                          className="flex items-center justify-between rounded-xl bg-[#F5F5F7] px-3 py-2"
+                        >
+                          <span className="text-sm font-bold text-[#427A72]">{price.label}</span>
+                          <span className="font-bold">{formatSeminarPrice(price.amount)}</span>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <span className="font-medium">{seminar.fee}</span>
+                  )}
+                </div>
               </div>
             </div>
           </div>
@@ -130,11 +162,16 @@ export default async function SeminarDetailPage({ params }: SeminarDetailPagePro
           <ApplicationForm
             seminarId={seminar.id}
             fee={
-              seminar.fee.startsWith("무료")
+              hasGradePrices
+                ? formatSeminarPrice(seminar.prices.priceBasic)
+                : seminar.fee.startsWith("무료")
                 ? "무료"
                 : seminar.fee.split(" ")[0] ?? seminar.fee
             }
-            hasFee={seminar.fee.includes("원")}
+            hasFee={hasGradePrices || seminar.fee.includes("원")}
+            prices={seminar.prices}
+            hasGradePrices={hasGradePrices}
+            gradeLabels={gradeLabels}
           />
         )}
 

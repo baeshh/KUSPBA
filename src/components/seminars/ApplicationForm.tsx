@@ -2,16 +2,44 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import {
+  formatSeminarPrice,
+  getSeminarPriceByGrade,
+  SEMINAR_GRADE_LABELS,
+  type SeminarMemberGrade,
+  type SeminarPrices,
+} from "@/lib/seminars";
 
 interface ApplicationFormProps {
   seminarId: string;
   fee: string;
   hasFee?: boolean;
+  hasGradePrices?: boolean;
+  prices?: SeminarPrices;
+  gradeLabels?: Partial<Record<SeminarMemberGrade, string>>;
 }
 
-export function ApplicationForm({ seminarId, fee, hasFee = true }: ApplicationFormProps) {
+const MEMBER_GRADES: SeminarMemberGrade[] = ["REGULAR", "VIP", "PARTNER", "SPECIAL"];
+
+export function ApplicationForm({
+  seminarId,
+  fee,
+  hasFee = true,
+  hasGradePrices = false,
+  prices,
+  gradeLabels,
+}: ApplicationFormProps) {
+  const labels = { ...SEMINAR_GRADE_LABELS, ...gradeLabels };
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isMember, setIsMember] = useState(false);
+  const [memberGrade, setMemberGrade] = useState<SeminarMemberGrade>("BASIC");
   const router = useRouter();
+  const amount = hasGradePrices && prices
+    ? getSeminarPriceByGrade(prices, memberGrade)
+    : hasFee && !isMember
+      ? Number(fee.replace(/[^0-9]/g, "") || "10000")
+      : 0;
+  const displayFee = hasGradePrices ? formatSeminarPrice(amount) : fee;
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -20,18 +48,42 @@ export function ApplicationForm({ seminarId, fee, hasFee = true }: ApplicationFo
     const form = e.currentTarget;
     const formData = new FormData(form);
     const name = (formData.get("name") as string) || "";
-    const isMember = formData.get("isMember") === "yes";
+    const affiliation = (formData.get("affiliation") as string) || "";
+    const phone = (formData.get("phone") as string) || "";
+    const email = (formData.get("email") as string) || "";
+    const submittedIsMember = formData.get("isMember") === "yes";
+    const submittedGrade = (formData.get("memberGrade") as SeminarMemberGrade | null) ?? "BASIC";
+    const depositAmount = hasGradePrices && prices
+      ? getSeminarPriceByGrade(prices, submittedGrade)
+      : hasFee && !submittedIsMember
+        ? Number(fee.replace(/[^0-9]/g, "") || "10000")
+        : 0;
 
-    // TODO: API 연동
-    await new Promise((r) => setTimeout(r, 500));
+    const response = await fetch("/api/seminar-applications", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        seminarId,
+        name,
+        affiliation,
+        phone,
+        email,
+        isMember: submittedIsMember,
+        memberGrade: submittedGrade,
+        depositAmount,
+      }),
+    });
+
+    if (!response.ok) {
+      alert("신청 저장에 실패했습니다. 잠시 후 다시 시도해 주세요.");
+      setIsSubmitting(false);
+      return;
+    }
 
     const params = new URLSearchParams();
     params.set("name", name);
-    if (hasFee && !isMember) {
-      const amount = fee.replace(/[^0-9]/g, "") || "10000";
-      params.set("amount", amount);
-    } else if (hasFee && isMember) {
-      params.set("amount", "0");
+    if (hasFee) {
+      params.set("amount", String(depositAmount));
     }
 
     router.push(`/seminars/${seminarId}/complete?${params.toString()}`);
@@ -124,26 +176,58 @@ export function ApplicationForm({ seminarId, fee, hasFee = true }: ApplicationFo
                 name="isMember"
                 value="yes"
                 required
+                checked={isMember}
+                onChange={() => {
+                  setIsMember(true);
+                  setMemberGrade("REGULAR");
+                }}
                 className="h-[18px] w-[18px] accent-[#427A72]"
               />
-              협회원 (무료)
+              협회원
             </label>
             <label className="flex cursor-pointer items-center gap-2 text-[15px]">
               <input
                 type="radio"
                 name="isMember"
                 value="no"
+                checked={!isMember}
+                onChange={() => {
+                  setIsMember(false);
+                  setMemberGrade("BASIC");
+                }}
                 className="h-[18px] w-[18px] accent-[#427A72]"
               />
-              일반 ({fee})
+              일반 ({hasGradePrices && prices ? formatSeminarPrice(prices.priceBasic) : fee})
             </label>
           </div>
         </div>
 
+        {isMember && (
+          <label className="mb-6 block">
+            <span className="mb-2 block text-sm font-semibold text-[#1D1D1F]">
+              회원 등급
+            </span>
+            <select
+              name="memberGrade"
+              value={memberGrade}
+              onChange={(event) => setMemberGrade(event.target.value as SeminarMemberGrade)}
+              className="w-full rounded-xl border border-black/[0.08] bg-[#FBFBFD] px-4 py-3.5 text-[15px] text-[#1D1D1F] transition-all focus:border-[#427A72] focus:bg-white focus:outline-none focus:ring-4 focus:ring-[#427A72]/15"
+            >
+              {MEMBER_GRADES.map((grade) => (
+                <option key={grade} value={grade}>
+                  {labels[grade]} ({prices ? formatSeminarPrice(getSeminarPriceByGrade(prices, grade)) : "무료"})
+                </option>
+              ))}
+            </select>
+          </label>
+        )}
+
+        {!isMember && <input type="hidden" name="memberGrade" value="BASIC" />}
+
         {hasFee && (
         <div className="mb-6 rounded-xl bg-[#E8F0EE] p-4">
           <p className="mb-1 text-[13px] font-medium text-[#427A72]">
-            무통장 입금 계좌 ({fee})
+            무통장 입금 계좌 ({displayFee})
           </p>
           <div className="text-[15px] font-bold text-[#1D1D1F]">
             국민은행 123456-00-123456

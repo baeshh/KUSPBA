@@ -1,0 +1,126 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id             String               @id @default(cuid())
+  name           String
+  email          String?              @unique
+  kakaoId        String?              @unique
+  phone          String?
+  affiliation    String?
+  memberType     MemberType           @default(ASSOCIATE)
+  grade          MemberGrade          @default(BASIC)
+  role           UserRole             @default(USER)
+  memo           String?
+  applications   SeminarApplication[]
+  createdAt      DateTime             @default(now())
+  updatedAt      DateTime             @updatedAt
+}
+
+model Seminar {
+  id                String               @id @default(cuid())
+  title             String
+  status            SeminarStatus         @default(RECRUITING)
+  type              SeminarType           @default(JOB_SEMINAR)
+  applicationPeriod String
+  imageUrl          String
+  eventDate         String
+  location          String
+  capacity          String
+  fee               String
+  priceBasic        Int                  @default(0)
+  priceRegular      Int                  @default(0)
+  priceVip          Int                  @default(0)
+  pricePartner      Int                  @default(0)
+  priceSpecial      Int                  @default(0)
+  description       String
+  program           String
+  applications      SeminarApplication[]
+  createdAt         DateTime             @default(now())
+  updatedAt         DateTime             @updatedAt
+}
+
+model MemberGradeSetting {
+  grade     MemberGrade @id
+  label     String
+  sortOrder Int         @default(0)
+  updatedAt DateTime    @updatedAt
+}
+
+model SeminarApplication {
+  id               String        @id @default(cuid())
+  seminar          Seminar       @relation(fields: [seminarId], references: [id], onDelete: Cascade)
+  seminarId        String
+  user             User?         @relation(fields: [userId], references: [id], onDelete: SetNull)
+  userId           String?
+  name             String
+  affiliation      String
+  phone            String
+  email            String
+  isMember         Boolean       @default(false)
+  depositAmount    Int           @default(0)
+  depositStatus    DepositStatus @default(PENDING)
+  memo             String?
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+}
+
+model Notice {
+  id          String       @id @default(cuid())
+  title       String
+  content     String
+  status      NoticeStatus @default(PUBLISHED)
+  viewCount   Int          @default(0)
+  publishedAt DateTime     @default(now())
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+}
+
+enum UserRole {
+  USER
+  ADMIN
+}
+
+enum MemberType {
+  ASSOCIATE
+  DEPARTMENT
+}
+
+enum MemberGrade {
+  BASIC
+  REGULAR
+  VIP
+  PARTNER
+  SPECIAL
+}
+
+enum SeminarStatus {
+  RECRUITING
+  CLOSED
+  ENDED
+}
+
+enum SeminarType {
+  JOB_SEMINAR
+  NETWORKING
+  PRACTICAL_PROJECT
+  COMPETITION
+}
+
+enum DepositStatus {
+  PENDING
+  CONFIRMED
+  WAIVED
+  CANCELLED
+}
+
+enum NoticeStatus {
+  DRAFT
+  PUBLISHED
+}

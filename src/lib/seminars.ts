@@ -6,6 +6,26 @@ export type SeminarType =
   | "실무 프로젝트"
   | "공모전";
 
+export type SeminarMemberGrade = "BASIC" | "REGULAR" | "VIP" | "PARTNER" | "SPECIAL";
+
+export const SEMINAR_GRADE_LABELS: Record<SeminarMemberGrade, string> = {
+  BASIC: "BASIC",
+  REGULAR: "REGULAR",
+  VIP: "VIP",
+  PARTNER: "PARTNER",
+  SPECIAL: "SPECIAL",
+};
+
+export const SEMINAR_MEMBER_GRADES = Object.keys(SEMINAR_GRADE_LABELS) as SeminarMemberGrade[];
+
+export interface SeminarPrices {
+  priceBasic: number;
+  priceRegular: number;
+  priceVip: number;
+  pricePartner: number;
+  priceSpecial: number;
+}
+
 export interface SeminarDetail {
   id: string;
   title: string;
@@ -17,8 +37,27 @@ export interface SeminarDetail {
   location: string;
   capacity: string;
   fee: string;
+  prices: SeminarPrices;
   description: string[];
   program: string[];
+}
+
+export function getSeminarPriceByGrade(prices: SeminarPrices, grade: SeminarMemberGrade) {
+  return {
+    BASIC: prices.priceBasic,
+    REGULAR: prices.priceRegular,
+    VIP: prices.priceVip,
+    PARTNER: prices.pricePartner,
+    SPECIAL: prices.priceSpecial,
+  }[grade];
+}
+
+export function hasSeminarGradePrices(prices: SeminarPrices) {
+  return Object.values(prices).some((price) => price > 0);
+}
+
+export function formatSeminarPrice(price: number) {
+  return price > 0 ? `${price.toLocaleString()}원` : "무료";
 }
 
 // TODO: API/DB 연동 시 교체
@@ -35,6 +74,13 @@ export const MOCK_SEMINARS: SeminarDetail[] = [
     location: "서울 강남구 코엑스 컨퍼런스룸 301호",
     capacity: "선착순 50명",
     fee: "10,000원 (협회원 무료)",
+    prices: {
+      priceBasic: 10000,
+      priceRegular: 0,
+      priceVip: 0,
+      pricePartner: 0,
+      priceSpecial: 0,
+    },
     description: [
       "제약바이오 산업과 접점이 적은 대학생들이 현업의 생생한 지식을 얻고, 자신이 산업과 잘 맞는지 체험해 볼 수 있는 직무 탐색 세미나입니다.",
       "현직 전문가들의 강연과 질의응답을 통해 진입장벽을 낮추고, 타 대학 학생들과 교류할 수 있는 소중한 네트워킹 시간을 제공합니다.",
@@ -57,6 +103,13 @@ export const MOCK_SEMINARS: SeminarDetail[] = [
     location: "온라인 (줌)",
     capacity: "선착순 30명",
     fee: "무료",
+    prices: {
+      priceBasic: 0,
+      priceRegular: 0,
+      priceVip: 0,
+      pricePartner: 0,
+      priceSpecial: 0,
+    },
     description: [
       "현직 제약/바이오 인사와 1:1 멘토링을 진행합니다.",
       "진로 고민, 이력서 피드백, 면접 준비 등 개인 맞춤 조언을 받을 수 있습니다.",
@@ -75,6 +128,13 @@ export const MOCK_SEMINARS: SeminarDetail[] = [
     location: "협약기업 본사 및 온라인",
     capacity: "15명",
     fee: "무료",
+    prices: {
+      priceBasic: 0,
+      priceRegular: 0,
+      priceVip: 0,
+      pricePartner: 0,
+      priceSpecial: 0,
+    },
     description: ["기업 연계 프로젝트 1기 모집이 마감되었습니다."],
     program: [],
   },
@@ -90,6 +150,13 @@ export const MOCK_SEMINARS: SeminarDetail[] = [
     location: "서울",
     capacity: "80명",
     fee: "무료",
+    prices: {
+      priceBasic: 0,
+      priceRegular: 0,
+      priceVip: 0,
+      pricePartner: 0,
+      priceSpecial: 0,
+    },
     description: ["2025 KUSPBA 제약바이오 산업 해커톤이 마감되었습니다."],
     program: [],
   },
@@ -105,6 +172,13 @@ export const MOCK_SEMINARS: SeminarDetail[] = [
     location: "온라인",
     capacity: "100명",
     fee: "무료",
+    prices: {
+      priceBasic: 0,
+      priceRegular: 0,
+      priceVip: 0,
+      pricePartner: 0,
+      priceSpecial: 0,
+    },
     description: ["제약 R&D 직무 특강이 마감되었습니다."],
     program: [],
   },
@@ -112,4 +186,80 @@ export const MOCK_SEMINARS: SeminarDetail[] = [
 
 export function getSeminarById(id: string): SeminarDetail | undefined {
   return MOCK_SEMINARS.find((s) => s.id === id);
+}
+
+export function toDbSeminarStatus(status: SeminarStatus) {
+  return {
+    recruiting: "RECRUITING",
+    closed: "CLOSED",
+    ended: "ENDED",
+  }[status] as "RECRUITING" | "CLOSED" | "ENDED";
+}
+
+export function fromDbSeminarStatus(status: string): SeminarStatus {
+  return {
+    RECRUITING: "recruiting",
+    CLOSED: "closed",
+    ENDED: "ended",
+  }[status] as SeminarStatus;
+}
+
+export function toDbSeminarType(type: SeminarType) {
+  return {
+    "직무 세미나": "JOB_SEMINAR",
+    네트워킹: "NETWORKING",
+    "실무 프로젝트": "PRACTICAL_PROJECT",
+    공모전: "COMPETITION",
+  }[type] as "JOB_SEMINAR" | "NETWORKING" | "PRACTICAL_PROJECT" | "COMPETITION";
+}
+
+export function fromDbSeminarType(type: string): SeminarType {
+  return {
+    JOB_SEMINAR: "직무 세미나",
+    NETWORKING: "네트워킹",
+    PRACTICAL_PROJECT: "실무 프로젝트",
+    COMPETITION: "공모전",
+  }[type] as SeminarType;
+}
+
+export function serializeSeminarList(items: Array<{
+  id: string;
+  title: string;
+  status: string;
+  type: string;
+  applicationPeriod: string;
+  imageUrl: string;
+  eventDate: string;
+  location: string;
+  capacity: string;
+  fee: string;
+  priceBasic: number;
+  priceRegular: number;
+  priceVip: number;
+  pricePartner: number;
+  priceSpecial?: number;
+  description: string;
+  program: string;
+}>): SeminarDetail[] {
+  return items.map((item) => ({
+    id: item.id,
+    title: item.title,
+    status: fromDbSeminarStatus(item.status),
+    type: fromDbSeminarType(item.type),
+    applicationPeriod: item.applicationPeriod,
+    imageUrl: item.imageUrl,
+    eventDate: item.eventDate,
+    location: item.location,
+    capacity: item.capacity,
+    fee: item.fee,
+    prices: {
+      priceBasic: item.priceBasic,
+      priceRegular: item.priceRegular,
+      priceVip: item.priceVip,
+      pricePartner: item.pricePartner,
+      priceSpecial: item.priceSpecial ?? 0,
+    },
+    description: item.description.split("\n").filter(Boolean),
+    program: item.program.split("\n").filter(Boolean),
+  }));
 }

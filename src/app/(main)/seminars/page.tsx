@@ -1,8 +1,13 @@
 import Link from "next/link";
 import { SeminarsList } from "@/components/seminars/SeminarsList";
-import { MOCK_SEMINARS } from "@/lib/seminars";
+import { prisma } from "@/lib/db";
+import { serializeSeminarList } from "@/lib/seminars";
 
-export default function SeminarsPage() {
+export default async function SeminarsPage() {
+  const seminars = await prisma.seminar.findMany({
+    orderBy: { createdAt: "desc" },
+  });
+
   return (
     <main className="mx-auto max-w-[1200px] px-6 py-[120px]">
       <Link
@@ -26,14 +31,14 @@ export default function SeminarsPage() {
       </Link>
       <div className="mb-16 text-center">
         <h1 className="mb-4 text-[40px] font-bold tracking-[-0.03em] max-md:text-[32px]">
-          세미나 & 교육 프로그램
+          KUSPBA 프로그램
         </h1>
         <p className="text-lg text-[#86868B]">
-          제약/바이오 현업의 생생한 지식과 실무 경험을 연결합니다.
+          제약·바이오산업의 생생한 지식과 실무 경험을 연결합니다.
         </p>
       </div>
 
-      <SeminarsList seminars={MOCK_SEMINARS} />
+      <SeminarsList seminars={serializeSeminarList(seminars)} />
     </main>
   );
 }

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 
 export default function DebugPage() {
   const [info, setInfo] = useState<{
@@ -8,17 +9,17 @@ export default function DebugPage() {
     redirectUri: string;
     hasJsKey: boolean;
     apiCheck: { hasJsKey?: boolean; hasRestKey?: boolean } | null;
-  } | null>(null);
-
-  useEffect(() => {
+  } | null>(() => {
     const origin = typeof window !== "undefined" ? window.location.origin : "";
-    setInfo({
+    return {
       origin,
       redirectUri: `${origin}/auth/kakao/callback`,
       hasJsKey: !!process.env.NEXT_PUBLIC_KAKAO_JS_KEY,
       apiCheck: null,
-    });
+    };
+  });
 
+  useEffect(() => {
     fetch("/api/auth/kakao/check")
       .then((r) => r.json())
       .then((data) => {
@@ -66,9 +67,9 @@ export default function DebugPage() {
           현재 REST API 방식 사용 중 → JavaScript SDK 도메인 불필요
         </p>
       </div>
-      <a href="/" className="text-blue-600 underline">
+      <Link href="/" className="text-blue-600 underline">
         메인으로 돌아가기
-      </a>
+      </Link>
     </div>
   );
 }

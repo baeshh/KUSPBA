@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getSeminarById } from "@/lib/seminars";
 import { CompletionCard } from "@/components/seminars/CompletionCard";
+import { prisma } from "@/lib/db";
+import { hasSeminarGradePrices, serializeSeminarList } from "@/lib/seminars";
 
 interface CompletePageProps {
   params: Promise<{ id: string }>;
@@ -20,10 +21,11 @@ export default async function CompletePage({
   const { id } = await params;
   const { name, amount } = await searchParams;
 
-  const seminar = getSeminarById(id);
-  if (!seminar) notFound();
+  const seminarRecord = await prisma.seminar.findUnique({ where: { id } });
+  if (!seminarRecord) notFound();
 
-  const seminarHasFee = seminar.fee.includes("원");
+  const [seminar] = serializeSeminarList([seminarRecord]);
+  const seminarHasFee = hasSeminarGradePrices(seminar.prices) || seminar.fee.includes("원");
   const displayAmount = amount ?? (seminarHasFee ? "10000" : "0");
   const applicantName = name ?? "신청자";
   const needsPayment = seminarHasFee && displayAmount !== "0";

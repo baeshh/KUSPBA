@@ -57,9 +57,15 @@ export default function AboutPage() {
           나갑니다.
         </p>
         <p className="mb-0 text-lg leading-relaxed text-[#86868B]">
-          우리의 철학 &apos;호연지기(浩然之氣)&apos;는 단순한 산업의 미래만을
-          위한 것이 아닙니다. &quot;어떤 존재로 살아갈 것인가&quot;에 대한
-          질문이자, 대학생인 우리가 그 해답을 만들어가는 여정입니다.
+          우리의 철학{" "}
+          <strong className="font-bold text-[#373737]">
+            &apos;호연지기(浩然之氣)&apos;
+          </strong>
+          는 단순한 산업의 미래만을 위한 것이 아닙니다.{" "}
+          <strong className="font-bold text-[#373737]">
+            &quot;어떤 존재로 살아갈 것인가&quot;
+          </strong>
+          에 대한 질문이자, 대학생인 우리가 그 해답을 만들어가는 여정입니다.
         </p>
       </section>
 
@@ -67,55 +73,51 @@ export default function AboutPage() {
         <span className="mb-4 block text-sm font-bold uppercase tracking-wider text-[#427A72]">
           Chairperson Message
         </span>
-        <div className="grid gap-8 rounded-[28px] border border-black/[0.08] bg-white p-8 md:grid-cols-[0.8fr_1.2fr] md:p-10">
-          <div className="flex items-center justify-center rounded-[20px] border border-dashed border-black/15 bg-[#F8F9FA] p-6">
+        <div className="grid items-start gap-6 rounded-[28px] border border-black/[0.08] bg-white p-8 md:grid-cols-[200px_1fr] md:gap-8 md:p-10 lg:grid-cols-[220px_1fr]">
+          <div className="mx-auto flex aspect-[3/4] w-full max-w-[200px] items-center justify-center rounded-[18px] border border-dashed border-black/15 bg-[#F8F9FA] p-4 md:mx-0 md:max-w-none">
             <div className="text-center">
               <p className="text-sm font-semibold text-[#86868B]">협회장 사진 영역</p>
               <p className="mt-2 text-xs text-[#A1A1A6]">사진 업데이트 예정</p>
             </div>
           </div>
 
-          <div>
+          <div className="min-w-0">
             <h3 className="mb-4 text-2xl font-bold tracking-[-0.02em] text-[#1D1D1F]">
-              협회장 소개 및 인삿말
+              협회장 소개 및 인사말
             </h3>
-            <p className="text-[16px] leading-relaxed text-[#555]">
-              안녕하세요,
-              <br />
-              한국대학생제약바이오산업협회(KUSPBA) 협회장 박찬희입니다.
-              <br />
-              <br />
-              &ldquo;걷는 자에게 절망은 없습니다.&rdquo;
-              <br />
-              앞으로 나아가겠다는 선택을 한 순간, 우리는 이미 멈춰 있지 않습니다.
-              <br />
-              <br />
-              KUSPBA는 그 길 위에서,
-              <br />
-              대학생이 산업으로 나아갈 수 있도록 돕는 디딤돌 같은 존재가 되고자 합니다.
-              <br />
-              <br />
-              제약&middot;바이오산업은 높은 전문성과 복잡한 구조를 가진 분야이지만,
-              <br />
-              대학생이 이를 실제로 이해하고 진입할 수 있는 경로는 여전히 제한적입니다.
-              <br />
-              협회는 이 간극을 연결하고,
-              <br />
-              단순한 경험을 넘어 지속 가능한 기회와 성장의 구조를 만들어가고 있습니다.
-              <br />
-              <br />
-              또한 협회원 한 사람 한 사람이 협회 안에서 경험을 공유하고,
-              <br />
-              하나의 정체성과 연결을 만들어갈 수 있도록 노력하고 있습니다.
-              <br />
-              <br />
-              앞으로도 KUSPBA는 변하지 않는 방향성과 함께,
-              <br />
-              여러분이 흔들림 없이 나아갈 수 있도록 그 자리를 지키겠습니다.
-              <br />
-              <br />
-              감사합니다.
-            </p>
+            <div className="space-y-4 text-[16px] leading-relaxed break-keep text-[#555]">
+              <p>
+                안녕하세요,
+                <br />
+                한국대학생제약바이오산업협회(KUSPBA) 협회장 박찬희입니다.
+              </p>
+              <p>
+                <strong className="font-bold text-[#1D1D1F]">
+                  &ldquo;걷는 자에게 절망은 없습니다.&rdquo;
+                </strong>
+                <br />
+                앞으로 나아가겠다는 선택을 한 순간, 우리는 이미 멈춰 있지 않습니다.
+              </p>
+              <p>
+                KUSPBA는 그 길 위에서, 대학생이 산업으로 나아갈 수 있도록 돕는
+                디딤돌 같은 존재가 되고자 합니다.
+              </p>
+              <p>
+                제약&middot;바이오산업은 높은 전문성과 복잡한 구조를 가진 분야이지만,
+                대학생이 이를 실제로 이해하고 진입할 수 있는 경로는 여전히 제한적입니다.
+                협회는 이 간극을 연결하고, 단순한 경험을 넘어 지속 가능한 기회와 성장의
+                구조를 만들어가고 있습니다.
+              </p>
+              <p>
+                또한 협회원 한 사람 한 사람이 협회 안에서 경험을 공유하고, 하나의
+                정체성과 연결을 만들어갈 수 있도록 노력하고 있습니다.
+              </p>
+              <p>
+                앞으로도 KUSPBA는 변하지 않는 방향성과 함께, 여러분이 흔들림 없이
+                나아갈 수 있도록 그 자리를 지키겠습니다.
+              </p>
+              <p>감사합니다.</p>
+            </div>
           </div>
         </div>
       </section>
@@ -142,7 +144,7 @@ export default function AboutPage() {
               개척 (Pioneer)
             </h3>
             <p className="m-0 text-[15px] leading-relaxed text-[#86868B]">
-              주체적인 도전정신으로 내부의 역량을 산업 전체의 에너지로
+              주체적인 도전 정신으로 내부의 역량을 산업 전체의 에너지로
               확장합니다.
             </p>
           </div>
@@ -174,16 +176,18 @@ export default function AboutPage() {
             디딤돌을 놓습니다.
           </p>
           <div className="mt-10 flex items-center justify-center gap-4 rounded-2xl bg-[#FBFBFD] p-5 md:gap-6">
-            <Image
-              src="/didimi.png"
-              alt="디딤이 - KUSPBA 마스코트"
-              width={120}
-              height={120}
-              className="h-24 w-24 shrink-0 object-contain md:h-28 md:w-28"
-            />
+            <div className="flex h-24 w-24 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-black md:h-28 md:w-28">
+              <Image
+                src="/didimi.png"
+                alt="디딤이 - KUSPBA 마스코트"
+                width={120}
+                height={120}
+                className="h-full w-full object-contain"
+              />
+            </div>
             <div className="text-left">
               <p className="mb-1 text-base font-semibold text-[#1D1D1F]">
-                뚜벅뚜벅 길을 내는 듬직한 거북이, 디딤이
+                뚜벅뚜벅 길을 내는 듬직한 거북이 디딤이
               </p>
               <p className="m-0 text-sm text-[#86868B]">
                 함께 성장하는 빌더들의 진심과 호연지기를 상징합니다.
