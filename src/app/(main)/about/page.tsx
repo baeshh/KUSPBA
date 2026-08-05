@@ -49,7 +49,7 @@ export default function AboutPage() {
           Our Message
         </span>
         <h2 className="mb-6 text-3xl font-bold">
-          &quot;우리는 머뭅니다, 당신이 멈추지 않도록.&quot;
+          &quot;우리는 머뭅니다, 당신이 멈추지 않도록&quot;
         </h2>
         <p className="mb-6 text-lg leading-relaxed text-[#86868B]">
           우리는 거대한 흐름 앞에서도 정의롭고 떳떳하게 사회를 직시합니다.
@@ -74,10 +74,24 @@ export default function AboutPage() {
           Chairperson Message
         </span>
         <div className="grid items-start gap-6 rounded-[28px] border border-black/[0.08] bg-white p-8 md:grid-cols-[200px_1fr] md:gap-8 md:p-10 lg:grid-cols-[220px_1fr]">
-          <div className="mx-auto flex aspect-[3/4] w-full max-w-[200px] items-center justify-center rounded-[18px] border border-dashed border-black/15 bg-[#F8F9FA] p-4 md:mx-0 md:max-w-none">
-            <div className="text-center">
-              <p className="text-sm font-semibold text-[#86868B]">협회장 사진 영역</p>
-              <p className="mt-2 text-xs text-[#A1A1A6]">사진 업데이트 예정</p>
+          <div className="mx-auto w-full max-w-[200px] md:mx-0 md:max-w-none">
+            <div className="relative aspect-[3/4] w-full overflow-hidden rounded-[18px] border border-black/10 bg-[#F8F9FA]">
+              <Image
+                src="/chairperson.png"
+                alt="KUSPBA 협회장 박찬희"
+                fill
+                sizes="220px"
+                className="object-cover object-top"
+                priority
+              />
+            </div>
+            <div className="mt-4 text-left">
+              <p className="text-[18px] font-bold tracking-[-0.02em] text-[#1D1D1F]">
+                박찬희
+              </p>
+              <p className="mt-1 text-[13px] leading-snug text-[#888]">
+                한국대학생제약바이오산업협회 협회장
+              </p>
             </div>
           </div>
 
@@ -176,7 +190,7 @@ export default function AboutPage() {
             디딤돌을 놓습니다.
           </p>
           <div className="mt-10 flex items-center justify-center gap-4 rounded-2xl bg-[#FBFBFD] p-5 md:gap-6">
-            <div className="flex h-24 w-24 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-black md:h-28 md:w-28">
+            <div className="relative flex h-24 w-24 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-transparent md:h-28 md:w-28">
               <Image
                 src="/didimi.png"
                 alt="디딤이 - KUSPBA 마스코트"

@@ -20,6 +20,28 @@ const ALLOWED_TAGS = new Set([
 
 const VOID_TAGS = new Set(["br", "img"]);
 
+/** contentEditable이 넣는 &nbsp; 등을 디코딩해 재살균이 멱등해지게 한다. */
+function decodeHtmlEntities(value: string) {
+  let previous = "";
+  let current = value;
+
+  while (previous !== current) {
+    previous = current;
+    current = current
+      .replace(/&nbsp;/gi, "\u00A0")
+      .replace(/&#0*160;/g, "\u00A0")
+      .replace(/&#x0*a0;/gi, "\u00A0")
+      .replace(/&quot;/gi, '"')
+      .replace(/&#0*39;/g, "'")
+      .replace(/&apos;/gi, "'")
+      .replace(/&lt;/gi, "<")
+      .replace(/&gt;/gi, ">")
+      .replace(/&amp;/gi, "&");
+  }
+
+  return current;
+}
+
 function escapeHtml(value: string) {
   return value
     .replaceAll("&", "&amp;")
@@ -27,6 +49,14 @@ function escapeHtml(value: string) {
     .replaceAll(">", "&gt;")
     .replaceAll('"', "&quot;")
     .replaceAll("'", "&#39;");
+}
+
+function escapeTextContent(value: string) {
+  return escapeHtml(decodeHtmlEntities(value)).replaceAll("\u00A0", "&nbsp;");
+}
+
+function escapeAttribute(value: string) {
+  return escapeHtml(decodeHtmlEntities(value));
 }
 
 function isSafeLink(value: string) {
@@ -43,22 +73,22 @@ function sanitizeAttributes(tagName: string, rawTag: string) {
 
   for (const match of rawTag.matchAll(attrPattern)) {
     const name = match[1].toLowerCase();
-    const value = match[2] ?? match[3] ?? match[4] ?? "";
+    const value = decodeHtmlEntities(match[2] ?? match[3] ?? match[4] ?? "");
 
     if (tagName === "a" && name === "href" && isSafeLink(value)) {
-      attrs.push(`href="${escapeHtml(value)}"`);
+      attrs.push(`href="${escapeAttribute(value)}"`);
       attrs.push('target="_blank"');
       attrs.push('rel="noopener noreferrer"');
     }
 
     if (tagName === "img" && name === "src" && isSafeImage(value)) {
-      attrs.push(`src="${escapeHtml(value)}"`);
+      attrs.push(`src="${escapeAttribute(value)}"`);
       attrs.push('loading="lazy"');
       attrs.push('decoding="async"');
     }
 
     if (tagName === "img" && ["alt", "title"].includes(name)) {
-      attrs.push(`${name}="${escapeHtml(value)}"`);
+      attrs.push(`${name}="${escapeAttribute(value)}"`);
     }
   }
 
@@ -74,7 +104,7 @@ export function sanitizeNoticeHtml(html: string) {
   for (const match of withoutUnsafeBlocks.matchAll(tagPattern)) {
     const rawTag = match[0];
     const index = match.index ?? 0;
-    result += escapeHtml(withoutUnsafeBlocks.slice(lastIndex, index));
+    result += escapeTextContent(withoutUnsafeBlocks.slice(lastIndex, index));
     lastIndex = index + rawTag.length;
 
     const tagMatch = rawTag.match(/^<\/?\s*([a-zA-Z0-9]+)/);
@@ -93,6 +123,6 @@ export function sanitizeNoticeHtml(html: string) {
     result += VOID_TAGS.has(tagName) ? `<${tagName}${attrs}>` : `<${tagName}${attrs}>`;
   }
 
-  result += escapeHtml(withoutUnsafeBlocks.slice(lastIndex));
+  result += escapeTextContent(withoutUnsafeBlocks.slice(lastIndex));
   return result.trim();
 }
