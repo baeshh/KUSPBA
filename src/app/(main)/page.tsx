@@ -323,13 +323,7 @@ export default function HomePage() {
                 <br />
                 {currentHeroSlide.titleLine2}
               </h1>
-              <p
-                className={`mb-8 max-w-[34em] break-keep font-medium leading-snug text-[#555] md:mb-10 ${
-                  currentHeroSlide.compact
-                    ? "text-[15px] md:text-base lg:text-lg"
-                    : "text-base md:text-lg lg:text-xl"
-                }`}
-              >
+              <p className="mb-8 max-w-[34em] break-keep text-base font-medium leading-snug text-[#555] md:mb-10 md:text-lg lg:text-xl">
                 {currentHeroSlide.descriptionLine1}
                 {currentHeroSlide.descriptionLine2 ? (
                   <>

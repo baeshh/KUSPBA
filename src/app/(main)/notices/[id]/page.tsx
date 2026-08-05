@@ -26,6 +26,32 @@ export default async function NoticeDetailPage({ params }: NoticeDetailPageProps
     notFound();
   }
 
+  // 목록(최신순) 기준: 이전 = 더 오래된 글, 다음 = 더 최신 글
+  const [previousNotice, nextNotice] = await Promise.all([
+    prisma.notice.findFirst({
+      where: {
+        status: "PUBLISHED",
+        OR: [
+          { publishedAt: { lt: notice.publishedAt } },
+          { publishedAt: notice.publishedAt, id: { lt: notice.id } },
+        ],
+      },
+      orderBy: [{ publishedAt: "desc" }, { id: "desc" }],
+      select: { id: true, title: true },
+    }),
+    prisma.notice.findFirst({
+      where: {
+        status: "PUBLISHED",
+        OR: [
+          { publishedAt: { gt: notice.publishedAt } },
+          { publishedAt: notice.publishedAt, id: { gt: notice.id } },
+        ],
+      },
+      orderBy: [{ publishedAt: "asc" }, { id: "asc" }],
+      select: { id: true, title: true },
+    }),
+  ]);
+
   return (
     <main className="mx-auto max-w-[900px] px-6 py-[120px]">
       <Link
@@ -47,6 +73,45 @@ export default async function NoticeDetailPage({ params }: NoticeDetailPageProps
           dangerouslySetInnerHTML={{ __html: sanitizeNoticeHtml(notice.content) }}
         />
       </article>
+
+      <nav
+        className="mt-8 grid gap-3 border-t border-black/10 pt-8 sm:grid-cols-2"
+        aria-label="이전·다음 공지"
+      >
+        {previousNotice ? (
+          <Link
+            href={`/notices/${previousNotice.id}`}
+            className="group rounded-2xl border border-black/10 bg-white px-5 py-4 transition hover:border-[#427A72]/30 hover:bg-[#F8F9FA]"
+          >
+            <p className="mb-1 text-sm font-semibold text-[#86868B]">← 이전 게시물</p>
+            <p className="line-clamp-1 text-[15px] font-bold text-[#1D1D1F] transition-colors group-hover:text-[#427A72]">
+              {previousNotice.title}
+            </p>
+          </Link>
+        ) : (
+          <div className="rounded-2xl border border-dashed border-black/10 px-5 py-4">
+            <p className="mb-1 text-sm font-semibold text-[#A1A1A6]">← 이전 게시물</p>
+            <p className="text-[15px] font-medium text-[#A1A1A6]">이전 게시물이 없습니다</p>
+          </div>
+        )}
+
+        {nextNotice ? (
+          <Link
+            href={`/notices/${nextNotice.id}`}
+            className="group rounded-2xl border border-black/10 bg-white px-5 py-4 text-right transition hover:border-[#427A72]/30 hover:bg-[#F8F9FA]"
+          >
+            <p className="mb-1 text-sm font-semibold text-[#86868B]">다음 게시물 →</p>
+            <p className="line-clamp-1 text-[15px] font-bold text-[#1D1D1F] transition-colors group-hover:text-[#427A72]">
+              {nextNotice.title}
+            </p>
+          </Link>
+        ) : (
+          <div className="rounded-2xl border border-dashed border-black/10 px-5 py-4 text-right">
+            <p className="mb-1 text-sm font-semibold text-[#A1A1A6]">다음 게시물 →</p>
+            <p className="text-[15px] font-medium text-[#A1A1A6]">다음 게시물이 없습니다</p>
+          </div>
+        )}
+      </nav>
     </main>
   );
 }
