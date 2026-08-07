@@ -125,14 +125,23 @@ export default async function SeminarDetailPage({ params }: SeminarDetailPagePro
           </div>
 
           <div className="relative mb-10 h-[400px] w-full overflow-hidden rounded-[20px] border border-black/[0.08] bg-[#E8F0EE]">
-            <Image
-              src={seminar.imageUrl}
-              alt={seminar.title}
-              fill
-              className="object-cover"
-              sizes="(max-width: 1024px) 100vw, 60vw"
-              priority
-            />
+            {seminar.imageUrl.startsWith("/uploads/") ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={seminar.imageUrl}
+                alt={seminar.title}
+                className="h-full w-full object-cover"
+              />
+            ) : (
+              <Image
+                src={seminar.imageUrl}
+                alt={seminar.title}
+                fill
+                className="object-cover"
+                sizes="(max-width: 1024px) 100vw, 60vw"
+                priority
+              />
+            )}
           </div>
 
           <div>

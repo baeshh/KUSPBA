@@ -10,7 +10,6 @@ import {
   validateAdminPassword,
 } from "@/lib/admin-auth";
 import { prisma } from "@/lib/db";
-import { saveUploadedImage } from "@/lib/server/image-upload";
 
 const DEFAULT_PROGRAM_IMAGE =
   "https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&q=80&w=1000";
@@ -29,9 +28,14 @@ function price(formData: FormData, key: string) {
   return Number.isFinite(value) && value > 0 ? Math.floor(value) : 0;
 }
 
-function imageFile(formData: FormData) {
-  const file = formData.get("imageFile");
-  return file instanceof File && file.size > 0 ? file : null;
+function isNextRedirectError(error: unknown) {
+  return (
+    typeof error === "object"
+    && error !== null
+    && "digest" in error
+    && typeof (error as { digest?: unknown }).digest === "string"
+    && String((error as { digest: string }).digest).startsWith("NEXT_REDIRECT")
+  );
 }
 
 export async function loginAdmin(formData: FormData) {
@@ -52,40 +56,48 @@ export async function logoutAdmin() {
 export async function saveSeminar(formData: FormData) {
   await requireAdmin();
 
-  const id = text(formData, "id");
-  const uploadedImage = imageFile(formData);
-  const imageUrl =
-    uploadedImage
-      ? await saveUploadedImage(uploadedImage, "programs")
-      : text(formData, "imageUrl") || DEFAULT_PROGRAM_IMAGE;
-  const data = {
-    title: text(formData, "title"),
-    status: enumValue(text(formData, "status"), Object.values(SeminarStatus), SeminarStatus.RECRUITING),
-    type: enumValue(text(formData, "type"), Object.values(SeminarType), SeminarType.JOB_SEMINAR),
-    applicationPeriod: text(formData, "applicationPeriod"),
-    imageUrl,
-    eventDate: text(formData, "eventDate"),
-    location: text(formData, "location"),
-    capacity: text(formData, "capacity"),
-    fee: text(formData, "fee"),
-    priceBasic: price(formData, "priceBasic"),
-    priceRegular: price(formData, "priceRegular"),
-    priceVip: price(formData, "priceVip"),
-    pricePartner: price(formData, "pricePartner"),
-    priceSpecial: price(formData, "priceSpecial"),
-    description: text(formData, "description"),
-    program: text(formData, "program"),
-  };
+  try {
+    const id = text(formData, "id");
+    // 이미지는 클라이언트에서 /api/admin/programs/upload 로 먼저 올린다.
+    // 서버 액션 파일 첨부는 배포 환경에서 본문 크기/권한 오류를 유발할 수 있어 사용하지 않는다.
+    const imageUrl = text(formData, "imageUrl") || DEFAULT_PROGRAM_IMAGE;
+    const data = {
+      title: text(formData, "title"),
+      status: enumValue(text(formData, "status"), Object.values(SeminarStatus), SeminarStatus.RECRUITING),
+      type: enumValue(text(formData, "type"), Object.values(SeminarType), SeminarType.JOB_SEMINAR),
+      applicationPeriod: text(formData, "applicationPeriod"),
+      imageUrl,
+      eventDate: text(formData, "eventDate"),
+      location: text(formData, "location"),
+      capacity: text(formData, "capacity"),
+      fee: text(formData, "fee"),
+      priceBasic: price(formData, "priceBasic"),
+      priceRegular: price(formData, "priceRegular"),
+      priceVip: price(formData, "priceVip"),
+      pricePartner: price(formData, "pricePartner"),
+      priceSpecial: price(formData, "priceSpecial"),
+      description: text(formData, "description"),
+      program: text(formData, "program"),
+    };
 
-  if (id) {
-    await prisma.seminar.update({ where: { id }, data });
-  } else {
-    await prisma.seminar.create({ data });
+    if (!data.title || !data.applicationPeriod || !data.eventDate || !data.location || !data.capacity || !data.description) {
+      redirect("/admin/seminars?error=required");
+    }
+
+    if (id) {
+      await prisma.seminar.update({ where: { id }, data });
+    } else {
+      await prisma.seminar.create({ data });
+    }
+
+    revalidatePath("/admin/seminars");
+    revalidatePath("/seminars");
+    redirect("/admin/seminars");
+  } catch (error) {
+    if (isNextRedirectError(error)) throw error;
+    console.error("saveSeminar failed:", error);
+    redirect("/admin/seminars?error=save");
   }
-
-  revalidatePath("/admin/seminars");
-  revalidatePath("/seminars");
-  redirect("/admin/seminars");
 }
 
 export async function deleteSeminar(formData: FormData) {

@@ -1,6 +1,6 @@
 "use client";
 
-import { Fragment, useMemo, useState } from "react";
+import { Fragment, useMemo, useState, type ChangeEvent } from "react";
 import { GRADE_PRICE_FIELD, type MemberGradeKey } from "@/lib/member-grades";
 import {
   AdminPagination,
@@ -70,12 +70,16 @@ function Field({
   defaultValue,
   type = "text",
   required = true,
+  value,
+  onChange,
 }: {
   name: string;
   label: string;
   defaultValue?: string;
   type?: string;
   required?: boolean;
+  value?: string;
+  onChange?: (value: string) => void;
 }) {
   return (
     <label className="block">
@@ -83,7 +87,13 @@ function Field({
       <input
         type={type}
         name={name}
-        defaultValue={defaultValue}
+        {...(onChange
+          ? {
+              value: value ?? "",
+              onChange: (event: ChangeEvent<HTMLInputElement>) =>
+                onChange(event.target.value),
+            }
+          : { defaultValue })}
         required={required}
         className={adminInputClass}
       />
@@ -91,18 +101,69 @@ function Field({
   );
 }
 
-function FileInput() {
+function ImageFields({
+  initialUrl,
+}: {
+  initialUrl: string;
+}) {
+  const [imageUrl, setImageUrl] = useState(initialUrl);
+  const [uploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState("");
+
+  const uploadImage = async (file: File) => {
+    setUploading(true);
+    setUploadError("");
+    try {
+      const body = new FormData();
+      body.append("file", file);
+      const response = await fetch("/api/admin/programs/upload", {
+        method: "POST",
+        body,
+      });
+      const payload = (await response.json().catch(() => null)) as
+        | { url?: string; error?: string }
+        | null;
+      if (!response.ok || !payload?.url) {
+        throw new Error(payload?.error || "이미지 업로드에 실패했습니다.");
+      }
+      setImageUrl(payload.url);
+    } catch (error) {
+      setUploadError(error instanceof Error ? error.message : "이미지 업로드에 실패했습니다.");
+    } finally {
+      setUploading(false);
+    }
+  };
+
   return (
-    <label className="block">
-      <span className="mb-1.5 block text-xs font-semibold text-[#8B95A1]">대표 이미지 파일</span>
-      <input
-        type="file"
-        name="imageFile"
-        accept="image/jpeg,image/png,image/webp,image/gif"
-        className="w-full rounded-md border border-[#E5E8EB] bg-white px-3 py-2 text-sm file:mr-3 file:rounded-md file:border-0 file:bg-[#EAF0EC] file:px-3 file:py-1.5 file:text-xs file:font-semibold file:text-[#2D6A4F]"
+    <>
+      <Field
+        name="imageUrl"
+        label="대표 이미지 URL"
+        value={imageUrl}
+        onChange={setImageUrl}
+        required={false}
       />
-      <span className="mt-1 block text-xs text-[#8B95A1]">jpg, png, webp, gif / 최대 5MB</span>
-    </label>
+      <label className="block">
+        <span className="mb-1.5 block text-xs font-semibold text-[#8B95A1]">대표 이미지 파일</span>
+        <input
+          type="file"
+          accept="image/jpeg,image/png,image/webp,image/gif"
+          disabled={uploading}
+          onChange={(event) => {
+            const file = event.target.files?.[0];
+            event.target.value = "";
+            if (file) void uploadImage(file);
+          }}
+          className="w-full rounded-md border border-[#E5E8EB] bg-white px-3 py-2 text-sm file:mr-3 file:rounded-md file:border-0 file:bg-[#EAF0EC] file:px-3 file:py-1.5 file:text-xs file:font-semibold file:text-[#2D6A4F] disabled:opacity-60"
+        />
+        <span className="mt-1 block text-xs text-[#8B95A1]">
+          {uploading ? "업로드 중..." : "jpg, png, webp, gif / 최대 5MB · 선택 시 바로 업로드됩니다"}
+        </span>
+        {uploadError ? (
+          <span className="mt-1 block text-xs font-semibold text-[#F04452]">{uploadError}</span>
+        ) : null}
+      </label>
+    </>
   );
 }
 
@@ -145,21 +206,16 @@ function SeminarFormFields({
   gradeOptions: GradeOption[];
   seminar?: SeminarRow;
 }) {
+  const defaultImageUrl =
+    seminar?.imageUrl
+    ?? "https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&q=80&w=1000";
+
   return (
     <form action={saveSeminar} className="grid gap-4 md:grid-cols-2">
       {seminar ? <input type="hidden" name="id" value={seminar.id} /> : null}
       <Field name="title" label="제목" defaultValue={seminar?.title} />
       <Field name="applicationPeriod" label="신청 기간" defaultValue={seminar?.applicationPeriod} />
-      <Field
-        name="imageUrl"
-        label="대표 이미지 URL"
-        defaultValue={
-          seminar?.imageUrl
-          ?? "https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&q=80&w=1000"
-        }
-        required={false}
-      />
-      <FileInput />
+      <ImageFields initialUrl={defaultImageUrl} />
       <Field name="eventDate" label="진행 일시" defaultValue={seminar?.eventDate} />
       <Field name="location" label="장소" defaultValue={seminar?.location} />
       <Field name="capacity" label="모집 인원" defaultValue={seminar?.capacity} />

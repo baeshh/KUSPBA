@@ -1,5 +1,5 @@
-import Link from "next/link";
 import Image from "next/image";
+import Link from "next/link";
 import type { SeminarStatus } from "@/types";
 
 interface ProgramCardProps {
@@ -12,6 +12,10 @@ interface ProgramCardProps {
   variant?: "default" | "list";
 }
 
+function isLocalUpload(src: string) {
+  return src.startsWith("/uploads/");
+}
+
 export function ProgramCard({
   id,
   title,
@@ -22,6 +26,7 @@ export function ProgramCard({
   variant = "default",
 }: ProgramCardProps) {
   const isClosed = status === "closed" || status === "ended";
+  const localUpload = isLocalUpload(imageUrl);
 
   return (
     <Link href={`/seminars/${id}`}>
@@ -33,13 +38,22 @@ export function ProgramCard({
         }`}
       >
         <div className="relative h-[200px] w-full bg-[#E8F0EE]">
-          <Image
-            src={imageUrl}
-            alt={title}
-            fill
-            className={`object-cover ${isClosed ? "grayscale opacity-80" : ""}`}
-            sizes="(max-width: 768px) 100vw, 33vw"
-          />
+          {localUpload ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={imageUrl}
+              alt={title}
+              className={`h-full w-full object-cover ${isClosed ? "grayscale opacity-80" : ""}`}
+            />
+          ) : (
+            <Image
+              src={imageUrl}
+              alt={title}
+              fill
+              className={`object-cover ${isClosed ? "grayscale opacity-80" : ""}`}
+              sizes="(max-width: 768px) 100vw, 33vw"
+            />
+          )}
         </div>
         <div className="flex flex-1 flex-col p-6">
           <span
