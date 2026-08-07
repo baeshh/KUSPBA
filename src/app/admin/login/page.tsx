@@ -1,6 +1,5 @@
 import { redirect } from "next/navigation";
 import { isAdminAuthenticated } from "@/lib/admin-auth";
-import { loginAdmin } from "../actions";
 
 export default async function AdminLoginPage({
   searchParams,
@@ -20,7 +19,7 @@ export default async function AdminLoginPage({
         <h1 className="mb-6 text-[28px] font-extrabold tracking-[-0.04em] text-[#191F28]">
           관리자 로그인
         </h1>
-        <form action={loginAdmin} className="space-y-4">
+        <form action="/api/admin/login" method="post" className="space-y-4">
           <div>
             <label htmlFor="password" className="mb-2 block text-sm font-semibold text-[#4E5968]">
               관리자 비밀번호
