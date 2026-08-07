@@ -38,5 +38,6 @@ next-env.d.ts
 /prisma/*.db
 /prisma/*.db-journal
 
-# User uploads
+# User uploads (runtime storage; not served from public/ in production)
 /public/uploads/
+/storage/
