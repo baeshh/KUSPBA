@@ -8,7 +8,7 @@ export const metadata = {
 
 export default function AboutPage() {
   return (
-    <main className="mx-auto max-w-[860px] px-6 pb-20 pt-[120px]">
+    <main className="mx-auto max-w-[860px] px-4 pb-16 pt-[calc(var(--header-offset)+20px)] sm:px-6 md:pb-20 md:pt-[120px]">
       <Link
         href="/"
         className="mb-10 inline-flex items-center gap-2 px-0 py-2 text-[15px] font-medium text-[#86868B] transition-colors hover:-translate-x-1 hover:text-[#427A72]"
@@ -29,22 +29,22 @@ export default function AboutPage() {
         메인으로 돌아가기
       </Link>
 
-      <section className="mb-20">
-        <h1 className="mb-6 text-[48px] font-bold leading-tight tracking-[-0.03em] max-md:text-[36px]">
+      <section className="mb-12 md:mb-20">
+        <h1 className="mb-5 break-keep text-[32px] font-bold leading-tight tracking-[-0.03em] md:mb-6 md:text-[48px]">
           인재와 산업을 잇는
           <br />
           <span className="bg-gradient-to-br from-[#427A72] to-[#4A6C82] bg-clip-text text-transparent">
             우리의 첫걸음
           </span>
         </h1>
-        <p className="text-xl leading-relaxed text-[#86868B]">
+        <p className="text-[17px] leading-relaxed text-[#86868B] md:text-xl">
           전국 유일의 대학생제약바이오산업협회 KUSPBA는 제약&middot;바이오 인재와
           산업을 연결하고, 더 나은 미래를 위한 첫걸음을 설계하기 위해
           모였습니다.
         </p>
       </section>
 
-      <section className="mb-24">
+      <section className="mb-14 md:mb-24">
         <span className="mb-4 block text-sm font-bold uppercase tracking-wider text-[#427A72]">
           Our Message
         </span>
@@ -69,11 +69,11 @@ export default function AboutPage() {
         </p>
       </section>
 
-      <section className="mb-24">
+      <section className="mb-14 md:mb-24">
         <span className="mb-4 block text-sm font-bold uppercase tracking-wider text-[#427A72]">
           Chairperson Message
         </span>
-        <div className="grid items-start gap-6 rounded-[28px] border border-black/[0.08] bg-white p-8 md:grid-cols-[200px_1fr] md:gap-8 md:p-10 lg:grid-cols-[220px_1fr]">
+        <div className="grid items-start gap-6 rounded-[24px] border border-black/[0.08] bg-white p-5 md:grid-cols-[200px_1fr] md:gap-8 md:rounded-[28px] md:p-10 lg:grid-cols-[220px_1fr]">
           <div className="mx-auto w-full max-w-[200px] md:mx-0 md:max-w-none">
             <div className="relative aspect-[3/4] w-full overflow-hidden rounded-[18px] border border-black/10 bg-[#F8F9FA]">
               <Image
@@ -136,15 +136,15 @@ export default function AboutPage() {
         </div>
       </section>
 
-      <section className="mb-24">
+      <section className="mb-14 md:mb-24">
         <span className="mb-4 block text-sm font-bold uppercase tracking-wider text-[#427A72]">
           Core Values
         </span>
-        <h2 className="mb-10 text-3xl font-bold">
+        <h2 className="mb-6 text-[24px] font-bold md:mb-10 md:text-3xl">
           KUSPBA가 추구하는 세 가지 가치
         </h2>
-        <div className="grid gap-6 md:grid-cols-3">
-          <div className="rounded-[24px] border border-black/[0.08] bg-white p-8">
+        <div className="grid gap-4 md:grid-cols-3">
+          <div className="rounded-[20px] border border-black/[0.08] bg-white p-5 md:rounded-[24px] md:p-8">
             <h3 className="mb-3 text-xl font-bold text-[#1D1D1F]">
               연결 (Connection)
             </h3>
@@ -153,7 +153,7 @@ export default function AboutPage() {
               발판을 만듭니다.
             </p>
           </div>
-          <div className="rounded-[24px] border border-black/[0.08] bg-white p-8">
+          <div className="rounded-[20px] border border-black/[0.08] bg-white p-5 md:rounded-[24px] md:p-8">
             <h3 className="mb-3 text-xl font-bold text-[#1D1D1F]">
               개척 (Pioneer)
             </h3>
@@ -162,7 +162,7 @@ export default function AboutPage() {
               확장합니다.
             </p>
           </div>
-          <div className="rounded-[24px] border border-black/[0.08] bg-white p-8">
+          <div className="rounded-[20px] border border-black/[0.08] bg-white p-5 md:rounded-[24px] md:p-8">
             <h3 className="mb-3 text-xl font-bold text-[#1D1D1F]">
               토대 (Foundation)
             </h3>
@@ -174,12 +174,12 @@ export default function AboutPage() {
         </div>
       </section>
 
-      <section className="mb-24">
-        <div className="rounded-[32px] border border-black/[0.08] bg-white px-8 py-14 text-center shadow-[0_20px_40px_rgba(0,0,0,0.02)] md:px-14">
+      <section className="mb-14 md:mb-24">
+        <div className="rounded-[24px] border border-black/[0.08] bg-white px-5 py-10 text-center shadow-[0_20px_40px_rgba(0,0,0,0.02)] md:rounded-[32px] md:px-14 md:py-14">
           <span className="mb-4 flex justify-center text-sm font-bold uppercase tracking-wider text-[#427A72]">
             Our Philosophy
           </span>
-          <h3 className="mb-5 text-[28px] font-bold">
+          <h3 className="mb-5 text-[22px] font-bold md:text-[28px]">
             우리는 &apos;빌더(Builder)&apos; 입니다
           </h3>
           <p className="mb-6 text-[#86868B]">
@@ -189,7 +189,7 @@ export default function AboutPage() {
             대학생들과 산업 사이, 아직 메워지지 않은 그 간극에 &lsquo;우리는&rsquo;
             디딤돌을 놓습니다.
           </p>
-          <div className="mt-10 flex items-center justify-center gap-4 rounded-2xl bg-[#FBFBFD] p-5 md:gap-6">
+          <div className="mt-8 flex flex-col items-center gap-4 rounded-2xl bg-[#FBFBFD] p-5 sm:flex-row sm:items-center md:mt-10 md:gap-6">
             <div className="relative flex h-24 w-24 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-transparent md:h-28 md:w-28">
               <Image
                 src="/didimi.png"
@@ -199,7 +199,7 @@ export default function AboutPage() {
                 className="h-full w-full object-contain"
               />
             </div>
-            <div className="text-left">
+            <div className="text-center sm:text-left">
               <p className="mb-1 text-base font-semibold text-[#1D1D1F]">
                 뚜벅뚜벅 길을 내는 듬직한 거북이 디딤이
               </p>
@@ -211,13 +211,13 @@ export default function AboutPage() {
         </div>
       </section>
 
-      <div className="border-t border-black/[0.08] pt-16 text-center">
-        <h2 className="mb-6 text-2xl font-bold">
+      <div className="border-t border-black/[0.08] pt-10 text-center md:pt-16">
+        <h2 className="mb-6 break-keep text-xl font-bold md:text-2xl">
           이제 KUSPBA와 함께 여정을 시작해 보세요.
         </h2>
         <Link
           href="/"
-          className="inline-flex items-center justify-center rounded-full bg-[#1D1D1F] px-8 py-4 text-base font-semibold text-white transition-all hover:-translate-y-0.5 hover:bg-black hover:shadow-lg"
+          className="inline-flex w-full items-center justify-center rounded-full bg-[#1D1D1F] px-8 py-4 text-base font-semibold text-white transition-all hover:-translate-y-0.5 hover:bg-black hover:shadow-lg md:w-auto"
         >
           메인 화면으로 돌아가기
         </Link>

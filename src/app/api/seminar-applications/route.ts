@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { MemberGrade } from "@prisma/client";
 import { prisma } from "@/lib/db";
+import { getCurrentUser } from "@/lib/auth";
 
 function memberGrade(value: unknown, isMember: boolean) {
   if (!isMember) return MemberGrade.BASIC;
@@ -54,23 +55,35 @@ export async function POST(request: NextRequest) {
         }[grade]
       : fallbackFeeAmount(seminar.fee, isMember, submittedAmount);
 
-    const user = await prisma.user.upsert({
-      where: { email },
-      update: {
-        name,
-        phone,
-        affiliation,
-        grade,
-      },
-      create: {
-        name,
-        email,
-        phone,
-        affiliation,
-        memberType: "ASSOCIATE",
-        grade,
-      },
-    });
+    const sessionUser = await getCurrentUser();
+    const user = sessionUser
+      ? await prisma.user.update({
+          where: { id: sessionUser.id },
+          data: {
+            name,
+            phone,
+            affiliation,
+            email,
+            grade: sessionUser.grade === "BASIC" ? grade : sessionUser.grade,
+          },
+        })
+      : await prisma.user.upsert({
+          where: { email },
+          update: {
+            name,
+            phone,
+            affiliation,
+            grade,
+          },
+          create: {
+            name,
+            email,
+            phone,
+            affiliation,
+            memberType: "ASSOCIATE",
+            grade,
+          },
+        });
 
     const application = await prisma.seminarApplication.create({
       data: {

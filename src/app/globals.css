@@ -1,5 +1,15 @@
 @import "tailwindcss";
 
+/* 강원교육모두체 — 강원특별자치도교육청 무료 서체(출처 표기 권장, 웹 임베딩 가능) */
+@font-face {
+  font-family: "GangwonEducationModuche";
+  src: url("https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2201-2@1.0/GangwonEdu_OTFBoldA.woff")
+    format("woff");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
 /* KUSPBA 디자인 토큰 */
 :root {
   --bg-base: #fbfbfd;
@@ -11,6 +21,13 @@
   --brand-blue: #4a6c82;
   --brand-light: #e8f0ee;
   --kakao-yellow: #fee500;
+  --header-offset: calc(3.5rem + env(safe-area-inset-top, 0px));
+}
+
+@media (min-width: 640px) {
+  :root {
+    --header-offset: calc(4rem + env(safe-area-inset-top, 0px));
+  }
 }
 
 @theme inline {
@@ -18,6 +35,11 @@
   --color-foreground: var(--text-primary);
   --font-sans: "Pretendard Variable", -apple-system, BlinkMacSystemFont,
     "SF Pro KR", sans-serif;
+  --font-gangwon: "GangwonEducationModuche", "Pretendard Variable", sans-serif;
+}
+
+html {
+  overflow-x: hidden;
 }
 
 body {
@@ -29,4 +51,20 @@ body {
   letter-spacing: -0.02em;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+  max-width: 100%;
+}
+
+button,
+a,
+input,
+select,
+textarea {
+  touch-action: manipulation;
+}
+
+@media (max-width: 767px) {
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
 }

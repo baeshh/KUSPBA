@@ -30,7 +30,7 @@ export function CompletionCard({
   };
 
   return (
-    <div className="w-full max-w-[540px] rounded-[24px] border border-black/[0.08] bg-white p-10 text-center shadow-[0_12px_32px_rgba(0,0,0,0.04)] md:p-12">
+    <div className="w-full max-w-[540px] rounded-[24px] border border-black/[0.08] bg-white p-6 text-center shadow-[0_12px_32px_rgba(0,0,0,0.04)] md:p-12">
       <div className="mx-auto mb-6 flex h-[72px] w-[72px] items-center justify-center rounded-full bg-[rgba(52,199,89,0.1)] text-[#34C759]">
         <svg
           width="32"
@@ -46,7 +46,7 @@ export function CompletionCard({
         </svg>
       </div>
 
-      <h1 className="mb-3 text-[28px] font-bold">신청서가 접수되었습니다.</h1>
+      <h1 className="mb-3 break-keep text-[22px] font-bold md:text-[28px]">신청서가 접수되었습니다.</h1>
       <p className="mb-8 text-base text-[#86868B]">
         참가비 입금이 완료되어야 최종 신청이 확정됩니다.
       </p>

@@ -38,7 +38,7 @@ export default async function CompletePage({
         </Link>
       </header>
 
-      <div className="flex flex-1 items-center justify-center px-6 py-16">
+      <div className="flex flex-1 items-center justify-center px-4 py-10 sm:px-6 md:py-16">
         <CompletionCard
           applicantName={applicantName}
           amount={displayAmount}

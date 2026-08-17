@@ -33,7 +33,7 @@ function CallbackContent() {
       .then(async (res) => {
         if (res.ok) {
           setStatus("success");
-          router.push("/");
+          router.push("/mypage?welcome=1");
         } else {
           const data = await res.json().catch(() => ({}));
           console.error("Kakao auth error:", data);
@@ -53,7 +53,7 @@ function CallbackContent() {
         <p className="text-[#86868B]">로그인 처리 중...</p>
       )}
       {status === "success" && (
-        <p className="text-[#427A72]">로그인 완료! 메인으로 이동합니다.</p>
+        <p className="text-[#427A72]">로그인 완료! 마이페이지로 이동합니다.</p>
       )}
       {status === "error" && (
         <div className="text-center">

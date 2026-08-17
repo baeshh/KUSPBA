@@ -72,12 +72,12 @@ export default async function NoticesPage({
   });
 
   return (
-    <main className="mx-auto max-w-[1040px] px-6 py-[80px] md:py-[100px]">
+    <main className="mx-auto max-w-[1040px] px-4 pb-16 pt-[calc(var(--header-offset)+20px)] sm:px-6 md:py-[100px]">
       <div className="mb-12">
-        <h1 className="mb-3 text-[40px] font-extrabold tracking-[-0.04em] text-[#191919] max-md:text-[32px]">
+        <h1 className="mb-3 text-[28px] font-extrabold tracking-[-0.04em] text-[#191919] md:text-[40px]">
           공지사항
         </h1>
-        <p className="text-lg font-medium text-[#8B95A1]">
+        <p className="text-[15px] font-medium text-[#8B95A1] md:text-lg">
           KUSPBA의 새로운 소식과 활동을 확인해보세요.
         </p>
       </div>
@@ -88,7 +88,7 @@ export default async function NoticesPage({
         </p>
       ) : (
         <>
-          <div className="grid grid-cols-[repeat(auto-fill,minmax(310px,1fr))] gap-7">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-7 lg:grid-cols-3">
             {notices.map((notice) => {
               const thumbnail = extractNoticeThumbnail(notice.content);
               const isNew = isRecentNotice(notice.publishedAt);
@@ -120,7 +120,7 @@ export default async function NoticesPage({
                     </div>
                   ) : null}
 
-                  <div className="flex flex-1 flex-col p-7">
+                  <div className="flex flex-1 flex-col p-5 md:p-7">
                     <div className="mb-5 flex items-start justify-between gap-3">
                       <span
                         className={`rounded-lg px-3 py-1.5 text-[13px] font-bold ${

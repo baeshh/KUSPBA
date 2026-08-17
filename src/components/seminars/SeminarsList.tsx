@@ -6,13 +6,33 @@ import type { SeminarDetail } from "@/lib/seminars";
 
 const ITEMS_PER_PAGE = 6;
 
-interface SeminarsListProps {
-  seminars: SeminarDetail[];
-}
-
 type FilterTab = "all" | "recruiting" | "closed";
 
-export function SeminarsList({ seminars }: SeminarsListProps) {
+const VALUE_FILTERS: Record<
+  string,
+  { types: SeminarDetail["type"][]; keywords: string[] }
+> = {
+  connection: {
+    types: ["직무 세미나", "네트워킹"],
+    keywords: ["세미나", "봉사"],
+  },
+  pioneer: {
+    types: ["실무 프로젝트", "공모전"],
+    keywords: ["현장", "해커톤", "학술", "실습"],
+  },
+  foundation: {
+    types: [],
+    keywords: ["디딤돌"],
+  },
+};
+
+export function SeminarsList({
+  seminars,
+  valueFilter,
+}: {
+  seminars: SeminarDetail[];
+  valueFilter?: string;
+}) {
   const [activeTab, setActiveTab] = useState<FilterTab>("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
@@ -26,13 +46,22 @@ export function SeminarsList({ seminars }: SeminarsListProps) {
       result = result.filter((s) => s.status === "closed" || s.status === "ended");
     }
 
+    if (valueFilter && VALUE_FILTERS[valueFilter]) {
+      const { types, keywords } = VALUE_FILTERS[valueFilter];
+      result = result.filter((s) => {
+        if (types.includes(s.type)) return true;
+        const haystack = `${s.title} ${s.type}`.toLowerCase();
+        return keywords.some((keyword) => haystack.includes(keyword.toLowerCase()));
+      });
+    }
+
     if (searchQuery.trim()) {
       const query = searchQuery.toLowerCase().trim();
       result = result.filter((s) => s.title.toLowerCase().includes(query));
     }
 
     return result;
-  }, [seminars, activeTab, searchQuery]);
+  }, [seminars, activeTab, searchQuery, valueFilter]);
 
   const totalPages = Math.ceil(filteredSeminars.length / ITEMS_PER_PAGE);
   const paginatedSeminars = useMemo(() => {
@@ -42,15 +71,15 @@ export function SeminarsList({ seminars }: SeminarsListProps) {
 
   return (
     <>
-      <div className="mb-10 flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex rounded-full bg-[#F5F5F7] p-1">
+      <div className="mb-8 flex flex-col gap-4 md:mb-10 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex w-full rounded-full bg-[#F5F5F7] p-1 sm:w-auto">
           <button
             type="button"
             onClick={() => {
               setActiveTab("all");
               setCurrentPage(1);
             }}
-            className={`rounded-full px-5 py-2 text-sm font-semibold transition-all ${
+            className={`min-h-11 flex-1 rounded-full px-3 py-2 text-[13px] font-semibold transition-all sm:flex-none sm:px-5 sm:text-sm ${
               activeTab === "all"
                 ? "bg-white text-[#1D1D1F] shadow-[0_2px_8px_rgba(0,0,0,0.04)]"
                 : "text-[#86868B] hover:text-[#1D1D1F]"
@@ -64,7 +93,7 @@ export function SeminarsList({ seminars }: SeminarsListProps) {
               setActiveTab("recruiting");
               setCurrentPage(1);
             }}
-            className={`rounded-full px-5 py-2 text-sm font-semibold transition-all ${
+            className={`min-h-11 flex-1 rounded-full px-3 py-2 text-[13px] font-semibold transition-all sm:flex-none sm:px-5 sm:text-sm ${
               activeTab === "recruiting"
                 ? "bg-white text-[#1D1D1F] shadow-[0_2px_8px_rgba(0,0,0,0.04)]"
                 : "text-[#86868B] hover:text-[#1D1D1F]"
@@ -78,7 +107,7 @@ export function SeminarsList({ seminars }: SeminarsListProps) {
               setActiveTab("closed");
               setCurrentPage(1);
             }}
-            className={`rounded-full px-5 py-2 text-sm font-semibold transition-all ${
+            className={`min-h-11 flex-1 rounded-full px-3 py-2 text-[13px] font-semibold transition-all sm:flex-none sm:px-5 sm:text-sm ${
               activeTab === "closed"
                 ? "bg-white text-[#1D1D1F] shadow-[0_2px_8px_rgba(0,0,0,0.04)]"
                 : "text-[#86868B] hover:text-[#1D1D1F]"
@@ -109,12 +138,12 @@ export function SeminarsList({ seminars }: SeminarsListProps) {
               setSearchQuery(e.target.value);
               setCurrentPage(1);
             }}
-            className="w-full rounded-full border border-black/[0.08] bg-white py-3 pl-10 pr-4 text-sm outline-none transition-all placeholder:text-[#A1A1A6] focus:border-[#427A72] focus:ring-4 focus:ring-[#427A72]/15"
+            className="min-h-11 w-full rounded-full border border-black/[0.08] bg-white py-3 pl-10 pr-4 text-sm outline-none transition-all placeholder:text-[#A1A1A6] focus:border-[#427A72] focus:ring-4 focus:ring-[#427A72]/15"
           />
         </div>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-4 md:grid-cols-2 md:gap-6 lg:grid-cols-3">
         {paginatedSeminars.map((seminar) => (
           <ProgramCard
             key={seminar.id}

@@ -53,11 +53,12 @@ export async function POST(request: NextRequest) {
     const nickname = userData.kakao_account?.profile?.nickname || "카카오 사용자";
     const email = userData.kakao_account?.email || null;
 
-    await prisma.user.upsert({
+    const existing = await prisma.user.findUnique({ where: { kakaoId } });
+    const user = await prisma.user.upsert({
       where: { kakaoId },
       update: {
         name: nickname,
-        email,
+        email: email ?? undefined,
       },
       create: {
         kakaoId,
@@ -71,6 +72,8 @@ export async function POST(request: NextRequest) {
       nickname,
       profileImage: userData.kakao_account?.profile?.profile_image_url,
       email,
+      isNew: !existing,
+      needsGradeApplication: !user.requestedGrade,
     });
 
     response.cookies.set("kakao_user", kakaoId, {

@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect } from "react";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { JOB_MBTI_URL, KAKAO_PARTNERSHIP_URL, MEMBERSHIP_FORM_URL } from "@/lib/site";
 
 const revealClass = "home-reveal";
 const partnerLogos = Array.from({ length: 24 }, (_, i) => {
@@ -11,12 +11,19 @@ const partnerLogos = Array.from({ length: 24 }, (_, i) => {
   // 7번째: 성균관대 (검정 배경 제거, 학과명 유지)
   if (n === "07") return "/partners/skku-clear.png";
   return `/partners/partner-${n}.png`;
-});
+}).filter((_, index) => index !== 15); // partner-16: 경희대 생명과학대학 중복 제거
 type HeroSlide = {
   titleLine1: string;
   titleLine2: string;
   descriptionLine1: string;
   descriptionLine2?: string;
+  descriptionLine3?: string;
+  /** 슬로건 따옴표 */
+  quoted?: boolean;
+  /** 강원교육모두체 */
+  displayFont?: boolean;
+  /** 설명 둘째 줄부터 들여쓰기 */
+  descriptionIndent?: boolean;
   /** 긴 카피용: 제목 크기 축소 */
   compact?: boolean;
   /** 우측 비주얼. 없으면 협회 로고 */
@@ -30,8 +37,12 @@ const heroSlides: HeroSlide[] = [
   {
     titleLine1: "우리는 머뭅니다,",
     titleLine2: "당신이 멈추지 않도록",
-    descriptionLine1:
-      "학생과 현업을 잇는 가장 단단한 디딤돌, 지금 KUSPBA와 함께 제약·바이오의 미래를 그리세요!",
+    quoted: true,
+    displayFont: true,
+    descriptionIndent: true,
+    descriptionLine1: "학생과 현업을 잇는 가장 단단한 디딤돌,",
+    descriptionLine2: "지금 KUSPBA와 함께",
+    descriptionLine3: "제약·바이오의 미래를 그리세요!",
   },
   {
     // 배너2 — 사진2
@@ -39,6 +50,7 @@ const heroSlides: HeroSlide[] = [
     titleLine2: "KUSPBA 디딤돌 프로젝트",
     descriptionLine1: "산업을 이해하고 진로를 구체화하는 12주 스터디 프로그램",
     compact: true,
+    displayFont: true,
     imageSrc: "/hero/banner-2.png",
     imageAlt: "KUSPBA 디딤돌 프로젝트 17기 Orientation",
   },
@@ -48,6 +60,7 @@ const heroSlides: HeroSlide[] = [
     titleLine2: "KUSPBA 직무 세미나",
     descriptionLine1: "다양한 직무와 산업 현장을 배우는 시간",
     compact: true,
+    displayFont: true,
     imageSrc: "/hero/banner-3.png",
     imageAlt: "KUSPBA 제약·바이오 직무세미나",
   },
@@ -57,6 +70,7 @@ const heroSlides: HeroSlide[] = [
     titleLine2: "KUSPBA와 함께해요!",
     descriptionLine1: "전국 대학(원)생과 함께하는 산업 네트워크",
     compact: true,
+    displayFont: true,
     imageSrc: "/hero/banner-4.png",
     imageAlt: "KUSPBA와 함께해요",
     imageContain: true,
@@ -67,13 +81,14 @@ const heroSlides: HeroSlide[] = [
     titleLine2: "KUSPBA 직무 MBTI 테스트",
     descriptionLine1: "16가지 직무 중 나에게 맞는 진로를 찾아보세요.",
     compact: true,
+    displayFont: true,
     imageSrc: "/hero/banner-5.png",
     imageAlt: "KUSPBA 직무 MBTI 테스트",
     imageContain: true,
   },
 ];
 
-const HERO_AUTO_INTERVAL_MS = 5000;
+const HERO_AUTO_INTERVAL_MS = 3000;
 
 function HeroArrowIcon({ direction }: { direction: "prev" | "next" }) {
   return (
@@ -104,7 +119,9 @@ export default function HomePage() {
   const [heroTimerKey, setHeroTimerKey] = useState(0);
   const [heroSlideDir, setHeroSlideDir] = useState<"prev" | "next">("next");
   const [isHeroHovered, setIsHeroHovered] = useState(false);
+  const [isHeroTouching, setIsHeroTouching] = useState(false);
   const [openCoreValue, setOpenCoreValue] = useState<string | null>(null);
+  const heroTouchStart = useRef<{ x: number; y: number } | null>(null);
 
   const coreValues = [
     {
@@ -167,8 +184,29 @@ export default function HomePage() {
     setHeroTimerKey((key) => key + 1);
   };
 
+  const onHeroTouchStart = (event: React.TouchEvent) => {
+    const touch = event.touches[0];
+    if (!touch) return;
+    heroTouchStart.current = { x: touch.clientX, y: touch.clientY };
+    setIsHeroTouching(true);
+  };
+
+  const onHeroTouchEnd = (event: React.TouchEvent) => {
+    const start = heroTouchStart.current;
+    heroTouchStart.current = null;
+    setIsHeroTouching(false);
+    if (!start) return;
+    const touch = event.changedTouches[0];
+    if (!touch) return;
+    const dx = touch.clientX - start.x;
+    const dy = touch.clientY - start.y;
+    if (Math.abs(dx) < 40 || Math.abs(dx) < Math.abs(dy)) return;
+    if (dx > 0) handlePrevHeroSlide();
+    else handleNextHeroSlide();
+  };
+
   useEffect(() => {
-    if (isHeroHovered) return;
+    if (isHeroHovered || isHeroTouching) return;
 
     const timer = window.setInterval(() => {
       setHeroSlideDir("next");
@@ -178,7 +216,7 @@ export default function HomePage() {
     }, HERO_AUTO_INTERVAL_MS);
 
     return () => window.clearInterval(timer);
-  }, [heroTimerKey, isHeroHovered]);
+  }, [heroTimerKey, isHeroHovered, isHeroTouching]);
 
   useEffect(() => {
     const onScroll = () => {
@@ -241,7 +279,7 @@ export default function HomePage() {
   const currentHeroSlide = heroSlides[activeHeroSlide];
 
   return (
-    <div className="relative bg-white text-[#373737]">
+    <div className="relative overflow-x-hidden bg-white text-[#373737]">
       <div
         id="dynamicBg"
         className="pointer-events-none fixed inset-0 -z-30 opacity-0 transition-opacity duration-100"
@@ -261,17 +299,22 @@ export default function HomePage() {
         style={{ background: "#C1E0E4" }}
       />
 
-      {/* hero는 overflow-x-hidden 밖에 두어 좌우 화살표가 잘리지 않게 함 */}
       <section
-        className="hero-wrap relative mx-auto max-w-[1200px] overflow-visible px-6 pb-16 pt-[120px] lg:px-16 lg:pb-20 lg:pt-[170px]"
+        className="hero-wrap relative mx-auto max-w-[1200px] overflow-hidden px-4 pb-10 pt-[calc(var(--header-offset)+12px)] sm:overflow-visible sm:px-6 md:pb-16 lg:px-16 lg:pb-20 lg:pt-[170px]"
         onMouseEnter={() => setIsHeroHovered(true)}
         onMouseLeave={() => setIsHeroHovered(false)}
+        onTouchStart={onHeroTouchStart}
+        onTouchEnd={onHeroTouchEnd}
+        onTouchCancel={() => {
+          heroTouchStart.current = null;
+          setIsHeroTouching(false);
+        }}
       >
         <button
           type="button"
           onClick={handlePrevHeroSlide}
           aria-label="이전 멘트 보기"
-          className={`${heroArrowBtnClass} absolute left-1 top-[calc(50%+20px)] z-20 hidden h-12 w-12 -translate-y-1/2 lg:left-2 lg:flex xl:left-0`}
+          className={`${heroArrowBtnClass} absolute left-1 top-[calc(50%+20px)] z-20 !hidden h-12 w-12 -translate-y-1/2 lg:left-2 lg:!flex xl:left-0`}
         >
           <HeroArrowIcon direction="prev" />
         </button>
@@ -279,148 +322,244 @@ export default function HomePage() {
           type="button"
           onClick={handleNextHeroSlide}
           aria-label="다음 멘트 보기"
-          className={`${heroArrowBtnClass} absolute right-1 top-[calc(50%+20px)] z-20 hidden h-12 w-12 -translate-y-1/2 lg:right-2 lg:flex xl:right-0`}
+          className={`${heroArrowBtnClass} absolute right-1 top-[calc(50%+20px)] z-20 !hidden h-12 w-12 -translate-y-1/2 lg:right-2 lg:!flex xl:right-0`}
         >
           <HeroArrowIcon direction="next" />
         </button>
 
-        <div className="flex flex-col items-center gap-10 lg:flex-row lg:pl-10 lg:pr-10">
-          <div className="min-w-0 flex-[1.15]">
-            <span className="mb-6 inline-block rounded-full bg-[#C1E4D7] px-4 py-1.5 text-[13px] font-extrabold text-[#222]">
-              전국 유일 대학생제약바이오산업협회
-            </span>
-            <div className="mb-3 flex items-center justify-between lg:hidden">
+        <div className="lg:flex lg:items-center lg:gap-10 lg:pl-10 lg:pr-10">
+          <div className="flex flex-col overflow-hidden rounded-[24px] border border-black/[0.06] bg-white shadow-[0_16px_40px_rgba(0,0,0,0.07)] lg:contents lg:rounded-none lg:border-0 lg:bg-transparent lg:shadow-none">
+            <div className="relative order-1 lg:order-2 lg:flex-[0.8]">
+              <div className="relative mx-auto h-[196px] w-full sm:h-[260px] md:h-[320px] lg:flex lg:h-[420px] lg:max-w-[420px] lg:items-center lg:justify-center">
+                {currentHeroSlide.imageSrc ? (
+                  <div
+                    key={`hero-visual-${activeHeroSlide}-${heroSlideDir}`}
+                    data-dir={heroSlideDir}
+                    className={`hero-slide-visual relative h-full w-full overflow-hidden lg:rounded-[34px] lg:border lg:border-black/5 lg:shadow-[0_16px_36px_rgba(0,0,0,0.08)] ${
+                      currentHeroSlide.imageContain ? "bg-[#F7FFFC]" : "bg-[#F3F4F6]"
+                    }`}
+                  >
+                    <Image
+                      src={currentHeroSlide.imageSrc}
+                      alt={currentHeroSlide.imageAlt ?? "KUSPBA 배너 이미지"}
+                      fill
+                      sizes="(max-width: 768px) 100vw, 420px"
+                      className={
+                        currentHeroSlide.imageContain
+                          ? "object-contain p-5 md:p-6"
+                          : "object-cover"
+                      }
+                      priority={activeHeroSlide <= 1}
+                    />
+                  </div>
+                ) : (
+                  <>
+                    <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-[#E8F0EE] via-[#F7FFFC] to-white lg:hidden">
+                      <div className="relative h-[92px] w-[92px]">
+                        <Image
+                          src="/logo-capsule.png"
+                          alt="KUSPBA 로고"
+                          fill
+                          sizes="92px"
+                          className="object-contain"
+                          priority
+                        />
+                      </div>
+                    </div>
+                    <div
+                      id="cube3d"
+                      className="hidden items-center justify-center rounded-[42px] border border-white/90 bg-gradient-to-br from-white/80 to-white/30 shadow-[0_20px_40px_rgba(0,0,0,0.08)] backdrop-blur-xl transition-transform duration-100 lg:flex lg:h-[340px] lg:w-[340px]"
+                      style={{ transform: "rotateX(15deg) rotateY(-15deg)" }}
+                    >
+                      <div className="relative h-[248px] w-[248px]">
+                        <Image
+                          src="/logo-capsule.png"
+                          alt="KUSPBA 로고"
+                          fill
+                          sizes="248px"
+                          className="object-contain p-4"
+                          priority
+                        />
+                      </div>
+                    </div>
+                  </>
+                )}
+              </div>
+
+              <div
+                className="mt-8 hidden items-center justify-center gap-2 lg:flex"
+                role="tablist"
+                aria-label="히어로 슬라이드"
+              >
+                {heroSlides.map((slide, index) => {
+                  const isActive = index === activeHeroSlide;
+                  return (
+                    <button
+                      key={`${slide.titleLine1}-${index}`}
+                      type="button"
+                      role="tab"
+                      aria-selected={isActive}
+                      aria-label={`${index + 1}번째 슬라이드`}
+                      onClick={() => goToHeroSlide(index)}
+                      className="inline-flex h-8 w-8 items-center justify-center"
+                    >
+                      <span
+                        className={`rounded-full transition-all duration-300 ease-out ${
+                          isActive
+                            ? "h-2.5 w-2.5 scale-110 bg-[#8ABFB2]"
+                            : "h-2 w-2 bg-[#D4D4D8]"
+                        }`}
+                      />
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            <div className="order-2 flex min-h-[268px] min-w-0 flex-col bg-gradient-to-b from-[#F7FFFC] to-white px-5 pb-2 pt-5 sm:min-h-[300px] sm:px-6 md:min-h-[340px] lg:order-1 lg:min-h-0 lg:flex-[1.2] lg:bg-none lg:px-0 lg:pb-0 lg:pt-0">
+              <span className="mb-3 inline-block rounded-full bg-[#C1E4D7] px-3 py-1 text-[11px] font-extrabold text-[#222] sm:mb-6 sm:px-4 sm:py-1.5 sm:text-[13px]">
+                전국 유일 대학생제약바이오산업협회
+              </span>
+              <div
+                key={`${activeHeroSlide}-${heroSlideDir}`}
+                data-dir={heroSlideDir}
+                className="hero-slide-copy mb-4 flex min-h-[148px] flex-1 flex-col sm:min-h-[168px] md:mb-10 md:min-h-[200px] lg:min-h-[220px]"
+              >
+                <h1
+                  className={`mb-2 line-clamp-4 min-h-[5.28em] break-keep leading-[1.32] text-[#222] md:mb-5 md:line-clamp-2 md:min-h-[2.64em] ${
+                    currentHeroSlide.displayFont
+                      ? "font-gangwon font-bold tracking-[-0.02em]"
+                      : "font-black tracking-[-0.04em]"
+                  } text-[22px] sm:text-[28px] ${
+                    currentHeroSlide.compact
+                      ? "md:text-[36px] lg:text-[42px]"
+                      : "md:text-[48px] lg:text-[56px]"
+                  }`}
+                >
+                  {currentHeroSlide.quoted ? (
+                    <>
+                      &ldquo;{currentHeroSlide.titleLine1}
+                      <br />
+                      {currentHeroSlide.titleLine2}&rdquo;
+                    </>
+                  ) : (
+                    <>
+                      {currentHeroSlide.titleLine1}
+                      <br />
+                      {currentHeroSlide.titleLine2}
+                    </>
+                  )}
+                </h1>
+                <p className="min-h-[4.875em] break-keep text-[14px] font-medium leading-relaxed text-[#555] md:min-h-[4.875em] md:text-lg lg:text-xl">
+                  {currentHeroSlide.descriptionLine1}
+                  {currentHeroSlide.descriptionLine2 ? (
+                    <>
+                      <br />
+                      <span
+                        className={
+                          currentHeroSlide.descriptionIndent
+                            ? "inline-block pl-0 md:pl-8"
+                            : undefined
+                        }
+                      >
+                        {currentHeroSlide.descriptionLine2}
+                      </span>
+                    </>
+                  ) : null}
+                  {currentHeroSlide.descriptionLine3 ? (
+                    <>
+                      <br />
+                      <span
+                        className={
+                          currentHeroSlide.descriptionIndent
+                            ? "inline-block pl-0 md:pl-8"
+                            : undefined
+                        }
+                      >
+                        {currentHeroSlide.descriptionLine3}
+                      </span>
+                    </>
+                  ) : null}
+                </p>
+              </div>
+              <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap sm:items-center sm:gap-3">
+                <Link
+                  href="/seminars"
+                  className="inline-flex min-h-11 items-center justify-center rounded-full bg-[#373737] px-3 py-2.5 text-[13px] font-bold text-white transition hover:-translate-y-0.5 hover:bg-[#222] sm:min-h-0 sm:px-8 sm:py-3.5 sm:text-[15px]"
+                >
+                  프로그램 신청하기
+                </Link>
+                <a
+                  href={MEMBERSHIP_FORM_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex min-h-11 items-center justify-center rounded-full border border-black/10 bg-white px-3 py-2.5 text-[13px] font-bold text-[#373737] transition hover:-translate-y-0.5 hover:border-[#C1E4D7] sm:min-h-0 sm:px-8 sm:py-3.5 sm:text-[15px]"
+                >
+                  KUSPBA와 함께하기
+                </a>
+                <a
+                  href={JOB_MBTI_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="col-span-2 inline-flex min-h-11 items-center justify-center rounded-full bg-[#C1E4D7] px-4 py-2.5 text-[13px] font-extrabold text-[#222] transition hover:-translate-y-0.5 hover:bg-[#b3dccf] sm:col-span-1 sm:min-h-0 sm:w-auto"
+                >
+                  나의 직무 MBTI는?
+                </a>
+              </div>
+            </div>
+
+            <div className="order-3 flex items-center justify-between px-3 pb-3 pt-3 lg:hidden">
               <button
                 type="button"
                 onClick={handlePrevHeroSlide}
                 aria-label="이전 멘트 보기"
-                className={`${heroArrowBtnClass} relative z-20 h-10 w-10`}
+                className={`${heroArrowBtnClass} h-10 w-10`}
               >
                 <HeroArrowIcon direction="prev" />
               </button>
+              <div
+                className="flex items-center justify-center gap-1"
+                role="tablist"
+                aria-label="히어로 슬라이드"
+              >
+                {heroSlides.map((slide, index) => {
+                  const isActive = index === activeHeroSlide;
+                  return (
+                    <button
+                      key={`${slide.titleLine1}-m-${index}`}
+                      type="button"
+                      role="tab"
+                      aria-selected={isActive}
+                      aria-label={`${index + 1}번째 슬라이드`}
+                      onClick={() => goToHeroSlide(index)}
+                      className="inline-flex h-8 w-7 items-center justify-center"
+                    >
+                      <span
+                        className={`rounded-full transition-all duration-300 ease-out ${
+                          isActive
+                            ? "h-2 w-5 bg-[#8ABFB2]"
+                            : "h-2 w-2 bg-[#D4D4D8]"
+                        }`}
+                      />
+                    </button>
+                  );
+                })}
+              </div>
               <button
                 type="button"
                 onClick={handleNextHeroSlide}
                 aria-label="다음 멘트 보기"
-                className={`${heroArrowBtnClass} relative z-20 h-10 w-10`}
+                className={`${heroArrowBtnClass} h-10 w-10`}
               >
                 <HeroArrowIcon direction="next" />
               </button>
             </div>
-            <div
-              key={`${activeHeroSlide}-${heroSlideDir}`}
-              data-dir={heroSlideDir}
-              className="hero-slide-copy"
-            >
-              <h1
-                className={`mb-4 max-w-[22em] break-keep font-black leading-[1.2] tracking-[-0.04em] text-[#222] md:mb-5 ${
-                  currentHeroSlide.compact
-                    ? "text-[28px] md:text-[36px] lg:text-[42px]"
-                    : "text-[36px] md:text-[48px] lg:text-[56px]"
-                }`}
-              >
-                {currentHeroSlide.titleLine1}
-                <br />
-                {currentHeroSlide.titleLine2}
-              </h1>
-              <p className="mb-8 max-w-[34em] break-keep text-base font-medium leading-snug text-[#555] md:mb-10 md:text-lg lg:text-xl">
-                {currentHeroSlide.descriptionLine1}
-                {currentHeroSlide.descriptionLine2 ? (
-                  <>
-                    <br />
-                    {currentHeroSlide.descriptionLine2}
-                  </>
-                ) : null}
-              </p>
-            </div>
-            <div className="flex flex-wrap items-center gap-3">
-              <Link
-                href="/seminars"
-                className="inline-flex items-center justify-center rounded-full bg-[#373737] px-8 py-3.5 text-[15px] font-bold text-white transition hover:-translate-y-0.5 hover:bg-[#222]"
-              >
-                프로그램 신청하기
-              </Link>
-              <Link
-                href="/about"
-                className="inline-flex items-center justify-center rounded-full border border-black/10 bg-white px-8 py-3.5 text-[15px] font-bold text-[#373737] transition hover:-translate-y-0.5 hover:border-[#C1E4D7]"
-              >
-                KUSPBA와 함께하기
-              </Link>
-              <Link
-                href="#"
-                className="inline-flex items-center justify-center rounded-full bg-[#C1E4D7] px-4 py-2 text-[13px] font-extrabold text-[#222] transition hover:-translate-y-0.5 hover:bg-[#b3dccf]"
-              >
-                나의 직무 MBTI는?
-              </Link>
-            </div>
           </div>
-          <div className="relative flex h-[330px] w-full flex-[0.85] items-center justify-center md:h-[420px]">
-            {currentHeroSlide.imageSrc ? (
-              <div
-                key={`hero-visual-${activeHeroSlide}-${heroSlideDir}`}
-                data-dir={heroSlideDir}
-                className={`hero-slide-visual relative h-[260px] w-full max-w-[420px] overflow-hidden rounded-[28px] border border-black/5 shadow-[0_24px_50px_rgba(0,0,0,0.1)] md:h-[320px] md:rounded-[34px] lg:h-[360px] ${
-                  currentHeroSlide.imageContain ? "bg-[#F7FFFC] p-4 md:p-6" : "bg-[#F3F4F6]"
-                }`}
-              >
-                <Image
-                  src={currentHeroSlide.imageSrc}
-                  alt={currentHeroSlide.imageAlt ?? "KUSPBA 배너 이미지"}
-                  fill
-                  sizes="(max-width: 768px) 90vw, 420px"
-                  className={currentHeroSlide.imageContain ? "object-contain p-4 md:p-6" : "object-cover"}
-                  priority={activeHeroSlide <= 1}
-                />
-              </div>
-            ) : (
-              <div
-                id="cube3d"
-                className="flex h-[260px] w-[260px] items-center justify-center rounded-[34px] border border-white/90 bg-gradient-to-br from-white/80 to-white/30 shadow-[0_30px_60px_rgba(0,0,0,0.08)] backdrop-blur-xl transition-transform duration-100 md:h-[300px] md:w-[300px] md:rounded-[42px] lg:h-[340px] lg:w-[340px]"
-                style={{ transform: "rotateX(15deg) rotateY(-15deg)" }}
-              >
-                <div className="relative h-[186px] w-[186px] md:h-[224px] md:w-[224px] lg:h-[248px] lg:w-[248px]">
-                  <Image
-                    src="/logo.png"
-                    alt="KUSPBA 로고"
-                    fill
-                    sizes="248px"
-                    className="object-contain"
-                    priority
-                  />
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-
-        <div
-          className="mt-8 flex items-center justify-center gap-2.5"
-          role="tablist"
-          aria-label="히어로 슬라이드"
-        >
-          {heroSlides.map((slide, index) => {
-            const isActive = index === activeHeroSlide;
-            return (
-              <button
-                key={`${slide.titleLine1}-${index}`}
-                type="button"
-                role="tab"
-                aria-selected={isActive}
-                aria-label={`${index + 1}번째 슬라이드`}
-                onClick={() => goToHeroSlide(index)}
-                className={`rounded-full transition-all duration-300 ease-out ${
-                  isActive
-                    ? "h-2.5 w-2.5 bg-[#8ABFB2] scale-110"
-                    : "h-2 w-2 bg-[#D4D4D8] hover:bg-[#B0B0B5]"
-                }`}
-              />
-            );
-          })}
         </div>
       </section>
 
       <div className="overflow-x-hidden">
-      <section className="relative mx-auto max-w-[1000px] px-6 py-24 text-center md:py-36">
+      <section className="relative mx-auto max-w-[1000px] px-4 py-14 text-center sm:px-6 md:py-36">
         <div
           id="paraWave"
           className="pointer-events-none absolute -right-20 top-[10%] -z-10 h-[600px] w-[380px] opacity-20"
@@ -430,39 +569,36 @@ export default function HomePage() {
           }}
         />
         <div className={revealClass}>
-          <p className="mb-3 text-xl font-bold text-[#8ABFB2]">Our Vision</p>
-          <h2 className="mb-8 text-[28px] font-black tracking-[-0.03em] text-[#222] md:whitespace-nowrap md:text-[40px]">
+          <p className="mb-2 text-base font-bold text-[#8ABFB2] md:mb-3 md:text-xl">Our Vision</p>
+          <h2 className="mb-6 break-keep text-[22px] font-black leading-snug tracking-[-0.03em] text-[#222] md:mb-8 md:whitespace-nowrap md:text-[40px]">
             &ldquo;제약&middot;바이오 인재와 산업을 잇는 가장 단단한 토대가 되는 것&rdquo;
           </h2>
 
-          <p className="mb-3 mt-24 text-xl font-bold text-[#8ABFB2] md:mt-32">Our Mission</p>
-          <h2 className="break-keep text-[26px] font-black leading-[1.4] tracking-[-0.03em] text-[#222] md:text-[34px] lg:text-[38px]">
+          <p className="mb-2 mt-12 text-base font-bold text-[#8ABFB2] md:mb-3 md:mt-32 md:text-xl">Our Mission</p>
+          <h2 className="break-keep text-[20px] font-black leading-[1.45] tracking-[-0.03em] text-[#222] md:text-[34px] lg:text-[38px]">
             <span className="md:whitespace-nowrap">
               &ldquo;우리는 제약&middot;바이오 인재들이 지식의 고립을 넘어 서로를{" "}
               <span className="whitespace-nowrap">연결하고,</span>
             </span>
             <br />
-            함께 성장하도록 실질적인 기회를 만듭니다&rdquo;
+            함께 성장하도록 실질적인 기회를 만든다&rdquo;
           </h2>
         </div>
       </section>
 
-      <section className="mx-auto max-w-[1200px] px-6 pb-28 md:pb-40">
-        <div className="mb-12 text-center">
-          <p className="mb-3 text-xl font-bold text-[#8ABFB2]">Core Value</p>
-          <h2 className="text-[36px] font-black tracking-[-0.03em] text-[#222] md:text-[44px]">
-            우리가 선택한 세 가지 태도
-          </h2>
+      <section className="mx-auto max-w-[1200px] px-4 pb-16 sm:px-6 md:pb-40">
+        <div className="mb-6 text-center md:mb-10">
+          <p className="text-base font-bold text-[#8ABFB2] md:text-xl">Core Value</p>
         </div>
-        <div className="grid gap-6 md:grid-cols-3 md:gap-8">
+        <div className="grid gap-4 md:grid-cols-3 md:gap-8">
           {coreValues.map((value) => (
             <button
               key={value.id}
               type="button"
               onClick={() => setOpenCoreValue(value.id)}
-              className="group overflow-hidden rounded-[30px] border border-white bg-white/80 p-7 text-left shadow-[0_20px_40px_rgba(0,0,0,0.03)] backdrop-blur-2xl transition hover:-translate-y-2 hover:border-[#C1E4D7] hover:shadow-[0_25px_50px_rgba(0,0,0,0.06)] md:p-8"
+              className="group overflow-hidden rounded-[22px] border border-white bg-white/80 p-5 text-left shadow-[0_20px_40px_rgba(0,0,0,0.03)] backdrop-blur-2xl transition hover:-translate-y-2 hover:border-[#C1E4D7] hover:shadow-[0_25px_50px_rgba(0,0,0,0.06)] md:rounded-[30px] md:p-8"
             >
-              <h3 className="mb-3 text-[26px] font-extrabold tracking-[-0.03em] text-[#222]">
+              <h3 className="mb-2 text-[22px] font-extrabold tracking-[-0.03em] text-[#222] md:mb-3 md:text-[26px]">
                 {value.title}
               </h3>
               <p className="whitespace-pre-line text-[16px] leading-relaxed text-[#555]">
@@ -497,7 +633,7 @@ export default function HomePage() {
               type="button"
               onClick={() => setOpenCoreValue(null)}
               aria-label="사진 닫기"
-              className="absolute right-5 top-5 z-10 inline-flex h-11 w-11 items-center justify-center rounded-full bg-white text-2xl font-black text-[#222] shadow-lg transition hover:bg-[#C1E4D7] md:right-8 md:top-8"
+              className="absolute right-4 top-[max(1rem,env(safe-area-inset-top))] z-10 inline-flex h-11 w-11 items-center justify-center rounded-full bg-white text-2xl font-black text-[#222] shadow-lg transition hover:bg-[#C1E4D7] md:right-8 md:top-8"
             >
               ×
             </button>
@@ -518,31 +654,33 @@ export default function HomePage() {
         )}
       </section>
 
-      <section className="bg-[#F8F9FA] px-6 py-24 md:py-36">
+      <section className="bg-[#F8F9FA] px-4 py-14 sm:px-6 md:py-36">
         <div className="mx-auto max-w-[1200px]">
-          <div className={`${revealClass} mb-14 text-center`}>
-            <p className="mb-2 text-xl font-semibold text-[#8ABFB2]">Programs</p>
-            <h2 className="mb-4 text-[38px] font-bold tracking-[-0.03em] text-[#222] md:text-[44px]">
-              학생과 산업을 연결하는 디딤돌
+          <div className={`${revealClass} mb-8 text-center md:mb-14`}>
+            <p className="mb-2 text-base font-semibold text-[#8ABFB2] md:text-xl">Programs</p>
+            <h2 className="mb-2 break-keep text-[24px] font-bold tracking-[-0.03em] text-[#222] md:mb-3 md:text-[44px]">
+              우리가 선택한 세 가지 태도
             </h2>
-            <p className="text-lg text-[#555] md:text-xl">
+            <p className="mb-3 break-keep text-[24px] font-bold tracking-[-0.03em] text-[#222] md:mb-4 md:text-[44px]">
+              학생과 산업을 연결하는 디딤돌
+            </p>
+            <p className="text-[15px] text-[#555] md:text-xl">
               모든 프로그램은 KUSPBA의 핵심가치에서 시작됩니다.
             </p>
           </div>
-          <div className="grid gap-6 md:grid-cols-3 md:gap-8">
+          <div className="grid gap-4 md:grid-cols-3 md:gap-8">
             {[
               {
                 tag: "모집 중",
                 recruiting: true,
                 category: "연결",
                 programs: ["직무 세미나", "봉사활동"],
-                href: "/seminars" as string | undefined,
+                href: "/seminars?value=connection" as string | undefined,
                 body: (
                   <>
-                    직무 세미나를 통해 교실 밖 산업 현장과 연결하고,
-                    <br />
-                    <strong className="font-semibold text-[#222]">사회 공헌 활동</strong>을
-                    통해 나와 세상을 연결합니다.
+                    <strong className="font-extrabold text-[#222]">직무 세미나</strong>를 통해 교실 밖 산업 현장과 연결하고,{" "}
+                    <br className="hidden md:block" />
+                    사회 공헌 활동을 통해 나와 세상을 연결합니다.
                   </>
                 ),
               },
@@ -551,14 +689,19 @@ export default function HomePage() {
                 recruiting: true,
                 category: "개척",
                 programs: ["현장실습", "해커톤", "연합학술제"],
-                href: "/seminars" as string | undefined,
+                href: "/seminars?value=pioneer" as string | undefined,
                 body: (
                   <>
-                    현장실습과 해커톤으로
-                    <br />
-                    대학생의 시선에서 산업을 해석하고,
-                    <br />
-                    연합학술제를 통해 학계의 새로운 가능성을 직접 넓혀갑니다.
+                    <strong className="font-extrabold text-[#222]">현장실습</strong>과{" "}
+                    <strong className="font-extrabold text-[#222]">해커톤</strong>으로{" "}
+                    <br className="hidden md:block" />
+                    대학생의 시선에서 산업을 해석하고,{" "}
+                    <br className="hidden md:block" />
+                    <span className="inline md:inline-block md:pl-8">
+                      <strong className="font-extrabold text-[#222]">연합학술제</strong>를 통해 학계의 새로운 가능성을{" "}
+                      <br className="hidden md:block" />
+                      직접 넓혀갑니다.
+                    </span>
                   </>
                 ),
               },
@@ -570,10 +713,10 @@ export default function HomePage() {
                 href: undefined,
                 body: (
                   <>
-                    디딤돌 프로젝트를 통해
-                    <br />
-                    산업의 언어를 배우고, 지식의 기반을 쌓아가,
-                    <br />
+                    <strong className="font-extrabold text-[#222]">디딤돌 프로젝트</strong>를 통해{" "}
+                    <br className="hidden md:block" />
+                    산업의 언어를 배우고, 지식의 기반을 쌓아가,{" "}
+                    <br className="hidden md:block" />
                     나만의 디딤돌을 만들어갑니다.
                   </>
                 ),
@@ -581,7 +724,7 @@ export default function HomePage() {
             ].map((program) => (
               <article
                 key={program.category}
-                className={`${revealClass} flex min-h-[360px] flex-col rounded-[30px] border border-black/[0.06] bg-white p-8 shadow-[0_10px_30px_rgba(0,0,0,0.04)] transition hover:-translate-y-2 hover:border-black/15 hover:shadow-[0_20px_45px_rgba(0,0,0,0.08)] ${
+                className={`${revealClass} flex min-h-0 flex-col rounded-[22px] border border-black/[0.06] bg-white p-5 shadow-[0_10px_30px_rgba(0,0,0,0.04)] transition hover:-translate-y-2 hover:border-black/15 hover:shadow-[0_20px_45px_rgba(0,0,0,0.08)] md:min-h-[360px] md:rounded-[30px] md:p-8 ${
                   !program.recruiting ? "bg-white/70" : ""
                 }`}
               >
@@ -609,7 +752,7 @@ export default function HomePage() {
                     {program.tag}
                   </span>
                 </div>
-                <h3 className="mb-4 text-[28px] font-bold tracking-[-0.03em] text-[#222]">
+                <h3 className="mb-3 text-[22px] font-bold tracking-[-0.03em] text-[#222] md:mb-4 md:text-[28px]">
                   {program.category}
                 </h3>
                 <p className="mb-8 flex-grow text-[16px] leading-relaxed text-[#555]">
@@ -630,10 +773,10 @@ export default function HomePage() {
               </article>
             ))}
           </div>
-          <div className="mt-8 flex justify-end md:mt-10">
+          <div className="mt-6 flex justify-stretch md:mt-10 md:justify-end">
             <Link
               href="/seminars"
-              className="inline-flex items-center justify-center rounded-full bg-[#373737] px-6 py-3 text-[14px] font-semibold text-white transition hover:-translate-y-0.5 hover:bg-[#222] md:px-8 md:text-[15px]"
+              className="inline-flex w-full items-center justify-center rounded-full bg-[#373737] px-6 py-3.5 text-[14px] font-semibold text-white transition hover:-translate-y-0.5 hover:bg-[#222] md:w-auto md:px-8 md:text-[15px]"
             >
               이외 프로그램도 여기서 확인하세요!
             </Link>
@@ -641,19 +784,19 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section className="mx-auto max-w-[1000px] px-6 pb-10 pt-24 text-center md:pb-14 md:pt-32">
+      <section className="mx-auto max-w-[1000px] px-4 pb-8 pt-14 text-center sm:px-6 md:pb-14 md:pt-32">
         <div className={revealClass}>
-          <p className="mb-3 text-xl font-bold text-[#8EB8C5]">Mascot</p>
-          <h2 className="mb-5 text-[42px] font-black tracking-[-0.04em] text-[#222] md:text-[48px]">
+          <p className="mb-2 text-base font-bold text-[#8EB8C5] md:mb-3 md:text-xl">Mascot</p>
+          <h2 className="mb-3 text-[28px] font-black tracking-[-0.04em] text-[#222] md:mb-5 md:text-[48px]">
             든든한 빌더, 디딤이
           </h2>
-          <p className="mb-12 text-lg leading-relaxed text-[#555] md:text-xl">
+          <p className="mb-8 break-keep text-[15px] leading-relaxed text-[#555] md:mb-12 md:text-xl">
             청록색 과잠을 입고 제약&middot;바이오산업의 징검다리가 되기 위해
-            <br />
+            <br className="hidden sm:block" />
             오늘도 열심히 머무는 KUSPBA의 마스코트랍니다.
           </p>
-          <div className="mx-auto mb-8 flex max-w-[580px] items-center justify-center rounded-[34px] bg-white p-16 shadow-[0_30px_60px_rgba(0,0,0,0.08)] transition hover:-translate-y-1">
-            <div className="relative h-[220px] w-[220px]">
+          <div className="mx-auto mb-6 flex max-w-[580px] items-center justify-center rounded-[24px] bg-white p-8 shadow-[0_20px_40px_rgba(0,0,0,0.06)] transition hover:-translate-y-1 md:mb-8 md:rounded-[34px] md:p-16">
+            <div className="relative h-[160px] w-[160px] md:h-[220px] md:w-[220px]">
               <Image
                 src="/didimi-home.png"
                 alt="디딤이 마스코트"
@@ -672,18 +815,18 @@ export default function HomePage() {
             </span>
           </div>
 
-          <div className="mx-auto mt-12 max-w-[760px] rounded-[28px] border border-black/5 bg-[#F8F9FA] px-8 py-10 shadow-[0_12px_24px_rgba(0,0,0,0.04)]">
-            <h3 className="mb-3 text-[30px] font-black tracking-[-0.03em] text-[#222] md:text-[34px]">
+          <div className="mx-auto mt-8 max-w-[760px] rounded-[22px] border border-black/5 bg-[#F8F9FA] px-5 py-7 shadow-[0_12px_24px_rgba(0,0,0,0.04)] md:mt-12 md:rounded-[28px] md:px-8 md:py-10">
+            <h3 className="mb-2 break-keep text-[22px] font-black tracking-[-0.03em] text-[#222] md:mb-3 md:text-[34px]">
               KUSPBA 협회원으로 들어오세요!
             </h3>
-            <p className="mb-6 text-base font-medium leading-relaxed text-[#555] md:text-lg">
+            <p className="mb-5 text-[15px] font-medium leading-relaxed text-[#555] md:mb-6 md:text-lg">
               당신이 멈추지 않도록, 우리가 자리를 지키고 있습니다.
             </p>
             <a
-              href="https://form.naver.com/response/IyBsxyQhmyRLIPvVLidJWw"
+              href={MEMBERSHIP_FORM_URL}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center justify-center rounded-full bg-[#373737] px-8 py-3.5 text-[15px] font-bold text-white transition hover:-translate-y-0.5 hover:bg-[#222]"
+              className="inline-flex w-full items-center justify-center rounded-full bg-[#373737] px-8 py-3.5 text-[15px] font-bold text-white transition hover:-translate-y-0.5 hover:bg-[#222] md:w-auto"
             >
               협회원 가입하기
             </a>
@@ -691,34 +834,34 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section id="inquiry" className="mx-auto max-w-[1200px] px-6 pb-24 md:pb-40">
+      <section id="inquiry" className="mx-auto max-w-[1200px] px-4 pb-16 sm:px-6 md:pb-40">
         <div
-          className={`${revealClass} mx-auto max-w-[760px] rounded-[28px] border border-white/70 px-8 py-10 text-center shadow-[0_20px_40px_rgba(193,228,215,0.3)]`}
+          className={`${revealClass} mx-auto max-w-[760px] rounded-[22px] border border-white/70 px-5 py-8 text-center shadow-[0_20px_40px_rgba(193,228,215,0.3)] md:rounded-[28px] md:px-8 md:py-10`}
           style={{
             background:
               "linear-gradient(135deg, rgba(193,228,215,1) 0%, rgba(193,224,228,1) 100%)",
           }}
         >
-          <h2 className="mb-3 text-[30px] font-black tracking-[-0.03em] text-[#222] md:text-[34px]">
+          <h2 className="mb-2 break-keep text-[22px] font-black tracking-[-0.03em] text-[#222] md:mb-3 md:text-[34px]">
             학과 단위로 KUSPBA와 함께하세요!
           </h2>
-          <p className="mb-6 text-lg font-semibold text-black/60 md:text-xl">
+          <p className="mb-5 break-keep text-[15px] font-semibold text-black/60 md:mb-6 md:text-xl">
             타 대학 제약·바이오 학생들과의 탄탄한 네트워크를 만들어보세요.
           </p>
           <a
-            href="https://pf.kakao.com/_XHhSn"
+            href={KAKAO_PARTNERSHIP_URL}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center justify-center rounded-full bg-[#373737] px-8 py-3.5 text-[15px] font-bold text-white transition hover:-translate-y-0.5 hover:bg-[#222]"
+            className="inline-flex w-full items-center justify-center rounded-full bg-[#373737] px-6 py-3.5 text-[14px] font-bold text-white transition hover:-translate-y-0.5 hover:bg-[#222] md:w-auto md:px-8 md:text-[15px]"
           >
             💬 카카오톡으로 제휴 문의하기
           </a>
         </div>
 
         <div id="partner-departments" className="mt-10 md:mt-12">
-          <div className="mb-6 text-center md:mb-8">
-            <p className="mb-2 text-lg font-bold text-[#8ABFB2]">Partner Departments</p>
-            <h2 className="text-[28px] font-black tracking-[-0.03em] text-[#222] md:text-[32px]">
+          <div className="mb-5 text-center md:mb-8">
+            <p className="mb-1 text-base font-bold text-[#8ABFB2] md:mb-2 md:text-lg">Partner Departments</p>
+            <h2 className="text-[22px] font-black tracking-[-0.03em] text-[#222] md:text-[32px]">
               협력 학과 배너
             </h2>
           </div>
@@ -757,9 +900,13 @@ export default function HomePage() {
           opacity: 1;
           transform: translateY(0);
         }
-        @media (max-width: 767px) {
+        @media (max-width: 1023px) {
           .hero-wrap {
             min-height: auto;
+          }
+          .hero-slide-copy,
+          .hero-slide-visual {
+            animation-duration: 0.4s;
           }
         }
         .partner-marquee-track {

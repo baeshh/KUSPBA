@@ -90,7 +90,7 @@ export function ApplicationForm({
   };
 
   return (
-    <aside className="sticky top-[100px] rounded-[24px] border border-black/[0.08] bg-white p-8 shadow-[0_20px_40px_rgba(0,0,0,0.03)]">
+    <aside className="rounded-[24px] border border-black/[0.08] bg-white p-5 shadow-[0_20px_40px_rgba(0,0,0,0.03)] lg:sticky lg:top-[100px] lg:p-8">
       <div className="mb-6 border-b border-black/[0.08] pb-6">
         <h2 className="mb-2 text-xl font-bold">참가 신청서 작성</h2>
         <p className="text-sm text-[#86868B]">정확한 정보를 입력해 주세요.</p>
@@ -169,8 +169,8 @@ export function ApplicationForm({
           <label className="mb-2 block text-sm font-semibold text-[#1D1D1F]">
             협회원 여부
           </label>
-          <div className="flex gap-4">
-            <label className="flex cursor-pointer items-center gap-2 text-[15px]">
+          <div className="flex flex-wrap gap-x-5 gap-y-3">
+            <label className="flex min-h-11 cursor-pointer items-center gap-2 text-[15px]">
               <input
                 type="radio"
                 name="isMember"
@@ -185,7 +185,7 @@ export function ApplicationForm({
               />
               협회원
             </label>
-            <label className="flex cursor-pointer items-center gap-2 text-[15px]">
+            <label className="flex min-h-11 cursor-pointer items-center gap-2 text-[15px]">
               <input
                 type="radio"
                 name="isMember"

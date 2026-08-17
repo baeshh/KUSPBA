@@ -14,10 +14,12 @@ model User {
   kakaoId        String?              @unique
   phone          String?
   affiliation    String?
-  memberType     MemberType           @default(ASSOCIATE)
-  grade          MemberGrade          @default(BASIC)
-  role           UserRole             @default(USER)
-  memo           String?
+  memberType       MemberType           @default(ASSOCIATE)
+  grade            MemberGrade          @default(BASIC)
+  requestedGrade   MemberGrade?
+  gradeRequestedAt DateTime?
+  role             UserRole             @default(USER)
+  memo             String?
   applications   SeminarApplication[]
   createdAt      DateTime             @default(now())
   updatedAt      DateTime             @updatedAt

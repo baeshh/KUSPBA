@@ -17,7 +17,16 @@ function NaverBlogIcon({ className }: { className?: string }) {
 function NaverCafeIcon({ className }: { className?: string }) {
   return (
     <svg viewBox="0 0 24 24" className={className} fill="currentColor" aria-hidden>
-      <path d="M12 2C6.48 2 2 5.92 2 10.8c0 3.12 1.92 5.84 4.8 7.36L6 22l4.08-2.16c.64.12 1.28.16 1.92.16 5.52 0 10-3.92 10-8.8S17.52 2 12 2m-2.4 12.4H7.2V8.8h1.2l1.68 3.92h.08L11.84 8.8H13v5.6h-1.44v-3.68h-.08l-1.6 3.68H9.6m7.68 0h-3.36V8.8h3.36v1.12h-1.92v1.04h1.76v1.08h-1.76v1.24h1.92z" />
+      {/* 네이버 카페 앱스토어 공식 앱 아이콘 형태, 푸터 모노톤에 맞춤 */}
+      <rect x="3" y="3" width="18" height="18" rx="4.5" />
+      <path
+        d="M7.4 8.2c0-.4.32-.7.72-.7h7.76c.4 0 .72.3.72.7v6.05c0 .4-.32.7-.72.7H12.2L9.7 16.9a.55.55 0 0 1-.9-.43v-1.5H8.12c-.4 0-.72-.3-.72-.7z"
+        fill="white"
+      />
+      <path
+        d="M9.15 10.05h1.55l.85 2.35h.06l.88-2.35h1.5v3.55h-1.05v-2.35h-.05l-.9 2.32h-.78l-.9-2.32h-.06v2.35H9.15z"
+        fill="currentColor"
+      />
     </svg>
   );
 }
@@ -42,26 +51,26 @@ const socialLinks = [
 
 export function Footer() {
   return (
-    <footer className="border-t border-black/5 bg-[#F4F4F5] px-6 py-16 text-[#373737]">
+    <footer className="border-t border-black/5 bg-[#F4F4F5] px-4 py-10 pb-[max(2.5rem,env(safe-area-inset-bottom))] text-[#373737] sm:px-6 md:py-16">
       <div className="mx-auto max-w-[1200px]">
         <div className="grid gap-0 border-y border-black/10 md:grid-cols-3">
-          <div className="border-b border-black/10 px-5 py-5 md:border-b-0 md:border-r">
+          <div className="border-b border-black/10 px-1 py-4 sm:px-5 sm:py-5 md:border-b-0 md:border-r">
             <p className="text-xs text-[#777]">문의</p>
             <a
               href="mailto:kuspba@gmail.com"
-              className="mt-1 block text-[20px] font-black tracking-[-0.02em] text-[#1D1D1F] hover:underline"
+              className="mt-1 block break-all text-[18px] font-black tracking-[-0.02em] text-[#1D1D1F] hover:underline md:text-[20px]"
             >
               kuspba@gmail.com
             </a>
           </div>
-          <div className="border-b border-black/10 px-5 py-5 md:border-b-0 md:border-r">
+          <div className="border-b border-black/10 px-1 py-4 sm:px-5 sm:py-5 md:border-b-0 md:border-r">
             <p className="text-xs text-[#777]">계좌</p>
-            <p className="mt-1 text-[20px] font-black tracking-[-0.02em] text-[#1D1D1F]">
+            <p className="mt-1 break-keep text-[18px] font-black tracking-[-0.02em] text-[#1D1D1F] md:text-[20px]">
               국민 474501-01-178256
             </p>
             <p className="mt-1 text-xs text-[#777]">예금주 : 한국대학생제약바이오산업협회</p>
           </div>
-          <div className="px-5 py-5">
+          <div className="px-1 py-4 sm:px-5 sm:py-5">
             <p className="text-xs text-[#777]">소셜미디어</p>
             <div className="mt-3 flex items-center gap-3">
               {socialLinks.map((social) => (

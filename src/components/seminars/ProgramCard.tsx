@@ -55,7 +55,7 @@ export function ProgramCard({
             />
           )}
         </div>
-        <div className="flex flex-1 flex-col p-6">
+        <div className="flex flex-1 flex-col p-5">
           <span
             className={`mb-3 self-start rounded-md px-2.5 py-1 text-xs font-semibold ${
               isClosed
@@ -65,7 +65,7 @@ export function ProgramCard({
           >
             {isClosed ? "마감" : "모집 중"}
           </span>
-          <h3 className={`mb-2 text-xl font-semibold leading-snug ${isClosed ? "opacity-60" : ""}`}>
+          <h3 className={`mb-2 text-[18px] font-semibold leading-snug md:text-xl ${isClosed ? "opacity-60" : ""}`}>
             {title}
           </h3>
           <p className={`mb-5 text-sm text-[#86868B] ${isClosed ? "opacity-60" : ""}`}>

@@ -43,7 +43,7 @@ export default async function SeminarDetailPage({ params }: SeminarDetailPagePro
   }));
 
   return (
-    <main className="mx-auto max-w-[1200px] px-6 pb-20 pt-[120px]">
+    <main className="mx-auto max-w-[1200px] px-4 pb-16 pt-[calc(var(--header-offset)+20px)] sm:px-6 md:pb-20 md:pt-[120px]">
       <Link
         href="/seminars"
         className="mb-8 inline-flex items-center gap-2 text-[15px] font-medium text-[#86868B] transition-colors hover:-translate-x-1 hover:text-[#427A72]"
@@ -64,7 +64,7 @@ export default async function SeminarDetailPage({ params }: SeminarDetailPagePro
         목록으로 돌아가기
       </Link>
 
-      <div className="grid gap-16 lg:grid-cols-[1fr_400px] lg:gap-16">
+      <div className="grid gap-8 lg:grid-cols-[1fr_400px] lg:gap-16">
         <div>
           <span
             className={`mb-4 inline-block rounded-lg px-3 py-1.5 text-[13px] font-semibold ${
@@ -75,11 +75,11 @@ export default async function SeminarDetailPage({ params }: SeminarDetailPagePro
           >
             {isClosed ? "마감" : "모집 중"}
           </span>
-          <h1 className="mb-6 text-[40px] font-bold leading-tight max-md:text-[32px]">
+          <h1 className="mb-5 break-keep text-[26px] font-bold leading-tight md:mb-6 md:text-[40px]">
             {seminar.title}
           </h1>
 
-          <div className="mb-10 rounded-2xl border border-black/[0.08] bg-white p-6">
+          <div className="mb-8 rounded-2xl border border-black/[0.08] bg-white p-4 md:mb-10 md:p-6">
             <div className="space-y-3 text-[15px]">
               <div className="flex gap-4">
                 <span className="w-20 shrink-0 font-semibold text-[#86868B]">
@@ -124,7 +124,7 @@ export default async function SeminarDetailPage({ params }: SeminarDetailPagePro
             </div>
           </div>
 
-          <div className="relative mb-10 h-[400px] w-full overflow-hidden rounded-[20px] border border-black/[0.08] bg-[#E8F0EE]">
+          <div className="relative mb-8 h-[220px] w-full overflow-hidden rounded-[20px] border border-black/[0.08] bg-[#E8F0EE] md:mb-10 md:h-[400px]">
             {seminar.imageUrl.startsWith("/uploads/") ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img
@@ -185,7 +185,7 @@ export default async function SeminarDetailPage({ params }: SeminarDetailPagePro
         )}
 
         {isClosed && (
-          <aside className="rounded-[24px] border border-black/[0.08] bg-[#F5F5F7] p-8">
+          <aside className="rounded-[24px] border border-black/[0.08] bg-[#F5F5F7] p-6 md:p-8">
             <p className="text-center font-semibold text-[#86868B]">
               신청이 마감되었습니다.
             </p>

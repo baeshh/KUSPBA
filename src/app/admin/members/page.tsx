@@ -24,6 +24,7 @@ export default async function AdminMembersPage() {
         affiliation: user.affiliation,
         memberType: user.memberType,
         grade: user.grade,
+        requestedGrade: user.requestedGrade,
         role: user.role,
         memo: user.memo,
         applicationCount: user._count.applications,

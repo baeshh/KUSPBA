@@ -29,6 +29,7 @@ type MemberRow = {
   affiliation: string | null;
   memberType: string;
   grade: string;
+  requestedGrade: string | null;
   role: string;
   memo: string | null;
   applicationCount: number;
@@ -158,7 +159,14 @@ export function MembersAdminClient({
                       <td className="px-8 py-4 text-sm font-semibold">{user.name}</td>
                       <td className="px-8 py-4 text-sm text-[#4E5968]">{user.email || "-"}</td>
                       <td className="px-8 py-4 text-sm text-[#4E5968]">{user.affiliation || "-"}</td>
-                      <td className="px-8 py-4 text-sm">{gradeLabel(user.grade)}</td>
+                      <td className="px-8 py-4 text-sm">
+                        <span>{gradeLabel(user.grade)}</span>
+                        {user.requestedGrade && user.requestedGrade !== user.grade ? (
+                          <span className="mt-1 block text-xs font-semibold text-[#2D6A4F]">
+                            신청 {gradeLabel(user.requestedGrade)}
+                          </span>
+                        ) : null}
+                      </td>
                       <td className="px-8 py-4 text-sm text-[#8B95A1]">{user.createdAtLabel}</td>
                       <td className="px-8 py-4">
                         <StatusBadge tone={user.role === "ADMIN" ? "success" : "muted"}>
