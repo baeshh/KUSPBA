@@ -14,7 +14,7 @@ const VALUE_FILTERS: Record<
 > = {
   connection: {
     types: ["직무 세미나", "네트워킹"],
-    keywords: ["세미나", "봉사"],
+    keywords: ["세미나", "봉사", "ccp"],
   },
   pioneer: {
     types: ["실무 프로젝트", "공모전"],

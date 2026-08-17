@@ -327,10 +327,10 @@ export default function HomePage() {
           <HeroArrowIcon direction="next" />
         </button>
 
-        <div className="lg:flex lg:items-center lg:gap-10 lg:pl-10 lg:pr-10">
+        <div className="lg:flex lg:items-start lg:gap-10 lg:pl-10 lg:pr-10">
           <div className="flex flex-col overflow-hidden rounded-[24px] border border-black/[0.06] bg-white shadow-[0_16px_40px_rgba(0,0,0,0.07)] lg:contents lg:rounded-none lg:border-0 lg:bg-transparent lg:shadow-none">
-            <div className="relative order-1 lg:order-2 lg:flex-[0.8]">
-              <div className="relative mx-auto h-[196px] w-full sm:h-[260px] md:h-[320px] lg:flex lg:h-[420px] lg:max-w-[420px] lg:items-center lg:justify-center">
+            <div className="relative order-1 lg:order-2 lg:w-[420px] lg:shrink-0">
+              <div className="relative mx-auto h-[196px] w-full sm:h-[260px] md:h-[320px] lg:h-[420px] lg:w-[420px]">
                 {currentHeroSlide.imageSrc ? (
                   <div
                     key={`hero-visual-${activeHeroSlide}-${heroSlideDir}`}
@@ -368,8 +368,7 @@ export default function HomePage() {
                     </div>
                     <div
                       id="cube3d"
-                      className="hidden items-center justify-center rounded-[42px] border border-white/90 bg-gradient-to-br from-white/80 to-white/30 shadow-[0_20px_40px_rgba(0,0,0,0.08)] backdrop-blur-xl transition-transform duration-100 lg:flex lg:h-[340px] lg:w-[340px]"
-                      style={{ transform: "rotateX(15deg) rotateY(-15deg)" }}
+                      className="hero-slide-visual relative hidden h-full w-full overflow-hidden rounded-[34px] border border-black/5 bg-gradient-to-br from-white to-[#F7FFFC] shadow-[0_16px_36px_rgba(0,0,0,0.08)] lg:flex lg:items-center lg:justify-center"
                     >
                       <div className="relative h-[248px] w-[248px]">
                         <Image
@@ -416,25 +415,21 @@ export default function HomePage() {
               </div>
             </div>
 
-            <div className="order-2 flex min-h-[268px] min-w-0 flex-col bg-gradient-to-b from-[#F7FFFC] to-white px-5 pb-2 pt-5 sm:min-h-[300px] sm:px-6 md:min-h-[340px] lg:order-1 lg:min-h-0 lg:flex-[1.2] lg:bg-none lg:px-0 lg:pb-0 lg:pt-0">
-              <span className="mb-3 inline-block rounded-full bg-[#C1E4D7] px-3 py-1 text-[11px] font-extrabold text-[#222] sm:mb-6 sm:px-4 sm:py-1.5 sm:text-[13px]">
+            <div className="order-2 flex min-h-[268px] min-w-0 flex-col bg-gradient-to-b from-[#F7FFFC] to-white px-5 pb-2 pt-5 sm:min-h-[300px] sm:px-6 md:min-h-[340px] lg:order-1 lg:h-[420px] lg:min-h-[420px] lg:flex-1 lg:bg-none lg:px-0 lg:pb-0 lg:pt-0">
+              <span className="mb-2 inline-block w-fit rounded-full bg-[#C1E4D7] px-3 py-1 text-[11px] font-extrabold text-[#222] sm:mb-2.5 sm:px-3.5 sm:py-1 sm:text-[13px]">
                 전국 유일 대학생제약바이오산업협회
               </span>
               <div
                 key={`${activeHeroSlide}-${heroSlideDir}`}
                 data-dir={heroSlideDir}
-                className="hero-slide-copy mb-4 flex min-h-[148px] flex-1 flex-col sm:min-h-[168px] md:mb-10 md:min-h-[200px] lg:min-h-[220px]"
+                className="hero-slide-copy mb-4 flex min-h-[148px] flex-col sm:min-h-[168px] md:mb-8 md:min-h-[200px] lg:mb-0 lg:min-h-[248px]"
               >
                 <h1
-                  className={`mb-2 line-clamp-4 min-h-[5.28em] break-keep leading-[1.32] text-[#222] md:mb-5 md:line-clamp-2 md:min-h-[2.64em] ${
+                  className={`mb-2 line-clamp-4 min-h-[5.28em] break-keep leading-[1.32] text-[#222] md:mb-5 md:line-clamp-2 md:min-h-[calc(1.32em*2)] lg:min-h-[111px] ${
                     currentHeroSlide.displayFont
                       ? "font-gangwon font-bold tracking-[-0.02em]"
                       : "font-black tracking-[-0.04em]"
-                  } text-[22px] sm:text-[28px] ${
-                    currentHeroSlide.compact
-                      ? "md:text-[36px] lg:text-[42px]"
-                      : "md:text-[48px] lg:text-[56px]"
-                  }`}
+                  } text-[22px] sm:text-[28px] md:text-[36px] lg:text-[42px]`}
                 >
                   {currentHeroSlide.quoted ? (
                     <>
@@ -450,7 +445,7 @@ export default function HomePage() {
                     </>
                   )}
                 </h1>
-                <p className="min-h-[4.875em] break-keep text-[14px] font-medium leading-relaxed text-[#555] md:min-h-[4.875em] md:text-lg lg:text-xl">
+                <p className="min-h-[4.875em] break-keep text-[14px] font-medium leading-relaxed text-[#555] md:min-h-[4.875em] md:text-lg lg:min-h-[98px] lg:text-xl">
                   {currentHeroSlide.descriptionLine1}
                   {currentHeroSlide.descriptionLine2 ? (
                     <>
@@ -482,7 +477,7 @@ export default function HomePage() {
                   ) : null}
                 </p>
               </div>
-              <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap sm:items-center sm:gap-3">
+              <div className="mt-auto grid grid-cols-2 gap-2 sm:flex sm:flex-wrap sm:items-center sm:gap-3">
                 <Link
                   href="/seminars"
                   className="inline-flex min-h-11 items-center justify-center rounded-full bg-[#373737] px-3 py-2.5 text-[13px] font-bold text-white transition hover:-translate-y-0.5 hover:bg-[#222] sm:min-h-0 sm:px-8 sm:py-3.5 sm:text-[15px]"
@@ -674,11 +669,12 @@ export default function HomePage() {
                 tag: "모집 중",
                 recruiting: true,
                 category: "연결",
-                programs: ["직무 세미나", "봉사활동"],
+                programs: ["직무 세미나", "봉사활동", "CCP"],
                 href: "/seminars?value=connection" as string | undefined,
                 body: (
                   <>
-                    <strong className="font-extrabold text-[#222]">직무 세미나</strong>를 통해 교실 밖 산업 현장과 연결하고,{" "}
+                    <strong className="font-extrabold text-[#222]">직무 세미나</strong>와{" "}
+                    <strong className="font-extrabold text-[#222]">CCP</strong>를 통해 교실 밖 산업 현장과 연결하고,{" "}
                     <br className="hidden md:block" />
                     사회 공헌 활동을 통해 나와 세상을 연결합니다.
                   </>
@@ -724,7 +720,7 @@ export default function HomePage() {
             ].map((program) => (
               <article
                 key={program.category}
-                className={`${revealClass} flex min-h-0 flex-col rounded-[22px] border border-black/[0.06] bg-white p-5 shadow-[0_10px_30px_rgba(0,0,0,0.04)] transition hover:-translate-y-2 hover:border-black/15 hover:shadow-[0_20px_45px_rgba(0,0,0,0.08)] md:min-h-[360px] md:rounded-[30px] md:p-8 ${
+                className={`${revealClass} flex flex-col rounded-[22px] border border-black/[0.06] bg-white p-5 shadow-[0_10px_30px_rgba(0,0,0,0.04)] transition hover:-translate-y-2 hover:border-black/15 hover:shadow-[0_20px_45px_rgba(0,0,0,0.08)] md:rounded-[30px] md:p-8 ${
                   !program.recruiting ? "bg-white/70" : ""
                 }`}
               >
@@ -755,10 +751,10 @@ export default function HomePage() {
                 <h3 className="mb-3 text-[22px] font-bold tracking-[-0.03em] text-[#222] md:mb-4 md:text-[28px]">
                   {program.category}
                 </h3>
-                <p className="mb-8 flex-grow text-[16px] leading-relaxed text-[#555]">
+                <p className="mb-5 text-[16px] leading-relaxed text-[#555]">
                   {program.body}
                 </p>
-                <div className="border-t border-black/10 pt-5">
+                <div className="border-t border-black/10 pt-4">
                   {program.href ? (
                     <Link
                       href={program.href}
@@ -787,33 +783,28 @@ export default function HomePage() {
       <section className="mx-auto max-w-[1000px] px-4 pb-8 pt-14 text-center sm:px-6 md:pb-14 md:pt-32">
         <div className={revealClass}>
           <p className="mb-2 text-base font-bold text-[#8EB8C5] md:mb-3 md:text-xl">Mascot</p>
-          <h2 className="mb-3 text-[28px] font-black tracking-[-0.04em] text-[#222] md:mb-5 md:text-[48px]">
-            든든한 빌더, 디딤이
+          <h2 className="mb-3 break-keep text-[26px] font-black tracking-[-0.04em] text-[#222] md:mb-5 md:text-[48px]">
+            디딤이 · 쿠스 · 피바
           </h2>
           <p className="mb-8 break-keep text-[15px] leading-relaxed text-[#555] md:mb-12 md:text-xl">
-            청록색 과잠을 입고 제약&middot;바이오산업의 징검다리가 되기 위해
+            KUSPBA의 마스코트는 모두 협회의 가치에서 태어났습니다.
             <br className="hidden sm:block" />
-            오늘도 열심히 머무는 KUSPBA의 마스코트랍니다.
+            디딤이는 디딤돌에서, 쿠스와 피바는 이름과 심볼에서 시작되었습니다.
           </p>
-          <div className="mx-auto mb-6 flex max-w-[580px] items-center justify-center rounded-[24px] bg-white p-8 shadow-[0_20px_40px_rgba(0,0,0,0.06)] transition hover:-translate-y-1 md:mb-8 md:rounded-[34px] md:p-16">
-            <div className="relative h-[160px] w-[160px] md:h-[220px] md:w-[220px]">
+          <div className="mx-auto mb-6 flex max-w-[760px] items-center justify-center rounded-[24px] bg-white p-5 shadow-[0_20px_40px_rgba(0,0,0,0.06)] transition hover:-translate-y-1 md:mb-8 md:rounded-[34px] md:p-10">
+            <div className="relative aspect-[1400/839] w-full">
               <Image
-                src="/didimi-home.png"
-                alt="디딤이 마스코트"
+                src="/mascots-group.png"
+                alt="디딤이, 쿠스, 피바 - KUSPBA 마스코트"
                 fill
-                sizes="220px"
+                sizes="(max-width: 768px) 100vw, 760px"
                 className="object-contain"
               />
             </div>
           </div>
-          <div className="flex flex-wrap justify-center gap-3">
-            <span className="rounded-full bg-[#F8F9FA] px-5 py-2.5 text-sm font-bold text-[#222]">
-              🐢 06년생 (Born in 2006)
-            </span>
-            <span className="rounded-full bg-[#F8F9FA] px-5 py-2.5 text-sm font-bold text-[#222]">
-              🎓 한국대학교 재학중
-            </span>
-          </div>
+          <p className="break-keep text-[14px] font-semibold text-[#373737] md:text-base">
+            디딤이 · 쿠스 · 피바 — 세 친구 모두 KUSPBA의 가치에서 시작되었습니다.
+          </p>
 
           <div className="mx-auto mt-8 max-w-[760px] rounded-[22px] border border-black/5 bg-[#F8F9FA] px-5 py-7 shadow-[0_12px_24px_rgba(0,0,0,0.04)] md:mt-12 md:rounded-[28px] md:px-8 md:py-10">
             <h3 className="mb-2 break-keep text-[22px] font-black tracking-[-0.03em] text-[#222] md:mb-3 md:text-[34px]">

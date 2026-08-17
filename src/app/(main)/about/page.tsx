@@ -81,7 +81,7 @@ export default function AboutPage() {
                 alt="KUSPBA 협회장 박찬희"
                 fill
                 sizes="220px"
-                className="object-cover object-top"
+                className="object-cover object-[center_18%]"
                 priority
               />
             </div>
@@ -179,34 +179,30 @@ export default function AboutPage() {
           <span className="mb-4 flex justify-center text-sm font-bold uppercase tracking-wider text-[#427A72]">
             Our Philosophy
           </span>
-          <h3 className="mb-5 text-[22px] font-bold md:text-[28px]">
-            우리는 &apos;빌더(Builder)&apos; 입니다
+          <h3 className="mb-5 break-keep text-[22px] font-bold md:text-[28px]">
+            &ldquo;모든 것은 가치에서 출발합니다.&rdquo;
           </h3>
-          <p className="mb-6 text-[#86868B]">
-            우리는 단숨에 도달하기보다는 비약 없는 <strong>연결</strong>을
-            선택합니다.
+          <p className="mb-6 break-keep text-[15px] leading-relaxed text-[#86868B] md:text-base">
+            KUSPBA의 마스코트는 모두 협회의 가치에서 태어났습니다.
             <br />
-            대학생들과 산업 사이, 아직 메워지지 않은 그 간극에 &lsquo;우리는&rsquo;
-            디딤돌을 놓습니다.
+            디딤이는 협회의 메타포 &lsquo;디딤돌&rsquo;에서,
+            <br className="hidden md:block" />
+            쿠스와 피바는 이름 KUSPBA와 심볼 모양에서 나왔습니다.
           </p>
-          <div className="mt-8 flex flex-col items-center gap-4 rounded-2xl bg-[#FBFBFD] p-5 sm:flex-row sm:items-center md:mt-10 md:gap-6">
-            <div className="relative flex h-24 w-24 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-transparent md:h-28 md:w-28">
+          <div className="mt-8 rounded-2xl bg-[#FBFBFD] px-4 py-5 md:mt-10 md:px-8 md:py-8">
+            <div className="relative mx-auto aspect-[1400/839] w-full max-w-[720px]">
               <Image
-                src="/didimi.png"
-                alt="디딤이 - KUSPBA 마스코트"
-                width={120}
-                height={120}
-                className="h-full w-full object-contain"
+                src="/mascots-group.png"
+                alt="디딤이, 쿠스, 피바 - KUSPBA 마스코트"
+                fill
+                sizes="(max-width: 768px) 100vw, 720px"
+                className="object-contain"
+                priority
               />
             </div>
-            <div className="text-center sm:text-left">
-              <p className="mb-1 text-base font-semibold text-[#1D1D1F]">
-                뚜벅뚜벅 길을 내는 듬직한 거북이 디딤이
-              </p>
-              <p className="m-0 text-sm text-[#86868B]">
-                함께 성장하는 빌더들의 진심과 호연지기를 상징합니다.
-              </p>
-            </div>
+            <p className="mt-4 break-keep text-center text-sm font-semibold leading-relaxed text-[#1D1D1F] md:mt-5 md:text-base">
+              디딤이 · 쿠스 · 피바 — 세 친구 모두 KUSPBA의 가치에서 시작되었습니다.
+            </p>
           </div>
         </div>
       </section>
