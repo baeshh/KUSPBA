@@ -26,7 +26,14 @@ export interface SeminarPrices {
   priceSpecial: number;
 }
 
-export interface SeminarDetail {
+export interface SeminarCapacityInfo {
+  appliedCount: number;
+  capacityLimit: number | null;
+  remainingSeats: number | null;
+  isFull: boolean;
+}
+
+export interface SeminarDetail extends SeminarCapacityInfo {
   id: string;
   title: string;
   status: SeminarStatus;
@@ -40,6 +47,50 @@ export interface SeminarDetail {
   prices: SeminarPrices;
   description: string[];
   program: string[];
+}
+
+/** 취소되지 않은 신청만 정원에 포함합니다. */
+export const activeApplicationWhere = {
+  depositStatus: { not: "CANCELLED" as const },
+};
+
+export const seminarActiveApplicationCountInclude = {
+  include: {
+    _count: {
+      select: {
+        applications: {
+          where: activeApplicationWhere,
+        },
+      },
+    },
+  },
+} as const;
+
+export function parseCapacityLimit(capacity: string): number | null {
+  const match = capacity.replace(/,/g, "").match(/(\d+)/);
+  if (!match) return null;
+  const n = Number(match[1]);
+  return Number.isFinite(n) && n > 0 ? n : null;
+}
+
+export function getSeminarCapacityInfo(capacity: string, appliedCount: number): SeminarCapacityInfo {
+  const capacityLimit = parseCapacityLimit(capacity);
+  if (capacityLimit === null) {
+    return {
+      appliedCount,
+      capacityLimit: null,
+      remainingSeats: null,
+      isFull: false,
+    };
+  }
+
+  const remainingSeats = Math.max(0, capacityLimit - appliedCount);
+  return {
+    appliedCount,
+    capacityLimit,
+    remainingSeats,
+    isFull: remainingSeats <= 0,
+  };
 }
 
 export function getSeminarPriceByGrade(prices: SeminarPrices, grade: SeminarMemberGrade) {
@@ -60,8 +111,10 @@ export function formatSeminarPrice(price: number) {
   return price > 0 ? `${price.toLocaleString()}원` : "무료";
 }
 
+type SeminarSeed = Omit<SeminarDetail, keyof SeminarCapacityInfo>;
+
 // TODO: API/DB 연동 시 교체
-export const MOCK_SEMINARS: SeminarDetail[] = [
+const MOCK_SEMINAR_DATA: SeminarSeed[] = [
   {
     id: "1",
     title: "2026 상반기 제약/바이오 직무 탐색 세미나",
@@ -101,7 +154,7 @@ export const MOCK_SEMINARS: SeminarDetail[] = [
       "https://images.unsplash.com/photo-1532094349884-543bc11b234d?auto=format&fit=crop&q=80&w=1000",
     eventDate: "2026년 4월 중 (별도 안내)",
     location: "온라인 (줌)",
-    capacity: "선착순 30명",
+    capacity: "선착순 50명",
     fee: "무료",
     prices: {
       priceBasic: 0,
@@ -184,6 +237,11 @@ export const MOCK_SEMINARS: SeminarDetail[] = [
   },
 ];
 
+export const MOCK_SEMINARS: SeminarDetail[] = MOCK_SEMINAR_DATA.map((seminar) => ({
+  ...seminar,
+  ...getSeminarCapacityInfo(seminar.capacity, 0),
+}));
+
 export function getSeminarById(id: string): SeminarDetail | undefined {
   return MOCK_SEMINARS.find((s) => s.id === id);
 }
@@ -240,26 +298,32 @@ export function serializeSeminarList(items: Array<{
   priceSpecial?: number;
   description: string;
   program: string;
+  appliedCount?: number;
+  _count?: { applications: number };
 }>): SeminarDetail[] {
-  return items.map((item) => ({
-    id: item.id,
-    title: item.title,
-    status: fromDbSeminarStatus(item.status),
-    type: fromDbSeminarType(item.type),
-    applicationPeriod: item.applicationPeriod,
-    imageUrl: item.imageUrl,
-    eventDate: item.eventDate,
-    location: item.location,
-    capacity: item.capacity,
-    fee: item.fee,
-    prices: {
-      priceBasic: item.priceBasic,
-      priceRegular: item.priceRegular,
-      priceVip: item.priceVip,
-      pricePartner: item.pricePartner,
-      priceSpecial: item.priceSpecial ?? 0,
-    },
-    description: item.description.split("\n").filter(Boolean),
-    program: item.program.split("\n").filter(Boolean),
-  }));
+  return items.map((item) => {
+    const appliedCount = item.appliedCount ?? item._count?.applications ?? 0;
+    return {
+      id: item.id,
+      title: item.title,
+      status: fromDbSeminarStatus(item.status),
+      type: fromDbSeminarType(item.type),
+      applicationPeriod: item.applicationPeriod,
+      imageUrl: item.imageUrl,
+      eventDate: item.eventDate,
+      location: item.location,
+      capacity: item.capacity,
+      fee: item.fee,
+      prices: {
+        priceBasic: item.priceBasic,
+        priceRegular: item.priceRegular,
+        priceVip: item.priceVip,
+        pricePartner: item.pricePartner,
+        priceSpecial: item.priceSpecial ?? 0,
+      },
+      description: item.description.split("\n").filter(Boolean),
+      program: item.program.split("\n").filter(Boolean),
+      ...getSeminarCapacityInfo(item.capacity, appliedCount),
+    };
+  });
 }

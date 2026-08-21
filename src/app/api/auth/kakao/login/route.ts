@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { getSafeAuthRedirect } from "@/lib/auth-redirect";
 
 /**
  * REST API 방식 카카오 로그인 - JavaScript SDK 없이 직접 리다이렉트
@@ -17,10 +18,12 @@ export async function GET(request: NextRequest) {
     process.env.NEXT_PUBLIC_KAKAO_REDIRECT_URI ||
     `${request.nextUrl.origin}/auth/kakao/callback`;
 
+  const next = getSafeAuthRedirect(request.nextUrl.searchParams.get("next"));
   const params = new URLSearchParams({
     client_id: restApiKey,
     redirect_uri: redirectUri,
     response_type: "code",
+    state: next,
   });
 
   const authUrl = `https://kauth.kakao.com/oauth/authorize?${params.toString()}`;

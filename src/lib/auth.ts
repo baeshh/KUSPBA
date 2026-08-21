@@ -1,5 +1,8 @@
 import { cookies } from "next/headers";
 import { prisma } from "@/lib/db";
+import type { PublicAuthUser } from "@/lib/auth-types";
+
+export type { PublicAuthUser };
 
 export async function getSessionKakaoId() {
   const jar = await cookies();
@@ -10,4 +13,20 @@ export async function getCurrentUser() {
   const kakaoId = await getSessionKakaoId();
   if (!kakaoId) return null;
   return prisma.user.findUnique({ where: { kakaoId } });
+}
+
+export function toPublicAuthUser(user: {
+  id: string;
+  name: string;
+  email: string | null;
+  phone: string | null;
+  affiliation: string | null;
+}): PublicAuthUser {
+  return {
+    id: user.id,
+    name: user.name,
+    email: user.email,
+    phone: user.phone,
+    affiliation: user.affiliation,
+  };
 }

@@ -8,6 +8,7 @@ import {
   MEMBER_SELECTABLE_GRADES,
 } from "@/lib/member-grades";
 import { MembershipApplyForm } from "@/components/auth/MembershipApplyForm";
+import { CancelApplicationButton } from "@/components/seminars/CancelApplicationButton";
 
 export const metadata = {
   title: "마이페이지 | KUSPBA",
@@ -17,7 +18,7 @@ export const metadata = {
 export default async function MyPage() {
   const user = await getCurrentUser();
   if (!user) {
-    redirect("/api/auth/kakao/login");
+    redirect("/api/auth/kakao/login?next=/mypage");
   }
 
   const [gradeLabels, gradeOptions, applications] = await Promise.all([
@@ -115,15 +116,20 @@ export default async function MyPage() {
                       {application.isMember ? "협회원" : "일반"}
                     </p>
                   </div>
-                  <span className="rounded-full bg-[#F8F9FA] px-3 py-1 text-xs font-bold text-[#555]">
-                    {application.depositStatus === "CONFIRMED"
-                      ? "입금 확인"
-                      : application.depositStatus === "WAIVED"
-                        ? "입금 면제"
-                        : application.depositStatus === "CANCELLED"
-                          ? "취소"
-                          : "입금 대기"}
-                  </span>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="rounded-full bg-[#F8F9FA] px-3 py-1 text-xs font-bold text-[#555]">
+                      {application.depositStatus === "CONFIRMED"
+                        ? "입금 확인"
+                        : application.depositStatus === "WAIVED"
+                          ? "입금 면제"
+                          : application.depositStatus === "CANCELLED"
+                            ? "취소"
+                            : "입금 대기"}
+                    </span>
+                    {application.depositStatus !== "CANCELLED" ? (
+                      <CancelApplicationButton applicationId={application.id} />
+                    ) : null}
+                  </div>
                 </div>
               </li>
             ))}

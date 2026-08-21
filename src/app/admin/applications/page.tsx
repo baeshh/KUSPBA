@@ -30,6 +30,7 @@ export default async function AdminApplicationsPage() {
           depositStatus: application.depositStatus,
           memo: application.memo,
           isMember: application.isMember,
+          gradeKey,
           gradeLabel: gradeLabels[gradeKey] ?? gradeKey,
         };
       })}

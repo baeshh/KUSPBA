@@ -2,13 +2,22 @@ import { requireAdmin } from "@/lib/admin-auth";
 import { prisma } from "@/lib/db";
 import { getMemberGradeOptions } from "@/lib/member-grades";
 import { SeminarsAdminClient } from "@/components/admin/SeminarsAdminClient";
+import { getSeminarCapacityInfo } from "@/lib/seminars";
 
 export default async function AdminSeminarsPage() {
   await requireAdmin();
   const [seminars, gradeOptions] = await Promise.all([
     prisma.seminar.findMany({
       orderBy: { createdAt: "desc" },
-      include: { _count: { select: { applications: true } } },
+      include: {
+        _count: {
+          select: {
+            applications: {
+              where: { depositStatus: { not: "CANCELLED" } },
+            },
+          },
+        },
+      },
     }),
     getMemberGradeOptions(),
   ]);
@@ -16,7 +25,9 @@ export default async function AdminSeminarsPage() {
   return (
     <SeminarsAdminClient
       gradeOptions={gradeOptions}
-      seminars={seminars.map((seminar) => ({
+      seminars={seminars.map((seminar) => {
+        const capacityInfo = getSeminarCapacityInfo(seminar.capacity, seminar._count.applications);
+        return {
         id: seminar.id,
         title: seminar.title,
         applicationPeriod: seminar.applicationPeriod,
@@ -35,7 +46,10 @@ export default async function AdminSeminarsPage() {
         description: seminar.description,
         program: seminar.program,
         applicationCount: seminar._count.applications,
-      }))}
+        remainingSeats: capacityInfo.remainingSeats,
+        capacityLimit: capacityInfo.capacityLimit,
+      };
+      })}
     />
   );
 }

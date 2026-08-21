@@ -10,6 +10,8 @@ import {
   validateAdminPassword,
 } from "@/lib/admin-auth";
 import { prisma } from "@/lib/db";
+import { syncSeminarCapacity } from "@/lib/seminar-capacity-sync";
+import { activeApplicationWhere } from "@/lib/seminars";
 
 const DEFAULT_PROGRAM_IMAGE =
   "https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&q=80&w=1000";
@@ -26,6 +28,13 @@ function enumValue<T extends string>(value: string, allowed: readonly T[], fallb
 function price(formData: FormData, key: string) {
   const value = Number(text(formData, key).replace(/,/g, ""));
   return Number.isFinite(value) && value > 0 ? Math.floor(value) : 0;
+}
+
+const NOTICE_PIN_ORDERS = [1, 2, 3, 4, 5] as const;
+
+function pinOrder(formData: FormData) {
+  const value = Number(text(formData, "pinOrder"));
+  return NOTICE_PIN_ORDERS.includes(value as (typeof NOTICE_PIN_ORDERS)[number]) ? value : null;
 }
 
 function isNextRedirectError(error: unknown) {
@@ -84,14 +93,15 @@ export async function saveSeminar(formData: FormData) {
       redirect("/admin/seminars?error=required");
     }
 
-    if (id) {
-      await prisma.seminar.update({ where: { id }, data });
-    } else {
-      await prisma.seminar.create({ data });
-    }
+    const seminar = id
+      ? await prisma.seminar.update({ where: { id }, data })
+      : await prisma.seminar.create({ data });
+
+    await prisma.$transaction((tx) => syncSeminarCapacity(tx, seminar.id, seminar.capacity));
 
     revalidatePath("/admin/seminars");
     revalidatePath("/seminars");
+    revalidatePath(`/seminars/${seminar.id}`);
     redirect("/admin/seminars");
   } catch (error) {
     if (isNextRedirectError(error)) throw error;
@@ -165,36 +175,73 @@ export async function updateApplication(formData: FormData) {
   const id = text(formData, "id");
   if (!id) return;
 
-  await prisma.seminarApplication.update({
-    where: { id },
-    data: {
-      depositStatus: enumValue(
-        text(formData, "depositStatus"),
-        Object.values(DepositStatus),
-        DepositStatus.PENDING,
-      ),
-      memo: text(formData, "memo") || null,
-    },
+  const application = await prisma.$transaction(async (tx) => {
+    const current = await tx.seminarApplication.findUnique({
+      where: { id },
+      include: { seminar: { select: { capacity: true } } },
+    });
+    if (!current) return null;
+
+    const previousAppliedCount = await tx.seminarApplication.count({
+      where: { seminarId: current.seminarId, ...activeApplicationWhere },
+    });
+
+    const updated = await tx.seminarApplication.update({
+      where: { id },
+      data: {
+        depositStatus: enumValue(
+          text(formData, "depositStatus"),
+          Object.values(DepositStatus),
+          DepositStatus.PENDING,
+        ),
+        memo: text(formData, "memo") || null,
+      },
+    });
+
+    await syncSeminarCapacity(tx, current.seminarId, current.seminar.capacity, {
+      previousAppliedCount,
+    });
+
+    return updated;
   });
 
+  if (!application) return;
+
   revalidatePath("/admin/applications");
+  revalidatePath("/seminars");
+  revalidatePath(`/seminars/${application.seminarId}`);
+  revalidatePath("/mypage");
 }
 
 export async function saveNotice(formData: FormData) {
   await requireAdmin();
 
   const id = text(formData, "id");
+  const nextPinOrder = pinOrder(formData);
   const data = {
     title: text(formData, "title"),
     content: sanitizeNoticeHtml(text(formData, "content")),
     status: enumValue(text(formData, "status"), Object.values(NoticeStatus), NoticeStatus.PUBLISHED),
+    pinOrder: nextPinOrder,
   };
 
-  if (id) {
-    await prisma.notice.update({ where: { id }, data });
-  } else {
-    await prisma.notice.create({ data });
-  }
+  await prisma.$transaction(async (tx) => {
+    if (nextPinOrder !== null) {
+      await tx.notice.updateMany({
+        where: {
+          pinOrder: nextPinOrder,
+          ...(id ? { id: { not: id } } : {}),
+        },
+        data: { pinOrder: null },
+      });
+    }
+
+    if (id) {
+      await tx.notice.update({ where: { id }, data });
+    } else {
+      await tx.notice.create({ data });
+    }
+  });
 
   revalidatePath("/admin/notices");
   revalidatePath("/notices");

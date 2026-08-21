@@ -79,9 +79,12 @@ model Notice {
   content     String
   status      NoticeStatus @default(PUBLISHED)
   viewCount   Int          @default(0)
+  pinOrder    Int?
   publishedAt DateTime     @default(now())
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @updatedAt
+
+  @@unique([pinOrder])
 }
 
 enum UserRole {

@@ -19,6 +19,7 @@ interface NoticeRichEditorProps {
     content: string;
     status: NoticeStatus;
     viewCount: number;
+    pinOrder?: number | null;
   };
   heading: string;
   submitLabel: string;
@@ -28,6 +29,15 @@ const statusOptions: Array<[NoticeStatus, string]> = [
   ["PUBLISHED", "공개"],
   ["DRAFT", "임시저장"],
 ];
+
+const pinOrderOptions = [
+  ["", "고정 안 함"],
+  ["1", "핀 1 (맨 위)"],
+  ["2", "핀 2"],
+  ["3", "핀 3"],
+  ["4", "핀 4"],
+  ["5", "핀 5"],
+] as const;
 
 const toolbarButtons = [
   { label: "B", command: "bold" },
@@ -162,6 +172,17 @@ export function NoticeRichEditor({ action, notice, heading, submitLabel }: Notic
             >
               {statusOptions.map(([value, label]) => (
                 <option key={value} value={value}>
+                  {label}
+                </option>
+              ))}
+            </select>
+            <select
+              name="pinOrder"
+              defaultValue={notice?.pinOrder ? String(notice.pinOrder) : ""}
+              className={adminSelectClass}
+            >
+              {pinOrderOptions.map(([value, label]) => (
+                <option key={value || "none"} value={value}>
                   {label}
                 </option>
               ))}

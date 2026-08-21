@@ -10,6 +10,8 @@ interface ProgramCardProps {
   imageUrl?: string;
   type?: string;
   variant?: "default" | "list";
+  remainingSeats?: number | null;
+  isFull?: boolean;
 }
 
 function isLocalUpload(src: string) {
@@ -24,9 +26,25 @@ export function ProgramCard({
   imageUrl = "https://images.unsplash.com/photo-1582719478250-c894090bdcb1?auto=format&fit=crop&q=80&w=600",
   type,
   variant = "default",
+  remainingSeats = null,
+  isFull = false,
 }: ProgramCardProps) {
-  const isClosed = status === "closed" || status === "ended";
+  const isClosed = status === "closed" || status === "ended" || isFull;
   const localUpload = isLocalUpload(imageUrl);
+  const remainingLabel =
+    remainingSeats === null
+      ? null
+      : isFull
+        ? "잔여 0명"
+        : `잔여 ${remainingSeats}명`;
+  const remainingClass =
+    remainingSeats === null
+      ? ""
+      : isFull
+        ? "text-[#A1A1A6]"
+        : remainingSeats <= 5
+          ? "text-[#C2410C]"
+          : "text-[#427A72]";
 
   return (
     <Link href={`/seminars/${id}`}>
@@ -68,9 +86,16 @@ export function ProgramCard({
           <h3 className={`mb-2 text-[18px] font-semibold leading-snug md:text-xl ${isClosed ? "opacity-60" : ""}`}>
             {title}
           </h3>
-          <p className={`mb-5 text-sm text-[#86868B] ${isClosed ? "opacity-60" : ""}`}>
+          <p className={`mb-2 text-sm text-[#86868B] ${isClosed ? "opacity-60" : ""}`}>
             신청: {applicationPeriod}
           </p>
+          {remainingLabel ? (
+            <p className={`mb-5 text-sm font-semibold ${remainingClass} ${isClosed ? "opacity-80" : ""}`}>
+              {remainingLabel}
+            </p>
+          ) : (
+            <div className="mb-5" />
+          )}
           <div className="mt-auto flex items-center justify-between">
             {variant === "list" && type ? (
               <>

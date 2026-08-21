@@ -50,6 +50,74 @@ function pageNumbers(current: number, total: number): (number | "…")[] {
   return result;
 }
 
+function NoticeCard({
+  notice,
+}: {
+  notice: {
+    id: string;
+    title: string;
+    content: string;
+    publishedAt: Date;
+    viewCount: number;
+    pinOrder: number | null;
+  };
+}) {
+  const thumbnail = extractNoticeThumbnail(notice.content);
+  const isNew = isRecentNotice(notice.publishedAt);
+  const pinLabel = notice.pinOrder ? `고정 ${notice.pinOrder}` : isNew ? "최신" : "안내";
+  const pinClass = notice.pinOrder
+    ? "bg-[#1D1D1F] text-white"
+    : isNew
+      ? "bg-[#427A72]/10 text-[#427A72]"
+      : "bg-[#E5E8EB] text-[#4E5968]";
+
+  return (
+    <Link
+      href={`/notices/${notice.id}`}
+      className="group flex min-h-[260px] flex-col overflow-hidden rounded-[24px] border border-transparent bg-[#F9FAFB] transition-all duration-[400ms] ease-[cubic-bezier(0.25,1,0.5,1)] hover:-translate-y-2 hover:border-[#E5E8EB] hover:bg-white hover:shadow-[0_24px_48px_rgba(0,0,0,0.08),0_4px_12px_rgba(0,0,0,0.03)]"
+    >
+      {thumbnail ? (
+        <div className="relative h-[180px] w-full overflow-hidden bg-[#E5E8EB]">
+          {thumbnail.startsWith("/") ? (
+            <Image
+              src={thumbnail}
+              alt=""
+              fill
+              sizes="(max-width: 768px) 100vw, 310px"
+              className="object-cover transition-transform duration-[600ms] ease-[cubic-bezier(0.25,1,0.5,1)] group-hover:scale-[1.08]"
+            />
+          ) : (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={thumbnail}
+              alt=""
+              className="h-full w-full object-cover transition-transform duration-[600ms] ease-[cubic-bezier(0.25,1,0.5,1)] group-hover:scale-[1.08]"
+            />
+          )}
+        </div>
+      ) : null}
+
+      <div className="flex flex-1 flex-col p-5 md:p-7">
+        <div className="mb-5 flex items-start justify-between gap-3">
+          <span className={`rounded-lg px-3 py-1.5 text-[13px] font-bold ${pinClass}`}>
+            {pinLabel}
+          </span>
+          <ArrowIcon className="shrink-0 text-[#B0B8C1] transition-all duration-300 ease-[cubic-bezier(0.25,1,0.5,1)] group-hover:translate-x-1 group-hover:-translate-y-1 group-hover:text-[#427A72]" />
+        </div>
+
+        <h2 className="mb-8 line-clamp-2 text-[20px] font-bold leading-[1.4] tracking-[-0.4px] text-[#191919]">
+          {notice.title}
+        </h2>
+
+        <div className="mt-auto flex items-center gap-4 text-sm font-medium text-[#8B95A1]">
+          <span>{notice.publishedAt.toLocaleDateString("ko-KR")}</span>
+          <span>조회 {notice.viewCount.toLocaleString()}</span>
+        </div>
+      </div>
+    </Link>
+  );
+}
+
 export default async function NoticesPage({
   searchParams,
 }: {
@@ -58,18 +126,25 @@ export default async function NoticesPage({
   const params = await searchParams;
   const requestedPage = Math.max(1, Number.parseInt(params.page ?? "1", 10) || 1);
 
-  const totalItems = await prisma.notice.count({
-    where: { status: "PUBLISHED" },
-  });
-  const totalPages = Math.max(1, Math.ceil(totalItems / PAGE_SIZE));
+  const publishedWhere = { status: "PUBLISHED" as const };
+  const [pinnedNotices, totalUnpinned] = await Promise.all([
+    prisma.notice.findMany({
+      where: { ...publishedWhere, pinOrder: { in: [1, 2, 3, 4, 5] } },
+      orderBy: { pinOrder: "asc" },
+    }),
+    prisma.notice.count({
+      where: { ...publishedWhere, pinOrder: null },
+    }),
+  ]);
+  const totalPages = Math.max(1, Math.ceil(totalUnpinned / PAGE_SIZE));
   const page = Math.min(requestedPage, totalPages);
-
   const notices = await prisma.notice.findMany({
-    where: { status: "PUBLISHED" },
+    where: { ...publishedWhere, pinOrder: null },
     orderBy: { publishedAt: "desc" },
     skip: (page - 1) * PAGE_SIZE,
     take: PAGE_SIZE,
   });
+  const hasNotices = pinnedNotices.length > 0 || notices.length > 0;
 
   return (
     <main className="mx-auto max-w-[1040px] px-4 pb-16 pt-[calc(var(--header-offset)+20px)] sm:px-6 md:py-[100px]">
@@ -82,73 +157,35 @@ export default async function NoticesPage({
         </p>
       </div>
 
-      {notices.length === 0 ? (
+      {!hasNotices ? (
         <p className="rounded-[24px] bg-[#F9FAFB] p-10 text-center font-bold text-[#8B95A1]">
           등록된 공지사항이 없습니다.
         </p>
       ) : (
         <>
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-7 lg:grid-cols-3">
-            {notices.map((notice) => {
-              const thumbnail = extractNoticeThumbnail(notice.content);
-              const isNew = isRecentNotice(notice.publishedAt);
+          {pinnedNotices.length > 0 ? (
+            <section className="mb-10">
+              <h2 className="mb-4 text-lg font-bold tracking-[-0.03em] text-[#191919]">고정 공지</h2>
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-7 lg:grid-cols-3">
+                {pinnedNotices.map((notice) => (
+                  <NoticeCard key={notice.id} notice={notice} />
+                ))}
+              </div>
+            </section>
+          ) : null}
 
-              return (
-                <Link
-                  key={notice.id}
-                  href={`/notices/${notice.id}`}
-                  className="group flex min-h-[260px] flex-col overflow-hidden rounded-[24px] border border-transparent bg-[#F9FAFB] transition-all duration-[400ms] ease-[cubic-bezier(0.25,1,0.5,1)] hover:-translate-y-2 hover:border-[#E5E8EB] hover:bg-white hover:shadow-[0_24px_48px_rgba(0,0,0,0.08),0_4px_12px_rgba(0,0,0,0.03)]"
-                >
-                  {thumbnail ? (
-                    <div className="relative h-[180px] w-full overflow-hidden bg-[#E5E8EB]">
-                      {thumbnail.startsWith("/") ? (
-                        <Image
-                          src={thumbnail}
-                          alt=""
-                          fill
-                          sizes="(max-width: 768px) 100vw, 310px"
-                          className="object-cover transition-transform duration-[600ms] ease-[cubic-bezier(0.25,1,0.5,1)] group-hover:scale-[1.08]"
-                        />
-                      ) : (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img
-                          src={thumbnail}
-                          alt=""
-                          className="h-full w-full object-cover transition-transform duration-[600ms] ease-[cubic-bezier(0.25,1,0.5,1)] group-hover:scale-[1.08]"
-                        />
-                      )}
-                    </div>
-                  ) : null}
-
-                  <div className="flex flex-1 flex-col p-5 md:p-7">
-                    <div className="mb-5 flex items-start justify-between gap-3">
-                      <span
-                        className={`rounded-lg px-3 py-1.5 text-[13px] font-bold ${
-                          isNew
-                            ? "bg-[#427A72]/10 text-[#427A72]"
-                            : "bg-[#E5E8EB] text-[#4E5968]"
-                        }`}
-                      >
-                        {isNew ? "최신" : "안내"}
-                      </span>
-                      <ArrowIcon className="shrink-0 text-[#B0B8C1] transition-all duration-300 ease-[cubic-bezier(0.25,1,0.5,1)] group-hover:translate-x-1 group-hover:-translate-y-1 group-hover:text-[#427A72]" />
-                    </div>
-
-                    <h2 className="mb-8 line-clamp-2 text-[20px] font-bold leading-[1.4] tracking-[-0.4px] text-[#191919]">
-                      {notice.title}
-                    </h2>
-
-                    <div className="mt-auto flex items-center gap-4 text-sm font-medium text-[#8B95A1]">
-                      <span>
-                        {notice.publishedAt.toLocaleDateString("ko-KR")}
-                      </span>
-                      <span>조회 {notice.viewCount.toLocaleString()}</span>
-                    </div>
-                  </div>
-                </Link>
-              );
-            })}
-          </div>
+          {notices.length > 0 ? (
+            <section>
+              {pinnedNotices.length > 0 ? (
+                <h2 className="mb-4 text-lg font-bold tracking-[-0.03em] text-[#191919]">전체 공지</h2>
+              ) : null}
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-7 lg:grid-cols-3">
+                {notices.map((notice) => (
+                  <NoticeCard key={notice.id} notice={notice} />
+                ))}
+              </div>
+            </section>
+          ) : null}
 
           {totalPages > 1 ? (
             <nav

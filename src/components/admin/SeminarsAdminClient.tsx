@@ -54,6 +54,8 @@ type SeminarRow = {
   description: string;
   program: string;
   applicationCount: number;
+  remainingSeats: number | null;
+  capacityLimit: number | null;
 };
 
 function statusLabel(status: string) {
@@ -218,7 +220,12 @@ function SeminarFormFields({
       <ImageFields initialUrl={defaultImageUrl} />
       <Field name="eventDate" label="진행 일시" defaultValue={seminar?.eventDate} />
       <Field name="location" label="장소" defaultValue={seminar?.location} />
-      <Field name="capacity" label="모집 인원" defaultValue={seminar?.capacity} />
+      <div>
+        <Field name="capacity" label="모집 인원" defaultValue={seminar?.capacity ?? "50"} />
+        <p className="mt-1 text-xs text-[#8B95A1]">
+          숫자 정원에 도달하면 즉시 마감됩니다. 예: 50, 선착순 50명
+        </p>
+      </div>
       <Field name="fee" label="참가비" defaultValue={seminar?.fee ?? "무료"} />
       <PriceInputs
         gradeOptions={gradeOptions}
@@ -413,7 +420,11 @@ export function SeminarsAdminClient({
                         </StatusBadge>
                       </td>
                       <td className="px-8 py-4 text-sm text-[#8B95A1]">{seminar.applicationPeriod}</td>
-                      <td className="px-8 py-4 text-sm text-[#4E5968]">{seminar.applicationCount}명</td>
+                      <td className="px-8 py-4 text-sm text-[#4E5968]">
+                        {seminar.capacityLimit !== null
+                          ? `${seminar.applicationCount} / ${seminar.capacityLimit}명${seminar.remainingSeats !== null ? ` (잔여 ${seminar.remainingSeats}명)` : ""}`
+                          : `${seminar.applicationCount}명`}
+                      </td>
                       <td className="px-8 py-4">
                         <button
                           type="button"

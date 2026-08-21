@@ -62,6 +62,11 @@ export default async function NoticeDetailPage({ params }: NoticeDetailPageProps
       </Link>
       <article className="overflow-x-hidden rounded-[20px] border border-black/10 bg-white p-5 shadow-sm md:rounded-[28px] md:p-10">
         <div className="mb-6 flex flex-wrap items-center gap-3 text-sm font-bold text-[#86868B]">
+          {notice.pinOrder ? (
+            <span className="rounded-full bg-[#1D1D1F] px-3 py-1 text-xs font-bold text-white">
+              고정 {notice.pinOrder}
+            </span>
+          ) : null}
           <span>{notice.publishedAt.toLocaleDateString("ko-KR")}</span>
           <span>조회 {notice.viewCount.toLocaleString()}</span>
         </div>

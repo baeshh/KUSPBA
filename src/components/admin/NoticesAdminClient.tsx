@@ -24,6 +24,7 @@ type NoticeItem = {
   content: string;
   status: NoticeStatus;
   viewCount: number;
+  pinOrder: number | null;
   createdAtLabel: string;
 };
 
@@ -57,6 +58,7 @@ export function NoticesAdminClient({ notices }: { notices: NoticeItem[] }) {
             <thead>
               <tr className="border-b border-[#E5E8EB]">
                 <th className="px-8 py-4 text-[13px] font-semibold text-[#4E5968]">No</th>
+                <th className="px-8 py-4 text-[13px] font-semibold text-[#4E5968]">고정</th>
                 <th className="px-8 py-4 text-[13px] font-semibold text-[#4E5968]">제목</th>
                 <th className="px-8 py-4 text-[13px] font-semibold text-[#4E5968]">작성일</th>
                 <th className="px-8 py-4 text-[13px] font-semibold text-[#4E5968]">조회수</th>
@@ -67,7 +69,7 @@ export function NoticesAdminClient({ notices }: { notices: NoticeItem[] }) {
             <tbody>
               {notices.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="px-8 py-16 text-center text-sm text-[#8B95A1]">
+                  <td colSpan={7} className="px-8 py-16 text-center text-sm text-[#8B95A1]">
                     등록된 공지사항이 없습니다.
                   </td>
                 </tr>
@@ -88,6 +90,15 @@ export function NoticesAdminClient({ notices }: { notices: NoticeItem[] }) {
                     >
                       <td className="px-8 py-4 text-sm text-[#8B95A1]">
                         {notices.length - absoluteIndex}
+                      </td>
+                      <td className="px-8 py-4">
+                        {notice.pinOrder ? (
+                          <span className="inline-flex items-center rounded-full bg-[#427A72]/10 px-2.5 py-1 text-xs font-bold text-[#427A72]">
+                            핀 {notice.pinOrder}
+                          </span>
+                        ) : (
+                          <span className="text-sm text-[#C4C4C4]">-</span>
+                        )}
                       </td>
                       <td className="px-8 py-4 text-sm font-semibold">{notice.title}</td>
                       <td className="px-8 py-4 text-sm text-[#8B95A1]">{notice.createdAtLabel}</td>

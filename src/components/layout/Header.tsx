@@ -6,7 +6,12 @@ import Image from "next/image";
 import { KakaoLoginButton } from "@/components/auth/KakaoLoginButton";
 import { MEMBERSHIP_FORM_URL } from "@/lib/site";
 
-export function Header() {
+type HeaderUser = {
+  id: string;
+  name: string;
+};
+
+export function Header({ currentUser = null }: { currentUser?: HeaderUser | null }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const closeMobileMenu = () => setMobileMenuOpen(false);
@@ -23,18 +28,15 @@ export function Header() {
   return (
     <header className="fixed top-0 left-0 right-0 z-50 border-b border-black/5 bg-[rgba(251,251,253,0.92)] pt-[env(safe-area-inset-top)] backdrop-blur-xl">
       <div className="mx-auto flex h-14 max-w-[1200px] items-center justify-between px-4 sm:h-16 sm:px-6">
-        <Link href="/" className="flex min-w-0 items-center gap-2" onClick={closeMobileMenu}>
+        <Link href="/" className="flex min-w-0 items-center" onClick={closeMobileMenu}>
           <Image
-            src="/logo-capsule.png"
+            src="/logo-signature.png"
             alt="KUSPBA"
-            width={120}
-            height={36}
-            className="h-7 w-auto sm:h-8"
+            width={160}
+            height={65}
+            className="h-8 w-auto sm:h-9"
             priority
           />
-          <span className="truncate text-[14px] font-extrabold tracking-[-0.04em] text-[#1D1D1F] sm:text-[15px]">
-            KUSPBA
-          </span>
         </Link>
         <nav className="hidden items-center gap-5 lg:flex lg:gap-8">
           <Link
@@ -63,7 +65,7 @@ export function Header() {
           >
             공지사항
           </Link>
-          <KakaoLoginButton />
+          <KakaoLoginButton initialUser={currentUser} />
         </nav>
 
         <button
@@ -125,7 +127,7 @@ export function Header() {
               공지사항
             </Link>
             <div className="mt-2 px-1 pt-2" onClick={closeMobileMenu}>
-              <KakaoLoginButton compact />
+              <KakaoLoginButton compact initialUser={currentUser} />
             </div>
           </nav>
         </div>

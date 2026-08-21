@@ -154,6 +154,8 @@ export function SeminarsList({
             imageUrl={seminar.imageUrl}
             type={seminar.type}
             variant="list"
+            remainingSeats={seminar.remainingSeats}
+            isFull={seminar.isFull}
           />
         ))}
       </div>

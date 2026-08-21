@@ -8,9 +8,15 @@ import {
   formatSeminarPrice,
   getSeminarPriceByGrade,
   hasSeminarGradePrices,
+  seminarActiveApplicationCountInclude,
   SEMINAR_MEMBER_GRADES,
   serializeSeminarList,
 } from "@/lib/seminars";
+import { RemainingCapacity } from "@/components/seminars/RemainingCapacity";
+import { getCurrentUser, toPublicAuthUser } from "@/lib/auth";
+import { findActiveUserApplication } from "@/lib/seminar-applications";
+
+export const dynamic = "force-dynamic";
 
 interface SeminarDetailPageProps {
   params: Promise<{ id: string }>;
@@ -26,15 +32,25 @@ export async function generateMetadata({ params }: SeminarDetailPageProps) {
 
 export default async function SeminarDetailPage({ params }: SeminarDetailPageProps) {
   const { id } = await params;
-  const seminarRecord = await prisma.seminar.findUnique({ where: { id } });
+  const seminarRecord = await prisma.seminar.findUnique({
+    where: { id },
+    ...seminarActiveApplicationCountInclude,
+  });
 
   if (!seminarRecord) {
     notFound();
   }
 
   const [seminar] = serializeSeminarList([seminarRecord]);
-  const gradeLabels = await getMemberGradeLabels();
+  const [gradeLabels, currentUser] = await Promise.all([
+    getMemberGradeLabels(),
+    getCurrentUser(),
+  ]);
+  const existingApplication = currentUser
+    ? await findActiveUserApplication(prisma, seminar.id, currentUser)
+    : null;
   const isClosed = seminar.status === "closed" || seminar.status === "ended";
+  const recruitmentClosed = (isClosed || seminar.isFull) && !existingApplication;
   const hasGradePrices = hasSeminarGradePrices(seminar.prices);
   const gradePrices = SEMINAR_MEMBER_GRADES.map((grade) => ({
     grade,
@@ -68,12 +84,12 @@ export default async function SeminarDetailPage({ params }: SeminarDetailPagePro
         <div>
           <span
             className={`mb-4 inline-block rounded-lg px-3 py-1.5 text-[13px] font-semibold ${
-              isClosed
+              recruitmentClosed
                 ? "bg-[#F5F5F7] text-[#A1A1A6]"
                 : "bg-[#427A72]/10 text-[#427A72]"
             }`}
           >
-            {isClosed ? "마감" : "모집 중"}
+            {recruitmentClosed ? "마감" : "모집 중"}
           </span>
           <h1 className="mb-5 break-keep text-[26px] font-bold leading-tight md:mb-6 md:text-[40px]">
             {seminar.title}
@@ -99,6 +115,29 @@ export default async function SeminarDetailPage({ params }: SeminarDetailPagePro
                 </span>
                 <span className="font-medium">{seminar.capacity}</span>
               </div>
+              {seminar.remainingSeats !== null && (
+                <div className="flex gap-4">
+                  <span className="w-20 shrink-0 font-semibold text-[#86868B]">
+                    잔여인원
+                  </span>
+                  <span
+                    className={`font-semibold ${
+                      seminar.isFull
+                        ? "text-[#A1A1A6]"
+                        : seminar.remainingSeats <= 5
+                          ? "text-[#C2410C]"
+                          : "text-[#427A72]"
+                    }`}
+                  >
+                    {seminar.isFull ? "마감 (0명)" : `${seminar.remainingSeats}명`}
+                    {seminar.capacityLimit !== null ? (
+                      <span className="ml-1 font-normal text-[#86868B]">
+                        / {seminar.capacityLimit}명
+                      </span>
+                    ) : null}
+                  </span>
+                </div>
+              )}
               <div className="flex gap-4">
                 <span className="w-20 shrink-0 font-semibold text-[#86868B]">
                   참가비
@@ -167,7 +206,7 @@ export default async function SeminarDetailPage({ params }: SeminarDetailPagePro
           </div>
         </div>
 
-        {!isClosed && (
+        {!recruitmentClosed && (
           <ApplicationForm
             seminarId={seminar.id}
             fee={
@@ -181,13 +220,31 @@ export default async function SeminarDetailPage({ params }: SeminarDetailPagePro
             prices={seminar.prices}
             hasGradePrices={hasGradePrices}
             gradeLabels={gradeLabels}
+            capacity={seminar.capacity}
+            appliedCount={seminar.appliedCount}
+            remainingSeats={seminar.remainingSeats}
+            capacityLimit={seminar.capacityLimit}
+            isFull={seminar.isFull}
+            currentUser={currentUser ? toPublicAuthUser(currentUser) : null}
+            existingApplicationId={existingApplication?.id ?? null}
           />
         )}
 
-        {isClosed && (
+        {recruitmentClosed && (
           <aside className="rounded-[24px] border border-black/[0.08] bg-[#F5F5F7] p-6 md:p-8">
+            {seminar.remainingSeats !== null ? (
+              <RemainingCapacity
+                capacity={seminar.capacity}
+                appliedCount={seminar.appliedCount}
+                remainingSeats={seminar.remainingSeats}
+                capacityLimit={seminar.capacityLimit}
+                isFull={seminar.isFull}
+              />
+            ) : null}
             <p className="text-center font-semibold text-[#86868B]">
-              신청이 마감되었습니다.
+              {seminar.isFull && !isClosed
+                ? "정원이 마감되어 신청할 수 없습니다."
+                : "신청이 마감되었습니다."}
             </p>
           </aside>
         )}

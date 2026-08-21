@@ -357,7 +357,7 @@ export default function HomePage() {
                     <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-[#E8F0EE] via-[#F7FFFC] to-white lg:hidden">
                       <div className="relative h-[92px] w-[92px]">
                         <Image
-                          src="/logo-capsule.png"
+                          src="/logo-symbol.png"
                           alt="KUSPBA 로고"
                           fill
                           sizes="92px"
@@ -372,7 +372,7 @@ export default function HomePage() {
                     >
                       <div className="relative h-[248px] w-[248px]">
                         <Image
-                          src="/logo-capsule.png"
+                          src="/logo-symbol.png"
                           alt="KUSPBA 로고"
                           fill
                           sizes="248px"

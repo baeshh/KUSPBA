@@ -1,7 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { MemberGrade } from "@prisma/client";
 import { prisma } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
+import { syncSeminarCapacity } from "@/lib/seminar-capacity-sync";
+import { findActiveUserApplication } from "@/lib/seminar-applications";
 
 function memberGrade(value: unknown, isMember: boolean) {
   if (!isMember) return MemberGrade.BASIC;
@@ -15,6 +18,16 @@ function fallbackFeeAmount(fee: string, isMember: boolean, submittedAmount: numb
   const parsedFee = Number(fee.replace(/[^0-9]/g, ""));
   if (Number.isFinite(parsedFee) && parsedFee > 0) return parsedFee;
   return Number.isFinite(submittedAmount) && submittedAmount > 0 ? Math.floor(submittedAmount) : 0;
+}
+
+class ApplicationError extends Error {
+  constructor(
+    public status: number,
+    message: string,
+    public code?: string,
+  ) {
+    super(message);
+  }
 }
 
 export async function POST(request: NextRequest) {
@@ -33,74 +46,92 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "필수 입력값이 누락되었습니다." }, { status: 400 });
     }
 
-    const seminar = await prisma.seminar.findUnique({ where: { id: seminarId } });
-    if (!seminar) {
-      return NextResponse.json({ error: "프로그램을 찾을 수 없습니다." }, { status: 404 });
+    const sessionUser = await getCurrentUser();
+    if (!sessionUser) {
+      return NextResponse.json({ error: "로그인 후 신청해 주세요." }, { status: 401 });
     }
 
-    const hasGradePrices = [
-      seminar.priceBasic,
-      seminar.priceRegular,
-      seminar.priceVip,
-      seminar.pricePartner,
-      seminar.priceSpecial,
-    ].some((price) => price > 0);
-    const depositAmount = hasGradePrices
-      ? {
-          BASIC: seminar.priceBasic,
-          REGULAR: seminar.priceRegular,
-          VIP: seminar.priceVip,
-          PARTNER: seminar.pricePartner,
-          SPECIAL: seminar.priceSpecial,
-        }[grade]
-      : fallbackFeeAmount(seminar.fee, isMember, submittedAmount);
+    const application = await prisma.$transaction(async (tx) => {
+      const seminar = await tx.seminar.findUnique({ where: { id: seminarId } });
+      if (!seminar) {
+        throw new ApplicationError(404, "프로그램을 찾을 수 없습니다.");
+      }
+      if (seminar.status !== "RECRUITING") {
+        throw new ApplicationError(409, "신청이 마감된 프로그램입니다.", "CLOSED");
+      }
 
-    const sessionUser = await getCurrentUser();
-    const user = sessionUser
-      ? await prisma.user.update({
-          where: { id: sessionUser.id },
-          data: {
-            name,
-            phone,
-            affiliation,
-            email,
-            grade: sessionUser.grade === "BASIC" ? grade : sessionUser.grade,
-          },
-        })
-      : await prisma.user.upsert({
-          where: { email },
-          update: {
-            name,
-            phone,
-            affiliation,
-            grade,
-          },
-          create: {
-            name,
-            email,
-            phone,
-            affiliation,
-            memberType: "ASSOCIATE",
-            grade,
-          },
-        });
+      const existing = await findActiveUserApplication(tx, seminarId, sessionUser);
+      if (existing) {
+        throw new ApplicationError(409, "이미 신청한 프로그램입니다. 취소 후 다시 신청할 수 있습니다.", "ALREADY_APPLIED");
+      }
 
-    const application = await prisma.seminarApplication.create({
-      data: {
-        seminarId,
-        userId: user.id,
-        name,
-        affiliation,
-        phone,
-        email,
-        isMember,
-        depositAmount,
-        depositStatus: depositAmount === 0 ? "WAIVED" : "PENDING",
-      },
+      const before = await syncSeminarCapacity(tx, seminarId, seminar.capacity);
+      if (before.isFull) {
+        throw new ApplicationError(409, "정원이 마감되어 신청할 수 없습니다.", "FULL");
+      }
+
+      const hasGradePrices = [
+        seminar.priceBasic,
+        seminar.priceRegular,
+        seminar.priceVip,
+        seminar.pricePartner,
+        seminar.priceSpecial,
+      ].some((price) => price > 0);
+      const depositAmount = hasGradePrices
+        ? {
+            BASIC: seminar.priceBasic,
+            REGULAR: seminar.priceRegular,
+            VIP: seminar.priceVip,
+            PARTNER: seminar.pricePartner,
+            SPECIAL: seminar.priceSpecial,
+          }[grade]
+        : fallbackFeeAmount(seminar.fee, isMember, submittedAmount);
+
+      const user = await tx.user.update({
+        where: { id: sessionUser.id },
+        data: {
+          name,
+          phone,
+          affiliation,
+          email,
+          grade: sessionUser.grade === "BASIC" ? grade : sessionUser.grade,
+        },
+      });
+
+      const created = await tx.seminarApplication.create({
+        data: {
+          seminarId,
+          userId: user.id,
+          name,
+          affiliation,
+          phone,
+          email,
+          isMember,
+          depositAmount,
+          depositStatus: depositAmount === 0 ? "WAIVED" : "PENDING",
+        },
+      });
+
+      const after = await syncSeminarCapacity(tx, seminarId, seminar.capacity);
+      if (after.capacityLimit !== null && after.appliedCount > after.capacityLimit) {
+        throw new ApplicationError(409, "정원이 마감되어 신청할 수 없습니다.", "FULL");
+      }
+
+      return created;
     });
+
+    revalidatePath("/seminars");
+    revalidatePath(`/seminars/${seminarId}`);
+    revalidatePath("/mypage");
 
     return NextResponse.json({ id: application.id });
   } catch (error) {
+    if (error instanceof ApplicationError) {
+      return NextResponse.json(
+        { error: error.message, code: error.code },
+        { status: error.status },
+      );
+    }
     console.error("Create seminar application error:", error);
     return NextResponse.json({ error: "신청 저장에 실패했습니다." }, { status: 500 });
   }

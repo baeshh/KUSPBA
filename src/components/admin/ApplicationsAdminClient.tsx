@@ -22,6 +22,23 @@ const depositOptions = [
   ["CANCELLED", "취소"],
 ] as const;
 
+type SortOption = "newest" | "gradeAsc" | "gradeDesc";
+
+const sortOptions: Array<[SortOption, string]> = [
+  ["newest", "신청일 최신순"],
+  ["gradeAsc", "회원등급 낮은순"],
+  ["gradeDesc", "회원등급 높은순"],
+];
+
+/** BASIC → SPECIAL 순 (낮은 등급부터) */
+const GRADE_SORT_ORDER: Record<string, number> = {
+  BASIC: 1,
+  REGULAR: 2,
+  VIP: 3,
+  PARTNER: 4,
+  SPECIAL: 5,
+};
+
 type ApplicationRow = {
   id: string;
   name: string;
@@ -33,8 +50,13 @@ type ApplicationRow = {
   depositStatus: string;
   memo: string | null;
   isMember: boolean;
+  gradeKey: string;
   gradeLabel: string;
 };
+
+function gradeSortValue(gradeKey: string) {
+  return GRADE_SORT_ORDER[gradeKey] ?? 99;
+}
 
 export function ApplicationsAdminClient({
   applications,
@@ -43,10 +65,11 @@ export function ApplicationsAdminClient({
 }) {
   const [query, setQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("ALL");
+  const [sortBy, setSortBy] = useState<SortOption>("newest");
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
-    return applications.filter((application) => {
+    const rows = applications.filter((application) => {
       if (statusFilter !== "ALL" && application.depositStatus !== statusFilter) {
         return false;
       }
@@ -63,7 +86,14 @@ export function ApplicationsAdminClient({
         .filter(Boolean)
         .some((value) => String(value).toLowerCase().includes(q));
     });
-  }, [applications, query, statusFilter]);
+
+    if (sortBy === "newest") return rows;
+
+    return [...rows].sort((a, b) => {
+      const diff = gradeSortValue(a.gradeKey) - gradeSortValue(b.gradeKey);
+      return sortBy === "gradeAsc" ? diff : -diff;
+    });
+  }, [applications, query, statusFilter, sortBy]);
 
   const { page, setPage, resetPage, totalPages, pageItems, pageSize } =
     useAdminPagination(filtered);
@@ -90,6 +120,21 @@ export function ApplicationsAdminClient({
         >
           <option value="ALL">전체 입금 상태</option>
           {depositOptions.map(([value, label]) => (
+            <option key={value} value={value}>
+              {label}
+            </option>
+          ))}
+        </select>
+        <select
+          value={sortBy}
+          onChange={(event) => {
+            setSortBy(event.target.value as SortOption);
+            resetPage();
+          }}
+          className={adminSelectClass}
+          aria-label="정렬"
+        >
+          {sortOptions.map(([value, label]) => (
             <option key={value} value={value}>
               {label}
             </option>

@@ -1,7 +1,9 @@
 import Link from "next/link";
 import { SeminarsList } from "@/components/seminars/SeminarsList";
 import { prisma } from "@/lib/db";
-import { serializeSeminarList } from "@/lib/seminars";
+import { seminarActiveApplicationCountInclude, serializeSeminarList } from "@/lib/seminars";
+
+export const dynamic = "force-dynamic";
 
 const VALUE_LABELS: Record<string, string> = {
   connection: "연결",
@@ -18,6 +20,7 @@ export default async function SeminarsPage({
   const valueLabel = value ? VALUE_LABELS[value] : null;
   const seminars = await prisma.seminar.findMany({
     orderBy: { createdAt: "desc" },
+    ...seminarActiveApplicationCountInclude,
   });
 
   return (
