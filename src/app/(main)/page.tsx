@@ -20,7 +20,7 @@ type HeroSlide = {
   descriptionLine3?: string;
   /** 슬로건 따옴표 */
   quoted?: boolean;
-  /** 강원교육모두체 */
+  /** 제목에 강원교육모두체 사용 — 「우리는 머뭅니다…」 슬로건만 */
   displayFont?: boolean;
   /** 설명 둘째 줄부터 들여쓰기 */
   descriptionIndent?: boolean;
@@ -50,7 +50,6 @@ const heroSlides: HeroSlide[] = [
     titleLine2: "KUSPBA 디딤돌 프로젝트",
     descriptionLine1: "산업을 이해하고 진로를 구체화하는 12주 스터디 프로그램",
     compact: true,
-    displayFont: true,
     imageSrc: "/hero/banner-2.png",
     imageAlt: "KUSPBA 디딤돌 프로젝트 17기 Orientation",
   },
@@ -60,7 +59,6 @@ const heroSlides: HeroSlide[] = [
     titleLine2: "KUSPBA 직무 세미나",
     descriptionLine1: "다양한 직무와 산업 현장을 배우는 시간",
     compact: true,
-    displayFont: true,
     imageSrc: "/hero/banner-3.png",
     imageAlt: "KUSPBA 제약·바이오 직무세미나",
   },
@@ -70,7 +68,6 @@ const heroSlides: HeroSlide[] = [
     titleLine2: "KUSPBA와 함께해요!",
     descriptionLine1: "전국 대학(원)생과 함께하는 산업 네트워크",
     compact: true,
-    displayFont: true,
     imageSrc: "/hero/banner-4.png",
     imageAlt: "KUSPBA와 함께해요",
     imageContain: true,
@@ -81,7 +78,6 @@ const heroSlides: HeroSlide[] = [
     titleLine2: "KUSPBA 직무 MBTI 테스트",
     descriptionLine1: "16가지 직무 중 나에게 맞는 진로를 찾아보세요.",
     compact: true,
-    displayFont: true,
     imageSrc: "/hero/banner-5.png",
     imageAlt: "KUSPBA 직무 MBTI 테스트",
     imageContain: true,
@@ -428,7 +424,7 @@ export default function HomePage() {
                   className={`mb-2 line-clamp-4 min-h-[5.28em] break-keep leading-[1.32] text-[#222] md:mb-5 md:line-clamp-2 md:min-h-[calc(1.32em*2)] lg:min-h-[111px] ${
                     currentHeroSlide.displayFont
                       ? "font-gangwon font-bold tracking-[-0.02em]"
-                      : "font-black tracking-[-0.04em]"
+                      : "font-sans font-black tracking-[-0.04em]"
                   } text-[22px] sm:text-[28px] md:text-[36px] lg:text-[42px]`}
                 >
                   {currentHeroSlide.quoted ? (
@@ -445,7 +441,7 @@ export default function HomePage() {
                     </>
                   )}
                 </h1>
-                <p className="min-h-[4.875em] break-keep text-[14px] font-medium leading-relaxed text-[#555] md:min-h-[4.875em] md:text-lg lg:min-h-[98px] lg:text-xl">
+                <p className="min-h-[4.875em] break-keep font-sans text-[14px] font-medium leading-relaxed text-[#555] md:min-h-[4.875em] md:text-lg lg:min-h-[98px] lg:text-xl">
                   {currentHeroSlide.descriptionLine1}
                   {currentHeroSlide.descriptionLine2 ? (
                     <>

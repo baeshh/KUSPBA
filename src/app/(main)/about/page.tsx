@@ -48,7 +48,7 @@ export default function AboutPage() {
         <span className="mb-4 block text-sm font-bold uppercase tracking-wider text-[#427A72]">
           Our Message
         </span>
-        <h2 className="mb-6 text-3xl font-bold">
+        <h2 className="mb-6 font-gangwon text-3xl font-bold tracking-[-0.02em]">
           &quot;우리는 머뭅니다, 당신이 멈추지 않도록&quot;
         </h2>
         <p className="mb-6 text-lg leading-relaxed text-[#86868B]">
