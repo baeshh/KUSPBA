@@ -4,11 +4,10 @@ import { ApplicationForm } from "@/components/seminars/ApplicationForm";
 import { prisma } from "@/lib/db";
 import { getMemberGradeLabels } from "@/lib/member-grades";
 import {
+  buildSeminarGradeOptions,
   formatSeminarPrice,
-  getSeminarPriceByGrade,
   hasSeminarGradePrices,
   seminarActiveApplicationCountInclude,
-  SEMINAR_MEMBER_GRADES,
   serializeSeminarList,
 } from "@/lib/seminars";
 import { RemainingCapacity } from "@/components/seminars/RemainingCapacity";
@@ -51,12 +50,9 @@ export default async function SeminarDetailPage({ params }: SeminarDetailPagePro
     : null;
   const isClosed = seminar.status === "closed" || seminar.status === "ended";
   const recruitmentClosed = (isClosed || seminar.isFull) && !existingApplication;
-  const hasGradePrices = hasSeminarGradePrices(seminar.prices);
-  const gradePrices = SEMINAR_MEMBER_GRADES.map((grade) => ({
-    grade,
-    label: gradeLabels[grade],
-    amount: getSeminarPriceByGrade(seminar.prices, grade),
-  }));
+  const gradeOptions = buildSeminarGradeOptions(seminar.prices, gradeLabels, seminar.gradeConfig);
+  const hasGradePrices = hasSeminarGradePrices(seminar.prices, seminar.gradeConfig);
+  const gradePrices = gradeOptions.filter((option) => option.enabled);
 
   return (
     <main className="mx-auto max-w-[1200px] px-4 pb-16 pt-[calc(var(--header-offset)+20px)] sm:px-6 md:pb-20 md:pt-[120px]">
@@ -151,7 +147,7 @@ export default async function SeminarDetailPage({ params }: SeminarDetailPagePro
                           className="flex items-center justify-between rounded-xl bg-[#F5F5F7] px-3 py-2"
                         >
                           <span className="text-sm font-bold text-[#427A72]">{price.label}</span>
-                          <span className="font-bold">{formatSeminarPrice(price.amount)}</span>
+                          <span className="font-bold">{formatSeminarPrice(price.price)}</span>
                         </div>
                       ))}
                     </div>
@@ -190,15 +186,16 @@ export default async function SeminarDetailPage({ params }: SeminarDetailPagePro
             seminarId={seminar.id}
             fee={
               hasGradePrices
-                ? formatSeminarPrice(seminar.prices.priceBasic)
+                ? formatSeminarPrice(
+                    gradeOptions.find((option) => option.grade === "BASIC")?.price ?? seminar.prices.priceBasic,
+                  )
                 : seminar.fee.startsWith("무료")
                 ? "무료"
                 : seminar.fee.split(" ")[0] ?? seminar.fee
             }
             hasFee={hasGradePrices || seminar.fee.includes("원")}
-            prices={seminar.prices}
             hasGradePrices={hasGradePrices}
-            gradeLabels={gradeLabels}
+            gradeOptions={gradeOptions}
             capacity={seminar.capacity}
             appliedCount={seminar.appliedCount}
             remainingSeats={seminar.remainingSeats}

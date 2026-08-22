@@ -4,10 +4,8 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   formatSeminarPrice,
-  getSeminarPriceByGrade,
-  SEMINAR_GRADE_LABELS,
+  type SeminarGradeOption,
   type SeminarMemberGrade,
-  type SeminarPrices,
 } from "@/lib/seminars";
 import { RemainingCapacity } from "@/components/seminars/RemainingCapacity";
 import { CancelApplicationButton } from "@/components/seminars/CancelApplicationButton";
@@ -18,8 +16,7 @@ interface ApplicationFormProps {
   fee: string;
   hasFee?: boolean;
   hasGradePrices?: boolean;
-  prices?: SeminarPrices;
-  gradeLabels?: Partial<Record<SeminarMemberGrade, string>>;
+  gradeOptions?: SeminarGradeOption[];
   capacity?: string;
   appliedCount?: number;
   remainingSeats?: number | null;
@@ -29,15 +26,12 @@ interface ApplicationFormProps {
   existingApplicationId?: string | null;
 }
 
-const MEMBER_GRADES: SeminarMemberGrade[] = ["REGULAR", "VIP", "PARTNER", "SPECIAL"];
-
 export function ApplicationForm({
   seminarId,
   fee,
   hasFee = true,
   hasGradePrices = false,
-  prices,
-  gradeLabels,
+  gradeOptions = [],
   capacity = "",
   appliedCount = 0,
   remainingSeats = null,
@@ -46,10 +40,14 @@ export function ApplicationForm({
   currentUser = null,
   existingApplicationId = null,
 }: ApplicationFormProps) {
-  const labels = { ...SEMINAR_GRADE_LABELS, ...gradeLabels };
+  const enabledOptions = gradeOptions.filter((option) => option.enabled);
+  const basicOption = enabledOptions.find((option) => option.grade === "BASIC");
+  const memberOptions = enabledOptions.filter((option) => option.grade !== "BASIC");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isMember, setIsMember] = useState(false);
-  const [memberGrade, setMemberGrade] = useState<SeminarMemberGrade>("BASIC");
+  const [isMember, setIsMember] = useState(Boolean(memberOptions.length && !basicOption));
+  const [memberGrade, setMemberGrade] = useState<SeminarMemberGrade>(
+    basicOption ? "BASIC" : (memberOptions[0]?.grade ?? "BASIC"),
+  );
   const [liveAppliedCount, setLiveAppliedCount] = useState(appliedCount);
   const [liveRemainingSeats, setLiveRemainingSeats] = useState(remainingSeats);
   const [liveCapacityLimit, setLiveCapacityLimit] = useState(capacityLimit);
@@ -100,8 +98,9 @@ export function ApplicationForm({
       window.clearInterval(timer);
     };
   }, [seminarId, router]);
-  const amount = hasGradePrices && prices
-    ? getSeminarPriceByGrade(prices, memberGrade)
+  const selectedOption = enabledOptions.find((option) => option.grade === memberGrade);
+  const amount = hasGradePrices
+    ? selectedOption?.price ?? 0
     : hasFee && !isMember
       ? Number(fee.replace(/[^0-9]/g, "") || "10000")
       : 0;
@@ -121,8 +120,9 @@ export function ApplicationForm({
     const email = (formData.get("email") as string) || "";
     const submittedIsMember = formData.get("isMember") === "yes";
     const submittedGrade = (formData.get("memberGrade") as SeminarMemberGrade | null) ?? "BASIC";
-    const depositAmount = hasGradePrices && prices
-      ? getSeminarPriceByGrade(prices, submittedGrade)
+    const submittedOption = enabledOptions.find((option) => option.grade === submittedGrade);
+    const depositAmount = hasGradePrices
+      ? submittedOption?.price ?? 0
       : hasFee && !submittedIsMember
         ? Number(fee.replace(/[^0-9]/g, "") || "10000")
         : 0;
@@ -338,39 +338,43 @@ export function ApplicationForm({
             협회원 여부
           </label>
           <div className="flex flex-wrap gap-x-5 gap-y-3">
-            <label className="flex min-h-11 cursor-pointer items-center gap-2 text-[15px]">
-              <input
-                type="radio"
-                name="isMember"
-                value="yes"
-                required
-                checked={isMember}
-                onChange={() => {
-                  setIsMember(true);
-                  setMemberGrade("REGULAR");
-                }}
-                className="h-[18px] w-[18px] accent-[#427A72]"
-              />
-              협회원
-            </label>
-            <label className="flex min-h-11 cursor-pointer items-center gap-2 text-[15px]">
-              <input
-                type="radio"
-                name="isMember"
-                value="no"
-                checked={!isMember}
-                onChange={() => {
-                  setIsMember(false);
-                  setMemberGrade("BASIC");
-                }}
-                className="h-[18px] w-[18px] accent-[#427A72]"
-              />
-              일반 ({hasGradePrices && prices ? formatSeminarPrice(prices.priceBasic) : fee})
-            </label>
+            {memberOptions.length > 0 ? (
+              <label className="flex min-h-11 cursor-pointer items-center gap-2 text-[15px]">
+                <input
+                  type="radio"
+                  name="isMember"
+                  value="yes"
+                  required
+                  checked={isMember}
+                  onChange={() => {
+                    setIsMember(true);
+                    setMemberGrade(memberOptions[0]?.grade ?? "REGULAR");
+                  }}
+                  className="h-[18px] w-[18px] accent-[#427A72]"
+                />
+                협회원
+              </label>
+            ) : null}
+            {basicOption ? (
+              <label className="flex min-h-11 cursor-pointer items-center gap-2 text-[15px]">
+                <input
+                  type="radio"
+                  name="isMember"
+                  value="no"
+                  checked={!isMember}
+                  onChange={() => {
+                    setIsMember(false);
+                    setMemberGrade("BASIC");
+                  }}
+                  className="h-[18px] w-[18px] accent-[#427A72]"
+                />
+                {basicOption.label} ({hasGradePrices ? formatSeminarPrice(basicOption.price) : fee})
+              </label>
+            ) : null}
           </div>
         </div>
 
-        {isMember && (
+        {isMember && memberOptions.length > 0 && (
           <label className="mb-6 block">
             <span className="mb-2 block text-sm font-semibold text-[#1D1D1F]">
               회원 등급
@@ -381,9 +385,9 @@ export function ApplicationForm({
               onChange={(event) => setMemberGrade(event.target.value as SeminarMemberGrade)}
               className="w-full rounded-xl border border-black/[0.08] bg-[#FBFBFD] px-4 py-3.5 text-[15px] text-[#1D1D1F] transition-all focus:border-[#427A72] focus:bg-white focus:outline-none focus:ring-4 focus:ring-[#427A72]/15"
             >
-              {MEMBER_GRADES.map((grade) => (
-                <option key={grade} value={grade}>
-                  {labels[grade]} ({prices ? formatSeminarPrice(getSeminarPriceByGrade(prices, grade)) : "무료"})
+              {memberOptions.map((option) => (
+                <option key={option.grade} value={option.grade}>
+                  {option.label} ({formatSeminarPrice(option.price)})
                 </option>
               ))}
             </select>
@@ -398,7 +402,7 @@ export function ApplicationForm({
             무통장 입금 계좌 ({displayFee})
           </p>
           <div className="text-[15px] font-bold text-[#1D1D1F]">
-            국민은행 123456-00-123456
+            국민은행 474501-01-178256
             <br />
             (예금주: 한국대학생제약바이오산업협회)
           </div>

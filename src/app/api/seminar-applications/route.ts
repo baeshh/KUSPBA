@@ -6,6 +6,7 @@ import { getCurrentUser } from "@/lib/auth";
 import { syncSeminarCapacity } from "@/lib/seminar-capacity-sync";
 import { findActiveUserApplication } from "@/lib/seminar-applications";
 import { formatAffiliation } from "@/lib/profile";
+import { buildSeminarGradeOptions, hasSeminarGradePrices } from "@/lib/seminars";
 
 function memberGrade(value: unknown, isMember: boolean) {
   if (!isMember) return MemberGrade.BASIC;
@@ -79,21 +80,21 @@ export async function POST(request: NextRequest) {
         throw new ApplicationError(409, "정원이 마감되어 신청할 수 없습니다.", "FULL");
       }
 
-      const hasGradePrices = [
-        seminar.priceBasic,
-        seminar.priceRegular,
-        seminar.priceVip,
-        seminar.pricePartner,
-        seminar.priceSpecial,
-      ].some((price) => price > 0);
+      const prices = {
+        priceBasic: seminar.priceBasic,
+        priceRegular: seminar.priceRegular,
+        priceVip: seminar.priceVip,
+        pricePartner: seminar.pricePartner,
+        priceSpecial: seminar.priceSpecial,
+      };
+      const gradeOptions = buildSeminarGradeOptions(prices, {}, seminar.gradeConfig);
+      const selectedGrade = gradeOptions.find((option) => option.grade === grade && option.enabled);
+      if (!selectedGrade) {
+        throw new ApplicationError(400, "선택할 수 없는 회원 등급입니다.");
+      }
+      const hasGradePrices = hasSeminarGradePrices(prices, seminar.gradeConfig);
       const depositAmount = hasGradePrices
-        ? {
-            BASIC: seminar.priceBasic,
-            REGULAR: seminar.priceRegular,
-            VIP: seminar.priceVip,
-            PARTNER: seminar.pricePartner,
-            SPECIAL: seminar.priceSpecial,
-          }[grade]
+        ? selectedGrade.price
         : fallbackFeeAmount(seminar.fee, isMember, submittedAmount);
 
       const user = await tx.user.update({

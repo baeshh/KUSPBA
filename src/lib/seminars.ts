@@ -47,6 +47,7 @@ export interface SeminarDetail extends SeminarCapacityInfo {
   prices: SeminarPrices;
   description: string[];
   program: string[];
+  gradeConfig?: string;
 }
 
 /** 취소되지 않은 신청만 정원에 포함합니다. */
@@ -103,12 +104,60 @@ export function getSeminarPriceByGrade(prices: SeminarPrices, grade: SeminarMemb
   }[grade];
 }
 
-export function hasSeminarGradePrices(prices: SeminarPrices) {
-  return Object.values(prices).some((price) => price > 0);
+export function formatSeminarPrice(amount: number) {
+  if (!Number.isFinite(amount) || amount <= 0) return "무료";
+  return `${amount.toLocaleString("ko-KR")}원`;
 }
 
-export function formatSeminarPrice(price: number) {
-  return price > 0 ? `${price.toLocaleString()}원` : "무료";
+export function hasSeminarGradePrices(prices: SeminarPrices, rawConfig?: string | null) {
+  return buildSeminarGradeOptions(prices, {}, rawConfig).some((option) => option.enabled && option.price > 0);
+}
+
+export type SeminarGradeOption = {
+  grade: SeminarMemberGrade;
+  label: string;
+  price: number;
+  enabled: boolean;
+};
+
+export function parseSeminarGradeConfig(raw: string | null | undefined): SeminarGradeOption[] {
+  if (!raw?.trim()) return [];
+  try {
+    const parsed = JSON.parse(raw) as SeminarGradeOption[];
+    if (!Array.isArray(parsed)) return [];
+    return parsed
+      .filter(
+        (item) =>
+          item &&
+          SEMINAR_MEMBER_GRADES.includes(item.grade) &&
+          typeof item.label === "string",
+      )
+      .map((item) => ({
+        grade: item.grade,
+        label: item.label,
+        price: Number.isFinite(Number(item.price)) ? Number(item.price) : 0,
+        enabled: item.enabled !== false,
+      }));
+  } catch {
+    return [];
+  }
+}
+
+export function buildSeminarGradeOptions(
+  prices: SeminarPrices,
+  labels: Partial<Record<SeminarMemberGrade, string>> = {},
+  rawConfig?: string | null,
+): SeminarGradeOption[] {
+  const fromConfig = parseSeminarGradeConfig(rawConfig);
+  return SEMINAR_MEMBER_GRADES.map((grade) => {
+    const saved = fromConfig.find((item) => item.grade === grade);
+    return {
+      grade,
+      label: saved?.label?.trim() || labels[grade] || SEMINAR_GRADE_LABELS[grade],
+      price: Number.isFinite(saved?.price) ? Number(saved?.price) : getSeminarPriceByGrade(prices, grade),
+      enabled: saved?.enabled ?? true,
+    };
+  });
 }
 
 type SeminarSeed = Omit<SeminarDetail, keyof SeminarCapacityInfo>;
@@ -298,6 +347,7 @@ export function serializeSeminarList(items: Array<{
   priceSpecial?: number;
   description: string;
   program: string;
+  gradeConfig?: string;
   appliedCount?: number;
   _count?: { applications: number };
 }>): SeminarDetail[] {
@@ -323,6 +373,7 @@ export function serializeSeminarList(items: Array<{
       },
       description: item.description.split(/\r?\n/),
       program: item.program.split(/\r?\n/),
+      gradeConfig: item.gradeConfig ?? "",
       ...getSeminarCapacityInfo(item.capacity, appliedCount),
     };
   });

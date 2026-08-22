@@ -2,6 +2,7 @@
 
 import { Fragment, useMemo, useState, type ChangeEvent } from "react";
 import { GRADE_PRICE_FIELD, type MemberGradeKey } from "@/lib/member-grade-constants";
+import { parseSeminarGradeConfig } from "@/lib/seminars";
 import {
   AdminPagination,
   useAdminPagination,
@@ -49,6 +50,7 @@ type SeminarRow = {
   priceVip: number;
   pricePartner: number;
   priceSpecial: number;
+  gradeConfig?: string;
   status: string;
   type: string;
   description: string;
@@ -169,34 +171,73 @@ function ImageFields({
   );
 }
 
-function PriceInputs({
+function GradeConfigInputs({
   gradeOptions,
   defaults,
 }: {
   gradeOptions: GradeOption[];
-  defaults?: {
-    priceBasic?: number;
-    priceRegular?: number;
-    priceVip?: number;
-    pricePartner?: number;
-    priceSpecial?: number;
-  };
+  defaults?: SeminarRow;
 }) {
+  const saved = parseSeminarGradeConfig(defaults?.gradeConfig);
+  const priceDefaults: Record<string, number> = {
+    BASIC: defaults?.priceBasic ?? 0,
+    REGULAR: defaults?.priceRegular ?? 0,
+    VIP: defaults?.priceVip ?? 0,
+    PARTNER: defaults?.pricePartner ?? 0,
+    SPECIAL: defaults?.priceSpecial ?? 0,
+  };
+
   return (
-    <div className="grid gap-3 rounded-xl bg-[#F2F4F6] p-4 md:col-span-2 md:grid-cols-5">
-      {gradeOptions.map((grade) => {
-        const field = GRADE_PRICE_FIELD[grade.value] as keyof NonNullable<typeof defaults>;
-        return (
-          <Field
-            key={grade.value}
-            name={GRADE_PRICE_FIELD[grade.value]}
-            label={`${grade.label} 가격`}
-            type="number"
-            defaultValue={String(defaults?.[field] ?? 0)}
-            required={false}
-          />
-        );
-      })}
+    <div className="md:col-span-2">
+      <p className="mb-1 text-xs font-semibold text-[#8B95A1]">신청서 회원 등급</p>
+      <p className="mb-3 text-xs leading-relaxed text-[#8B95A1]">
+        이 프로그램 신청서에 보일 등급 이름과 가격을 직접 정할 수 있습니다. 일반은 비회원 가격이고, 나머지는 협회원 선택 시 목록에 나갑니다.
+      </p>
+      <div className="overflow-x-auto rounded-xl border border-[#E5E8EB] bg-white">
+        <table className="w-full min-w-[520px] text-left">
+          <thead>
+            <tr className="border-b border-[#E5E8EB] bg-[#F8F9FA]">
+              <th className="px-3 py-2 text-xs font-semibold text-[#8B95A1]">사용</th>
+              <th className="px-3 py-2 text-xs font-semibold text-[#8B95A1]">신청서 표시 이름</th>
+              <th className="px-3 py-2 text-xs font-semibold text-[#8B95A1]">가격(원)</th>
+            </tr>
+          </thead>
+          <tbody>
+            {gradeOptions.map((grade) => {
+              const savedRow = saved.find((item) => item.grade === grade.value);
+              const roleLabel = grade.value === "BASIC" ? "일반(비회원)" : grade.label;
+              return (
+                <tr key={grade.value} className="border-b border-[#E5E8EB] last:border-b-0">
+                  <td className="px-3 py-2">
+                    <input
+                      type="checkbox"
+                      name={`gradeEnabled_${grade.value}`}
+                      defaultChecked={savedRow?.enabled ?? true}
+                      className="h-4 w-4 accent-[#2D6A4F]"
+                    />
+                    <span className="ml-2 text-xs text-[#8B95A1]">{roleLabel}</span>
+                  </td>
+                  <td className="px-3 py-2">
+                    <input
+                      name={`gradeLabel_${grade.value}`}
+                      defaultValue={savedRow?.label || grade.label}
+                      className={adminInputClass}
+                    />
+                  </td>
+                  <td className="px-3 py-2">
+                    <input
+                      type="number"
+                      name={GRADE_PRICE_FIELD[grade.value]}
+                      defaultValue={String(savedRow?.price ?? priceDefaults[grade.value] ?? 0)}
+                      className={adminInputClass}
+                    />
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }
@@ -227,20 +268,7 @@ function SeminarFormFields({
         </p>
       </div>
       <Field name="fee" label="참가비" defaultValue={seminar?.fee ?? "무료"} />
-      <PriceInputs
-        gradeOptions={gradeOptions}
-        defaults={
-          seminar
-            ? {
-                priceBasic: seminar.priceBasic,
-                priceRegular: seminar.priceRegular,
-                priceVip: seminar.priceVip,
-                pricePartner: seminar.pricePartner,
-                priceSpecial: seminar.priceSpecial,
-              }
-            : undefined
-        }
-      />
+      <GradeConfigInputs gradeOptions={gradeOptions} defaults={seminar} />
       <label className="block">
         <span className="mb-1.5 block text-xs font-semibold text-[#8B95A1]">상태</span>
         <select

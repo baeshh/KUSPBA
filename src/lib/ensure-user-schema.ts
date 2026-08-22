@@ -36,3 +36,27 @@ export function ensureUserSchemaOnce(prisma: PrismaClient) {
   }
   return pending;
 }
+
+const SEMINAR_COLUMNS: Array<[string, string]> = [
+  ["gradeConfig", "TEXT NOT NULL DEFAULT ''"],
+];
+
+let seminarPending: Promise<void> | null = null;
+
+export async function ensureSeminarSchema(prisma: PrismaClient) {
+  for (const [name, definition] of SEMINAR_COLUMNS) {
+    try {
+      await prisma.$executeRawUnsafe(`ALTER TABLE Seminar ADD COLUMN "${name}" ${definition}`);
+    } catch (error) {
+      if (isDuplicateColumnError(error)) continue;
+      console.error(`ensureSeminarSchema failed for ${name}:`, error);
+    }
+  }
+}
+
+export function ensureSeminarSchemaOnce(prisma: PrismaClient) {
+  if (!seminarPending) {
+    seminarPending = ensureSeminarSchema(prisma);
+  }
+  return seminarPending;
+}

@@ -25,7 +25,7 @@ export default async function CompletePage({
   if (!seminarRecord) notFound();
 
   const [seminar] = serializeSeminarList([seminarRecord]);
-  const seminarHasFee = hasSeminarGradePrices(seminar.prices) || seminar.fee.includes("원");
+  const seminarHasFee = hasSeminarGradePrices(seminar.prices, seminar.gradeConfig) || seminar.fee.includes("원");
   const displayAmount = amount ?? (seminarHasFee ? "10000" : "0");
   const applicantName = name ?? "신청자";
   const needsPayment = seminarHasFee && displayAmount !== "0";

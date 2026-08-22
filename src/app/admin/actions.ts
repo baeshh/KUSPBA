@@ -13,6 +13,7 @@ import { prisma } from "@/lib/db";
 import { syncSeminarCapacity } from "@/lib/seminar-capacity-sync";
 import { activeApplicationWhere } from "@/lib/seminars";
 import { formatAffiliation, hasRequiredProfileFields } from "@/lib/profile";
+import { GRADE_PRICE_FIELD, MEMBER_GRADE_KEYS } from "@/lib/member-grade-constants";
 
 const DEFAULT_PROGRAM_IMAGE =
   "https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&q=80&w=1000";
@@ -71,6 +72,18 @@ export async function saveSeminar(formData: FormData) {
     // 이미지는 클라이언트에서 /api/admin/programs/upload 로 먼저 올린다.
     // 서버 액션 파일 첨부는 배포 환경에서 본문 크기/권한 오류를 유발할 수 있어 사용하지 않는다.
     const imageUrl = text(formData, "imageUrl") || DEFAULT_PROGRAM_IMAGE;
+    const { ensureSeminarSchema } = await import("@/lib/ensure-user-schema");
+    await ensureSeminarSchema(prisma);
+
+    const gradeConfig = JSON.stringify(
+      MEMBER_GRADE_KEYS.map((grade) => ({
+        grade,
+        label: text(formData, `gradeLabel_${grade}`) || grade,
+        price: price(formData, GRADE_PRICE_FIELD[grade]),
+        enabled: formData.get(`gradeEnabled_${grade}`) === "on",
+      })),
+    );
+
     const data = {
       title: text(formData, "title"),
       status: enumValue(text(formData, "status"), Object.values(SeminarStatus), SeminarStatus.RECRUITING),
@@ -86,6 +99,7 @@ export async function saveSeminar(formData: FormData) {
       priceVip: price(formData, "priceVip"),
       pricePartner: price(formData, "pricePartner"),
       priceSpecial: price(formData, "priceSpecial"),
+      gradeConfig,
       description: text(formData, "description"),
       program: text(formData, "program"),
     };
