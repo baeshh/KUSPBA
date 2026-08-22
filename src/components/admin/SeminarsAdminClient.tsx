@@ -51,6 +51,7 @@ type SeminarRow = {
   pricePartner: number;
   priceSpecial: number;
   gradeConfig?: string;
+  acceptingApplications?: boolean;
   status: string;
   type: string;
   description: string;
@@ -268,6 +269,20 @@ function SeminarFormFields({
         </p>
       </div>
       <Field name="fee" label="참가비" defaultValue={seminar?.fee ?? "무료"} />
+      <label className="flex items-start gap-3 rounded-xl border border-[#E5E8EB] bg-white px-4 py-3 md:col-span-2">
+        <input
+          type="checkbox"
+          name="acceptingApplications"
+          defaultChecked={Boolean(seminar?.acceptingApplications)}
+          className="mt-0.5 h-4 w-4 accent-[#2D6A4F]"
+        />
+        <span>
+          <span className="block text-sm font-semibold text-[#191F28]">신청 받기</span>
+          <span className="mt-1 block text-xs leading-relaxed text-[#8B95A1]">
+            체크를 해제하면 프로그램은 보이지만 신청 버튼이 비활성화됩니다. 기존 신청자는 직접 취소할 수 있습니다.
+          </span>
+        </span>
+      </label>
       <GradeConfigInputs gradeOptions={gradeOptions} defaults={seminar} />
       <label className="block">
         <span className="mb-1.5 block text-xs font-semibold text-[#8B95A1]">상태</span>
@@ -294,7 +309,7 @@ function SeminarFormFields({
         </select>
       </label>
       <label className="block md:col-span-2">
-        <span className="mb-1.5 block text-xs font-semibold text-[#8B95A1]">소개 (줄바꿈 그대로 표시, URL은 자동 링크)</span>
+        <span className="mb-1.5 block text-xs font-semibold text-[#8B95A1]">프로그램 소개 (줄바꿈 그대로 표시, URL은 자동 링크)</span>
         <textarea
           name="description"
           required
@@ -445,6 +460,9 @@ export function SeminarsAdminClient({
                           }
                         >
                           {statusLabel(seminar.status)}
+                          {seminar.status === "RECRUITING" && !seminar.acceptingApplications
+                            ? " · 신청 중지"
+                            : null}
                         </StatusBadge>
                       </td>
                       <td className="px-8 py-4 text-sm text-[#8B95A1]">{seminar.applicationPeriod}</td>

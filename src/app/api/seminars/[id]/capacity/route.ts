@@ -13,7 +13,7 @@ export async function GET(
   const { id } = await params;
   const seminar = await prisma.seminar.findUnique({
     where: { id },
-    select: { capacity: true, status: true },
+    select: { capacity: true, status: true, acceptingApplications: true },
   });
 
   if (!seminar) {
@@ -32,7 +32,7 @@ export async function GET(
   return NextResponse.json({
     ...info,
     status: seminar.status,
-    isClosed: seminar.status !== "RECRUITING" || info.isFull,
+    isClosed: seminar.status !== "RECRUITING" || !seminar.acceptingApplications || info.isFull,
     existingApplicationId: existingApplication?.id ?? null,
   });
 }

@@ -42,6 +42,7 @@ export default async function AdminSeminarsPage() {
         pricePartner: seminar.pricePartner,
         priceSpecial: seminar.priceSpecial,
         gradeConfig: seminar.gradeConfig,
+        acceptingApplications: seminar.acceptingApplications,
         status: seminar.status,
         type: seminar.type,
         description: seminar.description,

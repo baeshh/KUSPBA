@@ -50,7 +50,8 @@ model Seminar {
   priceVip          Int                  @default(0)
   pricePartner      Int                  @default(0)
   priceSpecial      Int                  @default(0)
-  gradeConfig       String               @default("")
+  gradeConfig            String               @default("")
+  acceptingApplications  Boolean              @default(false)
   description       String
   program           String
   applications      SeminarApplication[]

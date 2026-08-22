@@ -25,7 +25,7 @@ export async function generateMetadata({ params }: SeminarDetailPageProps) {
   const { id } = await params;
   const seminar = await prisma.seminar.findUnique({ where: { id } });
   return {
-    title: seminar ? `${seminar.title} | KUSPBA` : "세미나 상세 | KUSPBA",
+    title: seminar ? `${seminar.title} | KUSPBA` : "프로그램 상세 | KUSPBA",
   };
 }
 
@@ -49,7 +49,8 @@ export default async function SeminarDetailPage({ params }: SeminarDetailPagePro
     ? await findActiveUserApplication(prisma, seminar.id, currentUser)
     : null;
   const isClosed = seminar.status === "closed" || seminar.status === "ended";
-  const recruitmentClosed = (isClosed || seminar.isFull) && !existingApplication;
+  const notAccepting = !seminar.acceptingApplications;
+  const recruitmentClosed = (isClosed || notAccepting || seminar.isFull) && !existingApplication;
   const gradeOptions = buildSeminarGradeOptions(seminar.prices, gradeLabels, seminar.gradeConfig);
   const hasGradePrices = hasSeminarGradePrices(seminar.prices, seminar.gradeConfig);
   const gradePrices = gradeOptions.filter((option) => option.enabled);
@@ -169,7 +170,7 @@ export default async function SeminarDetailPage({ params }: SeminarDetailPagePro
           </div>
 
           <div>
-            <h3 className="mb-4 mt-10 text-2xl font-bold">세미나 소개</h3>
+            <h3 className="mb-4 mt-10 text-2xl font-bold">프로그램 소개</h3>
             <SeminarBodyText lines={seminar.description} />
 
             {seminar.program.some((line) => line.trim()) ? (
@@ -220,7 +221,9 @@ export default async function SeminarDetailPage({ params }: SeminarDetailPagePro
             <p className="text-center font-semibold text-[#86868B]">
               {seminar.isFull && !isClosed
                 ? "정원이 마감되어 신청할 수 없습니다."
-                : "신청이 마감되었습니다."}
+                : notAccepting && !isClosed
+                  ? "현재 신청을 받지 않습니다."
+                  : "신청이 마감되었습니다."}
             </p>
           </aside>
         )}

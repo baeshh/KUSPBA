@@ -143,7 +143,7 @@ export function CompletionCard({
           href="/seminars"
           className="flex-1 rounded-xl bg-[#1D1D1F] px-4 py-4 text-center text-[15px] font-semibold text-white transition-colors hover:bg-black"
         >
-          세미나 목록 보기
+          프로그램 목록 보기
         </Link>
       </div>
     </div>

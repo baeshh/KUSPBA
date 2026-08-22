@@ -100,6 +100,7 @@ export async function saveSeminar(formData: FormData) {
       pricePartner: price(formData, "pricePartner"),
       priceSpecial: price(formData, "priceSpecial"),
       gradeConfig,
+      acceptingApplications: formData.get("acceptingApplications") === "on",
       description: text(formData, "description"),
       program: text(formData, "program"),
     };
@@ -255,6 +256,42 @@ export async function updateApplication(formData: FormData) {
         ),
         memo: text(formData, "memo") || null,
       },
+    });
+
+    await syncSeminarCapacity(tx, current.seminarId, current.seminar.capacity, {
+      previousAppliedCount,
+    });
+
+    return updated;
+  });
+
+  if (!application) return;
+
+  revalidatePath("/admin/applications");
+  revalidatePath("/seminars");
+  revalidatePath(`/seminars/${application.seminarId}`);
+  revalidatePath("/mypage");
+}
+
+export async function cancelApplicationByAdmin(formData: FormData) {
+  await requireAdmin();
+  const id = text(formData, "id");
+  if (!id) return;
+
+  const application = await prisma.$transaction(async (tx) => {
+    const current = await tx.seminarApplication.findUnique({
+      where: { id },
+      include: { seminar: { select: { capacity: true } } },
+    });
+    if (!current || current.depositStatus === DepositStatus.CANCELLED) return null;
+
+    const previousAppliedCount = await tx.seminarApplication.count({
+      where: { seminarId: current.seminarId, ...activeApplicationWhere },
+    });
+
+    const updated = await tx.seminarApplication.update({
+      where: { id },
+      data: { depositStatus: DepositStatus.CANCELLED },
     });
 
     await syncSeminarCapacity(tx, current.seminarId, current.seminar.capacity, {

@@ -9,11 +9,12 @@ import {
   AdminCard,
   AdminToolbar,
   StatusBadge,
+  adminBtnDangerClass,
   adminBtnPrimaryClass,
   adminInputClass,
   adminSelectClass,
 } from "@/components/admin/ui";
-import { updateApplication } from "@/app/admin/actions";
+import { cancelApplicationByAdmin, updateApplication } from "@/app/admin/actions";
 
 const depositOptions = [
   ["PENDING", "입금 대기"],
@@ -225,6 +226,22 @@ export function ApplicationsAdminClient({
                         상태 저장
                       </button>
                     </form>
+                    {application.depositStatus !== "CANCELLED" ? (
+                      <form
+                        action={cancelApplicationByAdmin}
+                        className="mt-2 max-w-[320px]"
+                        onSubmit={(event) => {
+                          if (!window.confirm("이 신청을 취소할까요? 정원에서 제외됩니다.")) {
+                            event.preventDefault();
+                          }
+                        }}
+                      >
+                        <input type="hidden" name="id" value={application.id} />
+                        <button type="submit" className={`${adminBtnDangerClass} w-full`}>
+                          신청 취소
+                        </button>
+                      </form>
+                    ) : null}
                   </td>
                 </tr>
               ))

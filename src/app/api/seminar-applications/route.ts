@@ -66,6 +66,9 @@ export async function POST(request: NextRequest) {
       if (!seminar) {
         throw new ApplicationError(404, "프로그램을 찾을 수 없습니다.");
       }
+      if (!seminar.acceptingApplications) {
+        throw new ApplicationError(409, "현재 신청을 받지 않는 프로그램입니다.", "CLOSED");
+      }
       if (seminar.status !== "RECRUITING") {
         throw new ApplicationError(409, "신청이 마감된 프로그램입니다.", "CLOSED");
       }

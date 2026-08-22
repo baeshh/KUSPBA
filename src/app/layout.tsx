@@ -5,6 +5,10 @@ export const metadata: Metadata = {
   title: "KUSPBA | 한국대학생제약바이오산업협회",
   description:
     "전국 유일의 대학생제약바이오산업협회. 세미나 신청, 교육 프로그램, 협회원 관리.",
+  icons: {
+    icon: "/logo-symbol.png",
+    apple: "/logo-symbol.png",
+  },
 };
 
 export const viewport: Viewport = {

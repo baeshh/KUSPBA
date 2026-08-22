@@ -11,7 +11,7 @@ interface CompletePageProps {
 
 export const metadata = {
   title: "신청 접수 완료 | KUSPBA",
-  description: "세미나 신청이 접수되었습니다. 참가비 입금을 완료해 주세요.",
+  description: "프로그램 신청이 접수되었습니다. 참가비 입금을 완료해 주세요.",
 };
 
 export default async function CompletePage({
