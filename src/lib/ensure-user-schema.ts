@@ -40,6 +40,8 @@ export function ensureUserSchemaOnce(prisma: PrismaClient) {
 const SEMINAR_COLUMNS: Array<[string, string]> = [
   ["gradeConfig", "TEXT NOT NULL DEFAULT ''"],
   ["acceptingApplications", "INTEGER NOT NULL DEFAULT 0"],
+  ["applicationNotice", "TEXT NOT NULL DEFAULT ''"],
+  ["applicationQrUrl", "TEXT NOT NULL DEFAULT ''"],
 ];
 
 let seminarPending: Promise<void> | null = null;

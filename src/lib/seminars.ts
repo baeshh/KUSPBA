@@ -49,6 +49,8 @@ export interface SeminarDetail extends SeminarCapacityInfo {
   program: string[];
   gradeConfig?: string;
   acceptingApplications?: boolean;
+  applicationNotice?: string;
+  applicationQrUrl?: string;
 }
 
 /** 취소되지 않은 신청만 정원에 포함합니다. */
@@ -350,6 +352,8 @@ export function serializeSeminarList(items: Array<{
   program: string;
   gradeConfig?: string;
   acceptingApplications?: boolean;
+  applicationNotice?: string;
+  applicationQrUrl?: string;
   appliedCount?: number;
   _count?: { applications: number };
 }>): SeminarDetail[] {
@@ -377,6 +381,8 @@ export function serializeSeminarList(items: Array<{
       program: item.program.split(/\r?\n/),
       gradeConfig: item.gradeConfig ?? "",
       acceptingApplications: Boolean(item.acceptingApplications),
+      applicationNotice: item.applicationNotice ?? "",
+      applicationQrUrl: item.applicationQrUrl ?? "",
       ...getSeminarCapacityInfo(item.capacity, appliedCount),
     };
   });

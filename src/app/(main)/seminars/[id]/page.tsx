@@ -218,13 +218,29 @@ export default async function SeminarDetailPage({ params }: SeminarDetailPagePro
                 isFull={seminar.isFull}
               />
             ) : null}
-            <p className="text-center font-semibold text-[#86868B]">
-              {seminar.isFull && !isClosed
-                ? "정원이 마감되어 신청할 수 없습니다."
-                : notAccepting && !isClosed
+            {seminar.isFull && !isClosed ? (
+              <p className="text-center font-semibold text-[#86868B]">
+                정원이 마감되어 신청할 수 없습니다.
+              </p>
+            ) : notAccepting && seminar.applicationNotice?.trim() ? (
+              <div className="text-left">
+                <SeminarBodyText lines={seminar.applicationNotice.split(/\r?\n/)} />
+                {seminar.applicationQrUrl?.trim() ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={seminar.applicationQrUrl}
+                    alt="신청 QR"
+                    className="mx-auto mt-5 h-auto w-full max-w-[220px] object-contain"
+                  />
+                ) : null}
+              </div>
+            ) : (
+              <p className="text-center font-semibold text-[#86868B]">
+                {notAccepting && !isClosed
                   ? "현재 신청을 받지 않습니다."
                   : "신청이 마감되었습니다."}
-            </p>
+              </p>
+            )}
           </aside>
         )}
       </div>

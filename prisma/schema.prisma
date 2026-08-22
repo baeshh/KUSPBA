@@ -52,6 +52,8 @@ model Seminar {
   priceSpecial      Int                  @default(0)
   gradeConfig            String               @default("")
   acceptingApplications  Boolean              @default(false)
+  applicationNotice      String               @default("")
+  applicationQrUrl       String               @default("")
   description       String
   program           String
   applications      SeminarApplication[]

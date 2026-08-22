@@ -52,6 +52,8 @@ type SeminarRow = {
   priceSpecial: number;
   gradeConfig?: string;
   acceptingApplications?: boolean;
+  applicationNotice?: string;
+  applicationQrUrl?: string;
   status: string;
   type: string;
   description: string;
@@ -108,8 +110,16 @@ function Field({
 
 function ImageFields({
   initialUrl,
+  name = "imageUrl",
+  urlLabel = "대표 이미지 URL",
+  fileLabel = "대표 이미지 파일",
+  required = false,
 }: {
   initialUrl: string;
+  name?: string;
+  urlLabel?: string;
+  fileLabel?: string;
+  required?: boolean;
 }) {
   const [imageUrl, setImageUrl] = useState(initialUrl);
   const [uploading, setUploading] = useState(false);
@@ -142,14 +152,14 @@ function ImageFields({
   return (
     <>
       <Field
-        name="imageUrl"
-        label="대표 이미지 URL"
+        name={name}
+        label={urlLabel}
         value={imageUrl}
         onChange={setImageUrl}
-        required={false}
+        required={required}
       />
       <label className="block">
-        <span className="mb-1.5 block text-xs font-semibold text-[#8B95A1]">대표 이미지 파일</span>
+        <span className="mb-1.5 block text-xs font-semibold text-[#8B95A1]">{fileLabel}</span>
         <input
           type="file"
           accept="image/jpeg,image/png,image/webp,image/gif"
@@ -279,10 +289,28 @@ function SeminarFormFields({
         <span>
           <span className="block text-sm font-semibold text-[#191F28]">신청 받기</span>
           <span className="mt-1 block text-xs leading-relaxed text-[#8B95A1]">
-            체크를 해제하면 프로그램은 보이지만 신청 버튼이 비활성화됩니다. 기존 신청자는 직접 취소할 수 있습니다.
+            체크를 해제하면 프로그램은 보이지만 홈페이지 신청이 막힙니다. 아래에 구글폼 안내를 넣으면 그 문구가 대신 보입니다.
           </span>
         </span>
       </label>
+      <label className="block md:col-span-2">
+        <span className="mb-1.5 block text-xs font-semibold text-[#8B95A1]">
+          신청 안내 (신청 받기를 끈 경우 표시, 줄바꿈·URL 자동 링크)
+        </span>
+        <textarea
+          name="applicationNotice"
+          rows={6}
+          defaultValue={seminar?.applicationNotice}
+          placeholder={"이번 프로그램은 홈페이지 신청이 아닌 구글폼으로 접수합니다.\n\n아래 링크(또는 하단 QR)를 통해 신청해 주세요.\n\n▶ 신청 링크: https://forms.gle/…"}
+          className={adminInputClass}
+        />
+      </label>
+      <ImageFields
+        initialUrl={seminar?.applicationQrUrl ?? ""}
+        name="applicationQrUrl"
+        urlLabel="신청 QR 이미지 URL (선택)"
+        fileLabel="신청 QR 이미지 파일"
+      />
       <GradeConfigInputs gradeOptions={gradeOptions} defaults={seminar} />
       <label className="block">
         <span className="mb-1.5 block text-xs font-semibold text-[#8B95A1]">상태</span>

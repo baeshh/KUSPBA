@@ -101,6 +101,8 @@ export async function saveSeminar(formData: FormData) {
       priceSpecial: price(formData, "priceSpecial"),
       gradeConfig,
       acceptingApplications: formData.get("acceptingApplications") === "on",
+      applicationNotice: text(formData, "applicationNotice"),
+      applicationQrUrl: text(formData, "applicationQrUrl"),
       description: text(formData, "description"),
       program: text(formData, "program"),
     };
