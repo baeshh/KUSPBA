@@ -4,4 +4,8 @@ export type PublicAuthUser = {
   email: string | null;
   phone: string | null;
   affiliation: string | null;
+  school: string | null;
+  department: string | null;
+  academicYear: string | null;
+  profileCompleted: boolean;
 };

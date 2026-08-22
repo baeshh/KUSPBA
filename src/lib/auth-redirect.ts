@@ -12,7 +12,8 @@ export function getSafeAuthRedirect(value: string | null | undefined) {
     !decoded.startsWith("/") ||
     decoded.startsWith("//") ||
     decoded.startsWith("/api/") ||
-    decoded.startsWith("/auth/")
+    decoded.startsWith("/auth/") ||
+    decoded.startsWith("/profile/setup")
   ) {
     return "/mypage";
   }

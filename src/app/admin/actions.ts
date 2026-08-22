@@ -1,6 +1,6 @@
 "use server";
 
-import { DepositStatus, MemberGrade, MemberType, NoticeStatus, SeminarStatus, SeminarType, UserRole } from "@prisma/client";
+import { DepositStatus, MemberGrade, MembershipClaimStatus, MemberType, NoticeStatus, SeminarStatus, SeminarType, UserRole } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import {
@@ -12,6 +12,7 @@ import {
 import { prisma } from "@/lib/db";
 import { syncSeminarCapacity } from "@/lib/seminar-capacity-sync";
 import { activeApplicationWhere } from "@/lib/seminars";
+import { formatAffiliation, hasRequiredProfileFields } from "@/lib/profile";
 
 const DEFAULT_PROGRAM_IMAGE =
   "https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&q=80&w=1000";
@@ -126,18 +127,39 @@ export async function updateUser(formData: FormData) {
   const id = text(formData, "id");
   if (!id) return;
 
+  const name = text(formData, "name");
+  const school = text(formData, "school") || null;
+  const department = text(formData, "department") || null;
+  const academicYear = text(formData, "academicYear") || null;
+  const phone = text(formData, "phone") || null;
+  const affiliation =
+    text(formData, "affiliation") ||
+    (school && department ? formatAffiliation(school, department) : school || department || null);
+  const profileData = {
+    name,
+    email: text(formData, "email") || null,
+    phone,
+    school,
+    department,
+    academicYear,
+    affiliation,
+    memberType: enumValue(text(formData, "memberType"), Object.values(MemberType), MemberType.ASSOCIATE),
+    grade: enumValue(text(formData, "grade"), Object.values(MemberGrade), MemberGrade.BASIC),
+    role: enumValue(text(formData, "role"), Object.values(UserRole), UserRole.USER),
+    memo: text(formData, "memo") || null,
+    profileCompleted: hasRequiredProfileFields({
+      name,
+      phone,
+      school,
+      department,
+      academicYear,
+      affiliation,
+    }),
+  };
+
   await prisma.user.update({
     where: { id },
-    data: {
-      name: text(formData, "name"),
-      email: text(formData, "email") || null,
-      phone: text(formData, "phone") || null,
-      affiliation: text(formData, "affiliation") || null,
-      memberType: enumValue(text(formData, "memberType"), Object.values(MemberType), MemberType.ASSOCIATE),
-      grade: enumValue(text(formData, "grade"), Object.values(MemberGrade), MemberGrade.BASIC),
-      role: enumValue(text(formData, "role"), Object.values(UserRole), UserRole.USER),
-      memo: text(formData, "memo") || null,
-    },
+    data: profileData,
   });
 
   revalidatePath("/admin/members");
@@ -159,6 +181,29 @@ export async function updateMemberGradeLabels(formData: FormData) {
   revalidatePath("/admin/members");
   revalidatePath("/admin/seminars");
   revalidatePath("/seminars");
+}
+
+export async function reviewMembershipClaim(formData: FormData) {
+  await requireAdmin();
+  const id = text(formData, "id");
+  if (!id) return;
+
+  const status = enumValue(
+    text(formData, "membershipClaimStatus"),
+    Object.values(MembershipClaimStatus),
+    MembershipClaimStatus.PENDING,
+  );
+  if (status !== MembershipClaimStatus.VERIFIED && status !== MembershipClaimStatus.REJECTED) {
+    return;
+  }
+
+  await prisma.user.update({
+    where: { id },
+    data: { membershipClaimStatus: status },
+  });
+
+  revalidatePath("/admin/members");
+  revalidatePath("/mypage");
 }
 
 export async function deleteUser(formData: FormData) {

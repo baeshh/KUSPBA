@@ -21,6 +21,10 @@ export function toPublicAuthUser(user: {
   email: string | null;
   phone: string | null;
   affiliation: string | null;
+  school: string | null;
+  department: string | null;
+  academicYear: string | null;
+  profileCompleted: boolean;
 }): PublicAuthUser {
   return {
     id: user.id,
@@ -28,5 +32,9 @@ export function toPublicAuthUser(user: {
     email: user.email,
     phone: user.phone,
     affiliation: user.affiliation,
+    school: user.school,
+    department: user.department,
+    academicYear: user.academicYear,
+    profileCompleted: user.profileCompleted,
   };
 }

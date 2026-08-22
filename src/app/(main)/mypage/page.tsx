@@ -1,6 +1,5 @@
 import Link from "next/link";
-import { redirect } from "next/navigation";
-import { getCurrentUser } from "@/lib/auth";
+import { requireCompletedProfile } from "@/lib/profile";
 import { prisma } from "@/lib/db";
 import {
   getMemberGradeLabels,
@@ -16,10 +15,7 @@ export const metadata = {
 };
 
 export default async function MyPage() {
-  const user = await getCurrentUser();
-  if (!user) {
-    redirect("/api/auth/kakao/login?next=/mypage");
-  }
+  const user = await requireCompletedProfile("/mypage");
 
   const [gradeLabels, gradeOptions, applications] = await Promise.all([
     getMemberGradeLabels(),
@@ -52,6 +48,12 @@ export default async function MyPage() {
       <h1 className="mb-2 break-keep text-[26px] font-black tracking-[-0.03em] text-[#222] md:text-[40px]">
         {user.name}님, 환영합니다
       </h1>
+      {user.school || user.department || user.academicYear || user.affiliation ? (
+        <p className="mb-2 text-sm font-medium text-[#427A72]">
+          {[user.school, user.department, user.academicYear].filter(Boolean).join(" · ") ||
+            user.affiliation}
+        </p>
+      ) : null}
       <p className="mb-10 text-[#666]">
         내 신청내역과 회원 등급을 한곳에서 확인하고, 로그인과 함께 등급 신청도 할 수 있습니다.
       </p>
@@ -70,6 +72,11 @@ export default async function MyPage() {
             현재 반영된 회원 등급입니다. 프로그램 참가비에 적용됩니다.
           </p>
         )}
+        {user.alreadyMember && user.membershipClaimStatus === "PENDING" ? (
+          <p className="mt-2 text-sm font-medium text-[#427A72]">
+            기존 회원 가입 정보는 관리자 확인 대기 중입니다.
+          </p>
+        ) : null}
       </section>
 
       <section className="mb-10">
@@ -77,8 +84,10 @@ export default async function MyPage() {
           name={user.name}
           email={user.email ?? ""}
           phone={user.phone ?? ""}
-          affiliation={user.affiliation ?? ""}
-          memberType={user.memberType}
+          school={user.school ?? ""}
+          department={user.department ?? ""}
+          alreadyMember={user.alreadyMember}
+          membershipClaimStatus={user.membershipClaimStatus}
           requestedGrade={user.requestedGrade ?? ""}
           gradeOptions={selectableGrades}
           alreadyRequested={Boolean(user.requestedGrade)}

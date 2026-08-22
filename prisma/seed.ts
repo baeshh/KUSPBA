@@ -37,6 +37,19 @@ async function main() {
   const { ensureMemberGradeSettings } = await import("../src/lib/member-grades");
   await ensureMemberGradeSettings();
 
+  const { hasRequiredProfileFields } = await import("../src/lib/profile");
+  const incompleteUsers = await prisma.user.findMany({
+    where: { profileCompleted: false },
+  });
+  for (const user of incompleteUsers) {
+    if (hasRequiredProfileFields(user)) {
+      await prisma.user.update({
+        where: { id: user.id },
+        data: { profileCompleted: true },
+      });
+    }
+  }
+
   const admin = await prisma.user.upsert({
     where: { email: "admin@kuspba.org" },
     update: { role: "ADMIN" },
@@ -47,6 +60,7 @@ async function main() {
       memberType: "ASSOCIATE",
       grade: "VIP",
       role: "ADMIN",
+      profileCompleted: true,
     },
   });
 
@@ -58,9 +72,13 @@ async function main() {
       email: "member@example.com",
       phone: "010-0000-0000",
       affiliation: "한국대학교 제약공학과",
+      school: "한국대학교",
+      department: "제약공학과",
+      academicYear: "4학년",
       memberType: "ASSOCIATE",
       grade: "REGULAR",
       role: "USER",
+      profileCompleted: true,
     },
   });
 

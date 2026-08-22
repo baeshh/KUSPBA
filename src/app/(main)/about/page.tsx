@@ -81,7 +81,7 @@ export default function AboutPage() {
                 alt="KUSPBA 협회장 박찬희"
                 fill
                 sizes="220px"
-                className="object-cover object-[center_18%]"
+                className="object-cover object-center"
                 priority
               />
             </div>

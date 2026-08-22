@@ -14,6 +14,7 @@ export async function GET() {
       email: user.email,
       grade: user.grade,
       requestedGrade: user.requestedGrade,
+      profileCompleted: user.profileCompleted,
     },
   });
 }

@@ -17,7 +17,7 @@ import {
   adminInputClass,
   adminSelectClass,
 } from "@/components/admin/ui";
-import { deleteUser, updateMemberGradeLabels, updateUser } from "@/app/admin/actions";
+import { deleteUser, reviewMembershipClaim, updateMemberGradeLabels, updateUser } from "@/app/admin/actions";
 
 type GradeOption = { value: string; label: string };
 
@@ -27,19 +27,23 @@ type MemberRow = {
   email: string | null;
   phone: string | null;
   affiliation: string | null;
+  school: string | null;
+  department: string | null;
+  academicYear: string | null;
   memberType: string;
+  alreadyMember: boolean;
+  claimedJoinName: string | null;
+  claimedJoinSchool: string | null;
+  claimedJoinDepartment: string | null;
+  membershipClaimStatus: string;
   grade: string;
   requestedGrade: string | null;
   role: string;
   memo: string | null;
   applicationCount: number;
   createdAtLabel: string;
+  profileCompleted: boolean;
 };
-
-const memberTypes = [
-  ["ASSOCIATE", "협회원"],
-  ["DEPARTMENT", "학과회원"],
-];
 
 const roles = [
   ["USER", "일반"],
@@ -55,18 +59,30 @@ export function MembersAdminClient({
 }) {
   const [query, setQuery] = useState("");
   const [gradeFilter, setGradeFilter] = useState("ALL");
+  const [claimFilter, setClaimFilter] = useState("ALL");
   const [editingId, setEditingId] = useState<string | null>(null);
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
     return users.filter((user) => {
       if (gradeFilter !== "ALL" && user.grade !== gradeFilter) return false;
+      if (claimFilter === "PENDING" && user.membershipClaimStatus !== "PENDING") return false;
       if (!q) return true;
-      return [user.name, user.email, user.affiliation, user.phone]
+      return [
+        user.name,
+        user.email,
+        user.affiliation,
+        user.school,
+        user.department,
+        user.phone,
+        user.claimedJoinName,
+        user.claimedJoinSchool,
+        user.claimedJoinDepartment,
+      ]
         .filter(Boolean)
         .some((value) => String(value).toLowerCase().includes(q));
     });
-  }, [users, query, gradeFilter]);
+  }, [users, query, gradeFilter, claimFilter]);
 
   const { page, setPage, resetPage, totalPages, pageItems, pageSize } =
     useAdminPagination(filtered);
@@ -128,6 +144,17 @@ export function MembersAdminClient({
               </option>
             ))}
           </select>
+          <select
+            value={claimFilter}
+            onChange={(event) => {
+              setClaimFilter(event.target.value);
+              resetPage();
+            }}
+            className={adminSelectClass}
+          >
+            <option value="ALL">전체 확인상태</option>
+            <option value="PENDING">기존회원 확인 대기</option>
+          </select>
           <div className="flex-1" />
           <span className="text-sm font-semibold text-[#8B95A1]">{filtered.length}명</span>
         </AdminToolbar>
@@ -158,7 +185,14 @@ export function MembersAdminClient({
                     <tr className="border-b border-[#E5E8EB] hover:bg-[#F2F4F6]">
                       <td className="px-8 py-4 text-sm font-semibold">{user.name}</td>
                       <td className="px-8 py-4 text-sm text-[#4E5968]">{user.email || "-"}</td>
-                      <td className="px-8 py-4 text-sm text-[#4E5968]">{user.affiliation || "-"}</td>
+                      <td className="px-8 py-4 text-sm text-[#4E5968]">
+                        {user.school && user.department
+                          ? `${user.school} ${user.department}`
+                          : user.affiliation || "-"}
+                        {user.academicYear ? (
+                          <span className="mt-1 block text-xs text-[#8B95A1]">{user.academicYear}</span>
+                        ) : null}
+                      </td>
                       <td className="px-8 py-4 text-sm">
                         <span>{gradeLabel(user.grade)}</span>
                         {user.requestedGrade && user.requestedGrade !== user.grade ? (
@@ -166,11 +200,20 @@ export function MembersAdminClient({
                             신청 {gradeLabel(user.requestedGrade)}
                           </span>
                         ) : null}
+                        {user.alreadyMember ? (
+                          <span className="mt-1 block text-xs font-semibold text-[#C27803]">
+                            {user.membershipClaimStatus === "VERIFIED"
+                              ? "기존회원 확인됨"
+                              : user.membershipClaimStatus === "REJECTED"
+                                ? "기존회원 반려"
+                                : "기존회원 확인 대기"}
+                          </span>
+                        ) : null}
                       </td>
                       <td className="px-8 py-4 text-sm text-[#8B95A1]">{user.createdAtLabel}</td>
                       <td className="px-8 py-4">
-                        <StatusBadge tone={user.role === "ADMIN" ? "success" : "muted"}>
-                          {user.role === "ADMIN" ? "관리자" : "활성"}
+                        <StatusBadge tone={user.profileCompleted ? (user.role === "ADMIN" ? "success" : "muted") : "warning"}>
+                          {user.role === "ADMIN" ? "관리자" : user.profileCompleted ? "활성" : "정보 미입력"}
                         </StatusBadge>
                       </td>
                       <td className="px-8 py-4">
@@ -191,12 +234,11 @@ export function MembersAdminClient({
                             <input name="name" defaultValue={user.name} required className={adminInputClass} placeholder="이름" />
                             <input name="email" defaultValue={user.email ?? ""} className={adminInputClass} placeholder="이메일" />
                             <input name="phone" defaultValue={user.phone ?? ""} className={adminInputClass} placeholder="연락처" />
-                            <input name="affiliation" defaultValue={user.affiliation ?? ""} className={adminInputClass} placeholder="소속" />
-                            <select name="memberType" defaultValue={user.memberType} className={adminSelectClass}>
-                              {memberTypes.map(([value, label]) => (
-                                <option key={value} value={value}>{label}</option>
-                              ))}
-                            </select>
+                            <input name="school" defaultValue={user.school ?? ""} className={adminInputClass} placeholder="학교" />
+                            <input name="department" defaultValue={user.department ?? ""} className={adminInputClass} placeholder="학과" />
+                            <input name="academicYear" defaultValue={user.academicYear ?? ""} className={adminInputClass} placeholder="학년" />
+                            <input name="affiliation" defaultValue={user.affiliation ?? ""} className={adminInputClass} placeholder="소속(표시용)" />
+                            <input type="hidden" name="memberType" value={user.memberType} />
                             <select name="grade" defaultValue={user.grade} className={adminSelectClass}>
                               {gradeOptions.map((grade) => (
                                 <option key={grade.value} value={grade.value}>{grade.label}</option>
@@ -219,6 +261,39 @@ export function MembersAdminClient({
                               </div>
                             </div>
                           </form>
+                          {user.alreadyMember ? (
+                            <div className="mt-4 rounded-2xl border border-[#E5E8EB] bg-white p-4">
+                              <p className="mb-2 text-sm font-bold text-[#191F28]">기존 회원 확인</p>
+                              <p className="text-sm text-[#4E5968]">
+                                이름 {user.claimedJoinName || "-"} · 학교 {user.claimedJoinSchool || "-"} · 학과{" "}
+                                {user.claimedJoinDepartment || "-"}
+                              </p>
+                              <p className="mt-1 text-xs font-semibold text-[#8B95A1]">
+                                현재 상태:{" "}
+                                {user.membershipClaimStatus === "VERIFIED"
+                                  ? "확인됨"
+                                  : user.membershipClaimStatus === "REJECTED"
+                                    ? "반려"
+                                    : "확인 대기"}
+                              </p>
+                              <div className="mt-3 flex gap-2">
+                                <form action={reviewMembershipClaim}>
+                                  <input type="hidden" name="id" value={user.id} />
+                                  <input type="hidden" name="membershipClaimStatus" value="VERIFIED" />
+                                  <button type="submit" className={adminBtnPrimaryClass}>
+                                    확인
+                                  </button>
+                                </form>
+                                <form action={reviewMembershipClaim}>
+                                  <input type="hidden" name="id" value={user.id} />
+                                  <input type="hidden" name="membershipClaimStatus" value="REJECTED" />
+                                  <button type="submit" className={adminBtnOutlineClass}>
+                                    반려
+                                  </button>
+                                </form>
+                              </div>
+                            </div>
+                          ) : null}
                           <form action={deleteUser} className="mt-3 text-right">
                             <input type="hidden" name="id" value={user.id} />
                             <button type="submit" className={adminBtnDangerClass}>

@@ -5,6 +5,7 @@ import { prisma } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
 import { syncSeminarCapacity } from "@/lib/seminar-capacity-sync";
 import { findActiveUserApplication } from "@/lib/seminar-applications";
+import { formatAffiliation } from "@/lib/profile";
 
 function memberGrade(value: unknown, isMember: boolean) {
   if (!isMember) return MemberGrade.BASIC;
@@ -35,7 +36,9 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const seminarId = String(body.seminarId || "");
     const name = String(body.name || "").trim();
-    const affiliation = String(body.affiliation || "").trim();
+    const school = String(body.school || "").trim();
+    const department = String(body.department || "").trim();
+    const affiliation = formatAffiliation(school, department) || String(body.affiliation || "").trim();
     const phone = String(body.phone || "").trim();
     const email = String(body.email || "").trim();
     const isMember = Boolean(body.isMember);
@@ -49,6 +52,12 @@ export async function POST(request: NextRequest) {
     const sessionUser = await getCurrentUser();
     if (!sessionUser) {
       return NextResponse.json({ error: "로그인 후 신청해 주세요." }, { status: 401 });
+    }
+    if (!sessionUser.profileCompleted) {
+      return NextResponse.json(
+        { error: "회원정보 설정 후 신청할 수 있습니다.", code: "PROFILE_REQUIRED" },
+        { status: 403 },
+      );
     }
 
     const application = await prisma.$transaction(async (tx) => {
@@ -92,6 +101,8 @@ export async function POST(request: NextRequest) {
         data: {
           name,
           phone,
+          school: school || undefined,
+          department: department || undefined,
           affiliation,
           email,
           grade: sessionUser.grade === "BASIC" ? grade : sessionUser.grade,

@@ -22,8 +22,6 @@ type HeroSlide = {
   quoted?: boolean;
   /** 제목에 강원교육모두체 사용 — 「우리는 머뭅니다…」 슬로건만 */
   displayFont?: boolean;
-  /** 설명 둘째 줄부터 들여쓰기 */
-  descriptionIndent?: boolean;
   /** 긴 카피용: 제목 크기 축소 */
   compact?: boolean;
   /** 우측 비주얼. 없으면 협회 로고 */
@@ -39,7 +37,6 @@ const heroSlides: HeroSlide[] = [
     titleLine2: "당신이 멈추지 않도록",
     quoted: true,
     displayFont: true,
-    descriptionIndent: true,
     descriptionLine1: "학생과 현업을 잇는 가장 단단한 디딤돌,",
     descriptionLine2: "지금 KUSPBA와 함께",
     descriptionLine3: "제약·바이오의 미래를 그리세요!",
@@ -64,7 +61,7 @@ const heroSlides: HeroSlide[] = [
   },
   {
     // 배너4 — 사진4
-    titleLine1: "제약·바이오산업에 관심 있는 대학생이라면,",
+    titleLine1: "제약·바이오산업에 관심 있는 대학생이라면...",
     titleLine2: "KUSPBA와 함께해요!",
     descriptionLine1: "전국 대학(원)생과 함께하는 산업 네트워크",
     compact: true,
@@ -446,29 +443,13 @@ export default function HomePage() {
                   {currentHeroSlide.descriptionLine2 ? (
                     <>
                       <br />
-                      <span
-                        className={
-                          currentHeroSlide.descriptionIndent
-                            ? "inline-block pl-0 md:pl-8"
-                            : undefined
-                        }
-                      >
-                        {currentHeroSlide.descriptionLine2}
-                      </span>
+                      {currentHeroSlide.descriptionLine2}
                     </>
                   ) : null}
                   {currentHeroSlide.descriptionLine3 ? (
                     <>
                       <br />
-                      <span
-                        className={
-                          currentHeroSlide.descriptionIndent
-                            ? "inline-block pl-0 md:pl-8"
-                            : undefined
-                        }
-                      >
-                        {currentHeroSlide.descriptionLine3}
-                      </span>
+                      {currentHeroSlide.descriptionLine3}
                     </>
                   ) : null}
                 </p>
@@ -689,11 +670,9 @@ export default function HomePage() {
                     <br className="hidden md:block" />
                     대학생의 시선에서 산업을 해석하고,{" "}
                     <br className="hidden md:block" />
-                    <span className="inline md:inline-block md:pl-8">
-                      <strong className="font-extrabold text-[#222]">연합학술제</strong>를 통해 학계의 새로운 가능성을{" "}
-                      <br className="hidden md:block" />
-                      직접 넓혀갑니다.
-                    </span>
+                    <strong className="font-extrabold text-[#222]">연합학술제</strong>를 통해 학계의 새로운 가능성을{" "}
+                    <br className="hidden md:block" />
+                    직접 넓혀갑니다.
                   </>
                 ),
               },

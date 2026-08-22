@@ -114,7 +114,9 @@ export function ApplicationForm({
     const form = e.currentTarget;
     const formData = new FormData(form);
     const name = (formData.get("name") as string) || "";
-    const affiliation = (formData.get("affiliation") as string) || "";
+    const school = (formData.get("school") as string) || "";
+    const department = (formData.get("department") as string) || "";
+    const affiliation = `${school.trim()} ${department.trim()}`.trim();
     const phone = (formData.get("phone") as string) || "";
     const email = (formData.get("email") as string) || "";
     const submittedIsMember = formData.get("isMember") === "yes";
@@ -131,6 +133,8 @@ export function ApplicationForm({
       body: JSON.stringify({
         seminarId,
         name,
+        school,
+        department,
         affiliation,
         phone,
         email,
@@ -142,6 +146,10 @@ export function ApplicationForm({
 
     if (!response.ok) {
       const payload = (await response.json().catch(() => null)) as { error?: string; code?: string } | null;
+      if (payload?.code === "PROFILE_REQUIRED") {
+        window.location.href = `/profile/setup?next=${encodeURIComponent(`/seminars/${seminarId}`)}`;
+        return;
+      }
       alert(payload?.error || "신청 저장에 실패했습니다. 잠시 후 다시 시도해 주세요.");
       if (payload?.code === "ALREADY_APPLIED") {
         router.refresh();
@@ -217,6 +225,19 @@ export function ApplicationForm({
             카카오 로그인 후 신청하기
           </a>
         </div>
+      ) : !currentUser.profileCompleted ? (
+        <div className="rounded-2xl bg-[#F5F5F7] px-5 py-8 text-center">
+          <p className="mb-2 text-lg font-bold text-[#1D1D1F]">회원정보를 먼저 입력해 주세요</p>
+          <p className="mb-6 text-sm leading-relaxed text-[#86868B]">
+            프로그램 신청 전에 이름, 학교, 학과, 학년, 연락처를 한 번만 입력하면 됩니다.
+          </p>
+          <a
+            href={`/profile/setup?next=${encodeURIComponent(`/seminars/${seminarId}`)}`}
+            className="inline-flex items-center justify-center rounded-full bg-[#373737] px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-[#222]"
+          >
+            회원정보 입력하기
+          </a>
+        </div>
       ) : (
       <form onSubmit={handleSubmit}>
         <p className="mb-5 rounded-xl bg-[#E8F0EE] px-4 py-3 text-sm font-medium text-[#427A72]">
@@ -227,7 +248,7 @@ export function ApplicationForm({
             htmlFor="name"
             className="mb-2 block text-sm font-semibold text-[#1D1D1F]"
           >
-            이름 (입금자명)
+            이름
           </label>
           <input
             type="text"
@@ -242,17 +263,35 @@ export function ApplicationForm({
 
         <div className="mb-5">
           <label
-            htmlFor="affiliation"
+            htmlFor="school"
             className="mb-2 block text-sm font-semibold text-[#1D1D1F]"
           >
-            소속 (학교/학과)
+            학교
           </label>
           <input
             type="text"
-            id="affiliation"
-            name="affiliation"
-            placeholder="한국대학교 제약공학과"
-            defaultValue={currentUser.affiliation ?? ""}
+            id="school"
+            name="school"
+            placeholder="예: OO대학교"
+            defaultValue={currentUser.school ?? ""}
+            required
+            className="w-full rounded-xl border border-black/[0.08] bg-[#FBFBFD] px-4 py-3.5 text-[15px] text-[#1D1D1F] placeholder-[#A1A1A6] transition-all focus:border-[#427A72] focus:bg-white focus:outline-none focus:ring-4 focus:ring-[#427A72]/15"
+          />
+        </div>
+
+        <div className="mb-5">
+          <label
+            htmlFor="department"
+            className="mb-2 block text-sm font-semibold text-[#1D1D1F]"
+          >
+            학과
+          </label>
+          <input
+            type="text"
+            id="department"
+            name="department"
+            placeholder="예: 약학과"
+            defaultValue={currentUser.department ?? ""}
             required
             className="w-full rounded-xl border border-black/[0.08] bg-[#FBFBFD] px-4 py-3.5 text-[15px] text-[#1D1D1F] placeholder-[#A1A1A6] transition-all focus:border-[#427A72] focus:bg-white focus:outline-none focus:ring-4 focus:ring-[#427A72]/15"
           />

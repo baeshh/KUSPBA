@@ -1,15 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
+import { hasRequiredProfileFields } from "@/lib/profile";
 
 export async function POST(request: NextRequest) {
   try {
     const { code, redirectUri: clientRedirectUri } = await request.json();
-
     const redirectUri =
       process.env.NEXT_PUBLIC_KAKAO_REDIRECT_URI ||
       clientRedirectUri ||
       `${request.headers.get("origin") || request.nextUrl.origin}/auth/kakao/callback`;
-
     const restApiKey = process.env.KAKAO_REST_API_KEY;
     const clientSecret = process.env.KAKAO_CLIENT_SECRET;
 
@@ -20,35 +19,27 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const tokenParams = new URLSearchParams({
+    const tokenBody: Record<string, string> = {
       grant_type: "authorization_code",
       client_id: restApiKey,
       redirect_uri: redirectUri,
       code,
-    });
-
+    };
     if (clientSecret) {
-      tokenParams.append("client_secret", clientSecret);
+      tokenBody.client_secret = clientSecret;
     }
 
     const tokenRes = await fetch("https://kauth.kakao.com/oauth/token", {
       method: "POST",
-      headers: {
-        "Content-Type": "application/x-www-form-urlencoded",
-      },
-      body: tokenParams,
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: new URLSearchParams(tokenBody),
     });
 
     if (!tokenRes.ok) {
       const err = await tokenRes.text();
-
       console.error("Kakao token error:", err);
-
       return NextResponse.json(
-        {
-          error: "Token exchange failed",
-          details: err,
-        },
+        { error: "Token exchange failed", details: err },
         { status: 400 }
       );
     }
@@ -57,52 +48,43 @@ export async function POST(request: NextRequest) {
     const { access_token } = tokenData;
 
     const userRes = await fetch("https://kapi.kakao.com/v2/user/me", {
-      headers: {
-        Authorization: `Bearer ${access_token}`,
-      },
+      headers: { Authorization: `Bearer ${access_token}` },
     });
 
     if (!userRes.ok) {
-      return NextResponse.json(
-        { error: "User info fetch failed" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "User info fetch failed" }, { status: 400 });
     }
 
     const userData = await userRes.json();
-
     const kakaoId = String(userData.id);
-    const nickname =
-      userData.kakao_account?.profile?.nickname || "카카오 사용자";
-    const email = userData.kakao_account?.email || null;
+    if (!kakaoId || kakaoId === "undefined") {
+      return NextResponse.json({ error: "Kakao user id is missing" }, { status: 400 });
+    }
 
-    const existing = await prisma.user.findUnique({
-      where: { kakaoId },
-    });
+    const existing = await prisma.user.findUnique({ where: { kakaoId } });
+    let user = existing
+      ? existing
+      : await prisma.user.create({
+          data: {
+            kakaoId,
+            name: "",
+            profileCompleted: false,
+          },
+        });
 
-    const user = await prisma.user.upsert({
-      where: { kakaoId },
+    if (!user.profileCompleted && hasRequiredProfileFields(user)) {
+      user = await prisma.user.update({
+        where: { id: user.id },
+        data: { profileCompleted: true },
+      });
+    }
 
-      update: {
-        name: nickname,
-        email: email ?? undefined,
-      },
-
-      create: {
-        kakaoId,
-        name: nickname,
-        email,
-      },
-    });
+    const needsProfileSetup = !user.profileCompleted;
 
     const response = NextResponse.json({
       id: kakaoId,
-      nickname,
-      profileImage:
-        userData.kakao_account?.profile?.profile_image_url,
-      email,
       isNew: !existing,
-      needsGradeApplication: !user.requestedGrade,
+      needsProfileSetup,
     });
 
     response.cookies.set("kakao_user", kakaoId, {
@@ -116,10 +98,6 @@ export async function POST(request: NextRequest) {
     return response;
   } catch (error) {
     console.error("Kakao auth error:", error);
-
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

@@ -8,21 +8,30 @@ datasource db {
 }
 
 model User {
-  id             String               @id @default(cuid())
-  name           String
-  email          String?              @unique
-  kakaoId        String?              @unique
-  phone          String?
-  affiliation    String?
+  id               String               @id @default(cuid())
+  name             String               @default("")
+  email            String?              @unique
+  kakaoId          String?              @unique
+  phone            String?
+  school           String?
+  department       String?
+  academicYear     String?
+  affiliation      String?
+  profileCompleted Boolean              @default(false)
   memberType       MemberType           @default(ASSOCIATE)
+  alreadyMember            Boolean                 @default(false)
+  claimedJoinName          String?
+  claimedJoinSchool        String?
+  claimedJoinDepartment    String?
+  membershipClaimStatus    MembershipClaimStatus   @default(NONE)
   grade            MemberGrade          @default(BASIC)
   requestedGrade   MemberGrade?
   gradeRequestedAt DateTime?
   role             UserRole             @default(USER)
   memo             String?
-  applications   SeminarApplication[]
-  createdAt      DateTime             @default(now())
-  updatedAt      DateTime             @updatedAt
+  applications     SeminarApplication[]
+  createdAt        DateTime             @default(now())
+  updatedAt        DateTime             @updatedAt
 }
 
 model Seminar {
@@ -85,6 +94,13 @@ model Notice {
   updatedAt   DateTime     @updatedAt
 
   @@unique([pinOrder])
+}
+
+enum MembershipClaimStatus {
+  NONE
+  PENDING
+  VERIFIED
+  REJECTED
 }
 
 enum UserRole {

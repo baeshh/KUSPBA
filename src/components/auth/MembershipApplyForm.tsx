@@ -10,8 +10,10 @@ export function MembershipApplyForm({
   name,
   email,
   phone,
-  affiliation,
-  memberType,
+  school,
+  department,
+  alreadyMember,
+  membershipClaimStatus,
   requestedGrade,
   gradeOptions,
   alreadyRequested,
@@ -19,8 +21,10 @@ export function MembershipApplyForm({
   name: string;
   email: string;
   phone: string;
-  affiliation: string;
-  memberType: string;
+  school: string;
+  department: string;
+  alreadyMember: boolean;
+  membershipClaimStatus: string;
   requestedGrade: string;
   gradeOptions: GradeOption[];
   alreadyRequested: boolean;
@@ -29,6 +33,7 @@ export function MembershipApplyForm({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [joined, setJoined] = useState(alreadyMember ? "yes" : alreadyRequested ? "no" : "");
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -38,16 +43,24 @@ export function MembershipApplyForm({
 
     const form = event.currentTarget;
     const formData = new FormData(form);
+    const joinName = String(formData.get("name") || "").trim();
+    const joinSchool = String(formData.get("school") || "").trim();
+    const joinDepartment = String(formData.get("department") || "").trim();
 
     const response = await fetch("/api/auth/membership", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        affiliation: formData.get("affiliation"),
+        name: joinName,
+        school: joinSchool,
+        department: joinDepartment,
         phone: formData.get("phone"),
         email: formData.get("email"),
         requestedGrade: formData.get("requestedGrade"),
-        memberType: formData.get("memberType"),
+        alreadyMember: formData.get("alreadyMember") === "yes",
+        claimedJoinName: joinName,
+        claimedJoinSchool: joinSchool,
+        claimedJoinDepartment: joinDepartment,
       }),
     });
 
@@ -63,6 +76,15 @@ export function MembershipApplyForm({
     router.refresh();
   };
 
+  const claimStatusLabel =
+    membershipClaimStatus === "PENDING"
+      ? "기존 회원 여부는 관리자 확인 중입니다."
+      : membershipClaimStatus === "VERIFIED"
+        ? "기존 회원 정보가 확인되었습니다."
+        : membershipClaimStatus === "REJECTED"
+          ? "기존 회원 정보가 확인되지 않았습니다. 이름·학교·학과를 다시 입력해 주세요."
+          : null;
+
   return (
     <form
       onSubmit={handleSubmit}
@@ -72,8 +94,7 @@ export function MembershipApplyForm({
         {alreadyRequested ? "회원 등급 신청 수정" : "회원 등급 신청"}
       </h2>
       <p className="mb-6 text-sm leading-relaxed text-[#666]">
-        카카오 로그인과 함께 희망 회원 등급을 신청할 수 있습니다. 공식 협회원 가입서는
-        네이버 폼으로도 제출해 주세요.
+        이름·학교·학과는 프로필과 같은 항목입니다. 이미 공식 가입을 완료했다면 예로 선택한 뒤 같은 정보를 제출하면 관리자가 확인합니다.
       </p>
 
       <div className="grid gap-4 md:grid-cols-2">
@@ -81,28 +102,10 @@ export function MembershipApplyForm({
           이름
           <input
             name="name"
+            required
+            minLength={2}
             defaultValue={name}
-            readOnly
-            className="mt-1.5 w-full rounded-xl border border-black/10 bg-[#F8F9FA] px-3 py-2.5 text-sm font-medium text-[#222]"
-          />
-        </label>
-        <label className="block text-sm font-semibold text-[#444]">
-          이메일
-          <input
-            name="email"
-            type="email"
-            required
-            defaultValue={email}
-            className="mt-1.5 w-full rounded-xl border border-black/10 px-3 py-2.5 text-sm font-medium text-[#222]"
-          />
-        </label>
-        <label className="block text-sm font-semibold text-[#444]">
-          소속 (학교/학과)
-          <input
-            name="affiliation"
-            required
-            defaultValue={affiliation}
-            placeholder="예: OO대학교 약학과"
+            placeholder="실명을 입력해 주세요"
             className="mt-1.5 w-full rounded-xl border border-black/10 px-3 py-2.5 text-sm font-medium text-[#222]"
           />
         </label>
@@ -117,18 +120,51 @@ export function MembershipApplyForm({
           />
         </label>
         <label className="block text-sm font-semibold text-[#444]">
-          회원 유형
-          <select
-            name="memberType"
-            defaultValue={memberType || "ASSOCIATE"}
+          학교
+          <input
+            name="school"
+            required
+            defaultValue={school}
+            placeholder="예: OO대학교"
             className="mt-1.5 w-full rounded-xl border border-black/10 px-3 py-2.5 text-sm font-medium text-[#222]"
-          >
-            <option value="ASSOCIATE">협회원</option>
-            <option value="DEPARTMENT">학과회원</option>
-          </select>
+          />
         </label>
         <label className="block text-sm font-semibold text-[#444]">
-          희망 회원 등급
+          학과
+          <input
+            name="department"
+            required
+            defaultValue={department}
+            placeholder="예: 약학과"
+            className="mt-1.5 w-full rounded-xl border border-black/10 px-3 py-2.5 text-sm font-medium text-[#222]"
+          />
+        </label>
+        <label className="block text-sm font-semibold text-[#444]">
+          이메일
+          <input
+            name="email"
+            type="email"
+            required
+            defaultValue={email}
+            className="mt-1.5 w-full rounded-xl border border-black/10 px-3 py-2.5 text-sm font-medium text-[#222]"
+          />
+        </label>
+        <label className="block text-sm font-semibold text-[#444]">
+          이미 회원으로 가입하셨나요?
+          <select
+            name="alreadyMember"
+            required
+            value={joined}
+            onChange={(event) => setJoined(event.target.value)}
+            className="mt-1.5 w-full rounded-xl border border-black/10 px-3 py-2.5 text-sm font-medium text-[#222]"
+          >
+            <option value="">선택</option>
+            <option value="yes">예</option>
+            <option value="no">아니오</option>
+          </select>
+        </label>
+        <label className="block text-sm font-semibold text-[#444] md:col-span-2">
+          신청 회원 등급
           <select
             name="requestedGrade"
             required
@@ -145,6 +181,15 @@ export function MembershipApplyForm({
         </label>
       </div>
 
+      {joined === "yes" ? (
+        <p className="mt-4 text-sm text-[#666]">
+          위에 입력한 이름·학교·학과가 기존 회원 확인용으로 관리자에게 전달됩니다.
+        </p>
+      ) : null}
+
+      {claimStatusLabel ? (
+        <p className="mt-4 text-sm font-medium text-[#427A72]">{claimStatusLabel}</p>
+      ) : null}
       {error && <p className="mt-4 text-sm font-medium text-red-600">{error}</p>}
       {message && <p className="mt-4 text-sm font-medium text-[#427A72]">{message}</p>}
 

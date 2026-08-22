@@ -1,6 +1,7 @@
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { getCurrentUser } from "@/lib/auth";
+import { displayName } from "@/lib/profile";
 
 export default async function MainLayout({
   children,
@@ -11,7 +12,7 @@ export default async function MainLayout({
 
   return (
     <>
-      <Header currentUser={user ? { id: user.id, name: user.name } : null} />
+      <Header currentUser={user ? { id: user.id, name: displayName(user.name) } : null} />
       <main>{children}</main>
       <Footer />
     </>

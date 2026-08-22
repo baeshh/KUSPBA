@@ -33,8 +33,14 @@ function CallbackContent() {
     })
       .then(async (res) => {
         if (res.ok) {
+          const data = await res.json().catch(() => ({}));
           setStatus("success");
-          router.push(getSafeAuthRedirect(searchParams.get("state")));
+          const next = getSafeAuthRedirect(searchParams.get("state"));
+          router.push(
+            data.needsProfileSetup
+              ? `/profile/setup?next=${encodeURIComponent(next)}`
+              : next,
+          );
         } else {
           const data = await res.json().catch(() => ({}));
           console.error("Kakao auth error:", data);
