@@ -1,5 +1,4 @@
 import Link from "next/link";
-import Image from "next/image";
 import { notFound } from "next/navigation";
 import { ApplicationForm } from "@/components/seminars/ApplicationForm";
 import { prisma } from "@/lib/db";
@@ -164,24 +163,13 @@ export default async function SeminarDetailPage({ params }: SeminarDetailPagePro
             </div>
           </div>
 
-          <div className="relative mb-8 h-[220px] w-full overflow-hidden rounded-[20px] border border-black/[0.08] bg-[#E8F0EE] md:mb-10 md:h-[400px]">
-            {seminar.imageUrl.startsWith("/uploads/") ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={seminar.imageUrl}
-                alt={seminar.title}
-                className="h-full w-full object-cover"
-              />
-            ) : (
-              <Image
-                src={seminar.imageUrl}
-                alt={seminar.title}
-                fill
-                className="object-cover"
-                sizes="(max-width: 1024px) 100vw, 60vw"
-                priority
-              />
-            )}
+          <div className="relative mb-8 w-full overflow-hidden rounded-[20px] border border-black/[0.08] bg-[#E8F0EE] md:mb-10">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={seminar.imageUrl}
+              alt={seminar.title}
+              className="h-auto w-full object-contain"
+            />
           </div>
 
           <div>
