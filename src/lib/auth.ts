@@ -12,6 +12,8 @@ export async function getSessionKakaoId() {
 export async function getCurrentUser() {
   const kakaoId = await getSessionKakaoId();
   if (!kakaoId) return null;
+  const { ensureUserSchemaOnce } = await import("@/lib/ensure-user-schema");
+  await ensureUserSchemaOnce(prisma);
   return prisma.user.findUnique({ where: { kakaoId } });
 }
 

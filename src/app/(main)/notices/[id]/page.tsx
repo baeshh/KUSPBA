@@ -74,7 +74,7 @@ export default async function NoticeDetailPage({ params }: NoticeDetailPageProps
           {notice.title}
         </h1>
         <div
-          className="overflow-x-auto text-[16px] leading-relaxed text-[#555] md:text-lg [&_a]:font-bold [&_a]:text-[#427A72] [&_blockquote]:my-6 [&_blockquote]:border-l-4 [&_blockquote]:border-[#8ABFB2] [&_blockquote]:bg-[#F8F9FA] [&_blockquote]:px-5 [&_blockquote]:py-4 [&_h2]:mb-4 [&_h2]:mt-8 [&_h2]:text-2xl [&_h2]:font-black [&_h3]:mb-3 [&_h3]:mt-6 [&_h3]:text-xl [&_h3]:font-black [&_img]:my-6 [&_img]:h-auto [&_img]:max-h-[640px] [&_img]:max-w-full [&_img]:rounded-2xl [&_li]:ml-6 [&_ol]:my-4 [&_ol]:list-decimal [&_p]:my-4 [&_table]:block [&_table]:max-w-full [&_table]:overflow-x-auto [&_ul]:my-4 [&_ul]:list-disc"
+          className="overflow-x-auto text-[16px] leading-relaxed text-[#555] md:text-lg [&_a]:pointer-events-auto [&_a]:font-bold [&_a]:text-[#427A72] [&_a]:underline [&_a]:underline-offset-2 [&_blockquote]:my-6 [&_blockquote]:border-l-4 [&_blockquote]:border-[#8ABFB2] [&_blockquote]:bg-[#F8F9FA] [&_blockquote]:px-5 [&_blockquote]:py-4 [&_h2]:mb-4 [&_h2]:mt-8 [&_h2]:text-2xl [&_h2]:font-black [&_h3]:mb-3 [&_h3]:mt-6 [&_h3]:text-xl [&_h3]:font-black [&_img]:my-6 [&_img]:h-auto [&_img]:max-h-[640px] [&_img]:max-w-full [&_img]:rounded-2xl [&_li]:ml-6 [&_ol]:my-4 [&_ol]:list-decimal [&_p]:my-4 [&_table]:block [&_table]:max-w-full [&_table]:overflow-x-auto [&_ul]:my-4 [&_ul]:list-disc"
           dangerouslySetInnerHTML={{ __html: sanitizeNoticeHtml(notice.content) }}
         />
       </article>

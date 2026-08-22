@@ -1,46 +1,43 @@
 import { MemberGrade } from "@prisma/client";
 import { prisma } from "@/lib/db";
+import {
+  DEFAULT_GRADE_LABELS,
+  DEFAULT_GRADE_ORDER,
+  MEMBER_GRADE_KEYS,
+  type MemberGradeKey,
+} from "@/lib/member-grade-constants";
 
-export const MEMBER_GRADE_KEYS = [
-  MemberGrade.BASIC,
-  MemberGrade.REGULAR,
-  MemberGrade.VIP,
-  MemberGrade.PARTNER,
-  MemberGrade.SPECIAL,
-] as const;
-
-export type MemberGradeKey = (typeof MEMBER_GRADE_KEYS)[number];
-
-export const DEFAULT_GRADE_LABELS: Record<MemberGradeKey, string> = {
-  BASIC: "BASIC",
-  REGULAR: "REGULAR",
-  VIP: "VIP",
-  PARTNER: "PARTNER",
-  SPECIAL: "SPECIAL",
-};
-
-export const DEFAULT_GRADE_ORDER: Record<MemberGradeKey, number> = {
-  BASIC: 1,
-  REGULAR: 2,
-  VIP: 3,
-  PARTNER: 4,
-  SPECIAL: 5,
-};
+export {
+  DEFAULT_GRADE_LABELS,
+  DEFAULT_GRADE_ORDER,
+  GRADE_PRICE_FIELD,
+  MEMBER_GRADE_KEYS,
+  MEMBER_SELECTABLE_GRADES,
+  type MemberGradeKey,
+} from "@/lib/member-grade-constants";
 
 export async function ensureMemberGradeSettings() {
   await Promise.all(
     MEMBER_GRADE_KEYS.map((grade) =>
       prisma.memberGradeSetting.upsert({
-        where: { grade },
+        where: { grade: grade as MemberGrade },
         update: {},
         create: {
-          grade,
+          grade: grade as MemberGrade,
           label: DEFAULT_GRADE_LABELS[grade],
           sortOrder: DEFAULT_GRADE_ORDER[grade],
         },
       }),
     ),
   );
+
+  await prisma.memberGradeSetting.updateMany({
+    where: {
+      grade: MemberGrade.PARTNER,
+      label: { in: ["PARTNER", "협력학과/단과대", "협력학과"] },
+    },
+    data: { label: DEFAULT_GRADE_LABELS.PARTNER },
+  });
 }
 
 export async function getMemberGradeLabels() {
@@ -51,7 +48,7 @@ export async function getMemberGradeLabels() {
 
   const labels = { ...DEFAULT_GRADE_LABELS };
   for (const row of rows) {
-    labels[row.grade] = row.label || DEFAULT_GRADE_LABELS[row.grade];
+    labels[row.grade as MemberGradeKey] = row.label || DEFAULT_GRADE_LABELS[row.grade as MemberGradeKey];
   }
   return labels;
 }
@@ -63,15 +60,3 @@ export async function getMemberGradeOptions() {
     label: labels[grade],
   }));
 }
-
-export const GRADE_PRICE_FIELD: Record<MemberGradeKey, string> = {
-  BASIC: "priceBasic",
-  REGULAR: "priceRegular",
-  VIP: "priceVip",
-  PARTNER: "pricePartner",
-  SPECIAL: "priceSpecial",
-};
-
-export const MEMBER_SELECTABLE_GRADES = MEMBER_GRADE_KEYS.filter(
-  (grade) => grade !== MemberGrade.BASIC,
-);

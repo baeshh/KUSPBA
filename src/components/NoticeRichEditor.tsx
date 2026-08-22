@@ -1,6 +1,7 @@
 "use client";
 
 import { FormEvent, useLayoutEffect, useRef, useState } from "react";
+import { normalizeNoticeHref } from "@/lib/sanitize-notice-html";
 import {
   AdminCard,
   AdminCardBody,
@@ -83,9 +84,47 @@ export function NoticeRichEditor({ action, notice, heading, submitLabel }: Notic
   };
 
   const applyLink = () => {
-    const url = window.prompt("연결할 URL을 입력하세요.");
-    if (!url) return;
-    runCommand("createLink", url);
+    const raw = window.prompt("연결할 URL을 입력하세요. 예: https://kuspba.kr");
+    if (!raw) return;
+
+    const url = normalizeNoticeHref(raw);
+    if (!url) {
+      window.alert("http:// 또는 https://로 시작하는 올바른 URL을 입력해 주세요.");
+      return;
+    }
+
+    const editor = editorRef.current;
+    if (!editor) return;
+    editor.focus();
+
+    const selection = window.getSelection();
+    const selectedText = selection?.toString().trim() ?? "";
+    const hasRange =
+      selection &&
+      selection.rangeCount > 0 &&
+      selection.anchorNode &&
+      editor.contains(selection.anchorNode);
+
+    const anchor = document.createElement("a");
+    anchor.href = url;
+    anchor.target = "_blank";
+    anchor.rel = "noopener noreferrer";
+    anchor.textContent = selectedText || url;
+
+    if (hasRange && selectedText && selection) {
+      const range = selection.getRangeAt(0);
+      range.deleteContents();
+      range.insertNode(anchor);
+      range.setStartAfter(anchor);
+      range.collapse(true);
+      selection.removeAllRanges();
+      selection.addRange(range);
+    } else {
+      editor.appendChild(anchor);
+      editor.appendChild(document.createElement("br"));
+    }
+
+    syncHiddenContent();
   };
 
   const insertImageAtCursor = (url: string) => {
@@ -246,7 +285,7 @@ export function NoticeRichEditor({ action, notice, heading, submitLabel }: Notic
               contentEditable
               suppressContentEditableWarning
               onInput={syncHiddenContent}
-              className="min-h-[350px] px-6 py-5 text-[15px] leading-relaxed text-[#191F28] outline-none [&_a]:font-semibold [&_a]:text-[#2D6A4F] [&_blockquote]:border-l-4 [&_blockquote]:border-[#2D6A4F] [&_blockquote]:bg-[#F2F4F6] [&_blockquote]:px-4 [&_blockquote]:py-3 [&_h2]:mb-3 [&_h2]:mt-5 [&_h2]:text-xl [&_h2]:font-bold [&_img]:my-5 [&_img]:max-h-[520px] [&_img]:max-w-full [&_img]:rounded-xl [&_li]:ml-5 [&_ol]:list-decimal [&_p]:my-3 [&_ul]:list-disc"
+              className="min-h-[350px] px-6 py-5 text-[15px] leading-relaxed text-[#191F28] outline-none [&_a]:font-semibold [&_a]:text-[#2D6A4F] [&_a]:underline [&_blockquote]:border-l-4 [&_blockquote]:border-[#2D6A4F] [&_blockquote]:bg-[#F2F4F6] [&_blockquote]:px-4 [&_blockquote]:py-3 [&_h2]:mb-3 [&_h2]:mt-5 [&_h2]:text-xl [&_h2]:font-bold [&_img]:my-5 [&_img]:max-h-[520px] [&_img]:max-w-full [&_img]:rounded-xl [&_li]:ml-5 [&_ol]:list-decimal [&_p]:my-3 [&_ul]:list-disc"
             />
           </div>
 

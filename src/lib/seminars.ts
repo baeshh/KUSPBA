@@ -12,7 +12,7 @@ export const SEMINAR_GRADE_LABELS: Record<SeminarMemberGrade, string> = {
   BASIC: "BASIC",
   REGULAR: "REGULAR",
   VIP: "VIP",
-  PARTNER: "PARTNER",
+  PARTNER: "파트너단과대(경희대 생대)",
   SPECIAL: "SPECIAL",
 };
 

@@ -1,7 +1,7 @@
 "use client";
 
 import { Fragment, useMemo, useState, type ChangeEvent } from "react";
-import { GRADE_PRICE_FIELD, type MemberGradeKey } from "@/lib/member-grades";
+import { GRADE_PRICE_FIELD, type MemberGradeKey } from "@/lib/member-grade-constants";
 import {
   AdminPagination,
   useAdminPagination,

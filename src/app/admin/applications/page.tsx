@@ -1,10 +1,12 @@
 import { requireAdmin } from "@/lib/admin-auth";
 import { prisma } from "@/lib/db";
+import { ensureUserSchemaOnce } from "@/lib/ensure-user-schema";
 import { getMemberGradeLabels } from "@/lib/member-grades";
 import { ApplicationsAdminClient } from "@/components/admin/ApplicationsAdminClient";
 
 export default async function AdminApplicationsPage() {
   await requireAdmin();
+  await ensureUserSchemaOnce(prisma);
   const [applications, gradeLabels] = await Promise.all([
     prisma.seminarApplication.findMany({
       orderBy: { createdAt: "desc" },
