@@ -77,12 +77,13 @@ export default function AboutPage() {
           <div className="mx-auto w-full max-w-[200px] md:mx-0 md:max-w-none">
             <div className="relative aspect-[3/4] w-full overflow-hidden rounded-[18px] border border-black/10 bg-[#F8F9FA]">
               <Image
-                src="/chairperson-park.png"
+                src="/chairperson.jpg"
                 alt="KUSPBA 협회장 박찬희"
                 fill
                 sizes="220px"
                 className="object-cover object-center"
                 priority
+                unoptimized
               />
             </div>
             <div className="mt-4 text-left">
