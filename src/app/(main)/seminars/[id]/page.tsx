@@ -77,8 +77,8 @@ export default async function SeminarDetailPage({ params }: SeminarDetailPagePro
         목록으로 돌아가기
       </Link>
 
-      <div className="grid gap-8 lg:grid-cols-[1fr_400px] lg:gap-16">
-        <div>
+      <div className="flex flex-col gap-8 lg:grid lg:grid-cols-[1fr_400px] lg:grid-rows-[auto_1fr] lg:gap-16">
+        <div className="order-2 lg:order-none lg:col-start-1 lg:row-start-1">
           <span
             className={`mb-4 inline-block rounded-lg px-3 py-1.5 text-[13px] font-semibold ${
               recruitmentClosed
@@ -92,7 +92,7 @@ export default async function SeminarDetailPage({ params }: SeminarDetailPagePro
             {seminar.title}
           </h1>
 
-          <div className="mb-8 rounded-2xl border border-black/[0.08] bg-white p-4 md:mb-10 md:p-6">
+          <div className="rounded-2xl border border-black/[0.08] bg-white p-4 md:p-6">
             <div className="space-y-3 text-[15px]">
               <div className="flex gap-4">
                 <span className="w-20 shrink-0 font-semibold text-[#86868B]">
@@ -159,29 +159,9 @@ export default async function SeminarDetailPage({ params }: SeminarDetailPagePro
               </div>
             </div>
           </div>
-
-          <div className="relative mb-8 w-full overflow-hidden rounded-[20px] border border-black/[0.08] bg-[#E8F0EE] md:mb-10">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={seminar.imageUrl}
-              alt={seminar.title}
-              className="h-auto w-full object-contain"
-            />
-          </div>
-
-          <div>
-            <h3 className="mb-4 mt-10 text-2xl font-bold">프로그램 소개</h3>
-            <SeminarBodyText lines={seminar.description} />
-
-            {seminar.program.some((line) => line.trim()) ? (
-              <>
-                <h3 className="mb-4 mt-10 text-2xl font-bold">프로그램 안내</h3>
-                <SeminarBodyText lines={seminar.program} />
-              </>
-            ) : null}
-          </div>
         </div>
 
+        <div className="order-1 lg:order-none lg:col-start-2 lg:row-span-2 lg:row-start-1 lg:self-start">
         {!recruitmentClosed && (
           <ApplicationForm
             seminarId={seminar.id}
@@ -243,6 +223,30 @@ export default async function SeminarDetailPage({ params }: SeminarDetailPagePro
             )}
           </aside>
         )}
+        </div>
+
+        <div className="order-3 lg:order-none lg:col-start-1 lg:row-start-2">
+          <div className="relative mb-8 w-full overflow-hidden rounded-[20px] border border-black/[0.08] bg-[#E8F0EE] md:mb-10">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={seminar.imageUrl}
+              alt={seminar.title}
+              className="h-auto w-full object-contain"
+            />
+          </div>
+
+          <div>
+            <h3 className="mb-4 text-2xl font-bold">프로그램 소개</h3>
+            <SeminarBodyText lines={seminar.description} />
+
+            {seminar.program.some((line) => line.trim()) ? (
+              <>
+                <h3 className="mb-4 mt-10 text-2xl font-bold">프로그램 안내</h3>
+                <SeminarBodyText lines={seminar.program} />
+              </>
+            ) : null}
+          </div>
+        </div>
       </div>
     </main>
   );
