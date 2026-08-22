@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
+import { Prisma } from "@prisma/client";
 import { getCurrentUser } from "@/lib/auth";
 import { prisma } from "@/lib/db";
+import { ensureUserSchema } from "@/lib/ensure-user-schema";
 import {
   ACADEMIC_YEAR_OPTIONS,
   formatAffiliation,
@@ -70,28 +72,62 @@ export async function GET() {
 }
 
 export async function PUT(request: NextRequest) {
-  const user = await getCurrentUser();
-  if (!user) {
-    return NextResponse.json({ error: "로그인이 필요합니다." }, { status: 401 });
+  try {
+    await ensureUserSchema(prisma);
+
+    const user = await getCurrentUser();
+    if (!user) {
+      return NextResponse.json({ error: "로그인이 필요합니다." }, { status: 401 });
+    }
+
+    const body = (await request.json().catch(() => null)) as Record<string, unknown> | null;
+    if (!body) {
+      return NextResponse.json({ error: "잘못된 요청입니다." }, { status: 400 });
+    }
+
+    const parsed = parseProfileBody(body);
+    if ("error" in parsed) {
+      return NextResponse.json({ error: parsed.error }, { status: 400 });
+    }
+
+    if (parsed.data.email) {
+      const emailTaken = await prisma.user.findFirst({
+        where: {
+          email: parsed.data.email,
+          NOT: { id: user.id },
+        },
+        select: { id: true },
+      });
+      if (emailTaken) {
+        return NextResponse.json(
+          { error: "이미 사용 중인 이메일입니다. 다른 이메일을 입력하거나 비워 주세요." },
+          { status: 409 },
+        );
+      }
+    }
+
+    const updated = await prisma.user.update({
+      where: { id: user.id },
+      data: parsed.data,
+    });
+
+    return NextResponse.json({
+      ok: true,
+      profileCompleted: updated.profileCompleted,
+    });
+  } catch (error) {
+    console.error("Update profile error:", error);
+
+    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {
+      return NextResponse.json(
+        { error: "이미 사용 중인 이메일입니다. 다른 이메일을 입력하거나 비워 주세요." },
+        { status: 409 },
+      );
+    }
+
+    return NextResponse.json(
+      { error: "회원정보 저장에 실패했습니다. 잠시 후 다시 시도해 주세요." },
+      { status: 500 },
+    );
   }
-
-  const body = (await request.json().catch(() => null)) as Record<string, unknown> | null;
-  if (!body) {
-    return NextResponse.json({ error: "잘못된 요청입니다." }, { status: 400 });
-  }
-
-  const parsed = parseProfileBody(body);
-  if ("error" in parsed) {
-    return NextResponse.json({ error: parsed.error }, { status: 400 });
-  }
-
-  const updated = await prisma.user.update({
-    where: { id: user.id },
-    data: parsed.data,
-  });
-
-  return NextResponse.json({
-    ok: true,
-    profileCompleted: updated.profileCompleted,
-  });
 }

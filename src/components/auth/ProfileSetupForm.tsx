@@ -48,7 +48,11 @@ export function ProfileSetupForm({
     setIsSubmitting(false);
 
     if (!response.ok) {
-      setError(data.error || "회원정보 저장에 실패했습니다. 잠시 후 다시 시도해 주세요.");
+      setError(
+        typeof data.error === "string" && data.error
+          ? data.error
+          : "회원정보 저장에 실패했습니다. 잠시 후 다시 시도해 주세요.",
+      );
       return;
     }
 

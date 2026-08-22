@@ -14,20 +14,19 @@ const USER_COLUMNS: Array<[string, string]> = [
 
 let pending: Promise<void> | null = null;
 
-export async function ensureUserSchema(prisma: PrismaClient) {
-  try {
-    const columns = await prisma.$queryRawUnsafe<Array<{ name: string }>>(
-      "PRAGMA table_info(User)",
-    );
-    if (!Array.isArray(columns) || columns.length === 0) return;
+function isDuplicateColumnError(error: unknown) {
+  const message = error instanceof Error ? error.message : String(error);
+  return /duplicate column name/i.test(message);
+}
 
-    const names = new Set(columns.map((column) => column.name));
-    for (const [name, definition] of USER_COLUMNS) {
-      if (names.has(name)) continue;
+export async function ensureUserSchema(prisma: PrismaClient) {
+  for (const [name, definition] of USER_COLUMNS) {
+    try {
       await prisma.$executeRawUnsafe(`ALTER TABLE User ADD COLUMN "${name}" ${definition}`);
+    } catch (error) {
+      if (isDuplicateColumnError(error)) continue;
+      console.error(`ensureUserSchema failed for ${name}:`, error);
     }
-  } catch (error) {
-    console.error("ensureUserSchema failed:", error);
   }
 }
 
