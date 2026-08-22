@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { requireCompletedProfile } from "@/lib/profile";
+import { requireCompletedProfile } from "@/lib/profile-server";
 import { prisma } from "@/lib/db";
 import {
   getMemberGradeLabels,

@@ -1,5 +1,3 @@
-import { redirect } from "next/navigation";
-import { getCurrentUser } from "@/lib/auth";
 import { getSafeAuthRedirect } from "@/lib/auth-redirect";
 
 export const PLACEHOLDER_NAMES = new Set(["", "카카오 사용자", "미설정", "회원"]);
@@ -46,22 +44,10 @@ export function hasRequiredProfileFields(user: ProfileFields) {
   const yearOk = Boolean(user.academicYear?.trim());
 
   if (schoolAndDept && nameOk && phoneOk && yearOk) return true;
-  // 기존 회원: 학교/학과/학년이 분리 저장되지 않아도 이름·연락처·소속이 있으면 완료로 본다.
   return nameOk && phoneOk && affiliationOk;
 }
 
 export function profileSetupUrl(nextPath?: string | null) {
   const next = getSafeAuthRedirect(nextPath);
   return `/profile/setup?next=${encodeURIComponent(next)}`;
-}
-
-export async function requireCompletedProfile(nextPath: string) {
-  const user = await getCurrentUser();
-  if (!user) {
-    redirect(`/api/auth/kakao/login?next=${encodeURIComponent(nextPath)}`);
-  }
-  if (!user.profileCompleted) {
-    redirect(profileSetupUrl(nextPath));
-  }
-  return user;
 }
