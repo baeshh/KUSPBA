@@ -61,8 +61,8 @@ const heroSlides: HeroSlide[] = [
   },
   {
     // 배너4 — 사진4
-    titleLine1: "제약·바이오산업에 관심 있는 대학생이라면...",
-    titleLine2: "KUSPBA와 함께해요!",
+    titleLine1: "제약·바이오산업에 관심 있는 대학생이라면",
+    titleLine2: "함께해요!",
     descriptionLine1: "전국 대학(원)생과 함께하는 산업 네트워크",
     compact: true,
     imageSrc: "/hero/banner-4.png",

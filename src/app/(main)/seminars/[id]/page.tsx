@@ -13,6 +13,7 @@ import {
   serializeSeminarList,
 } from "@/lib/seminars";
 import { RemainingCapacity } from "@/components/seminars/RemainingCapacity";
+import { SeminarBodyText } from "@/components/seminars/SeminarBodyText";
 import { getCurrentUser, toPublicAuthUser } from "@/lib/auth";
 import { findActiveUserApplication } from "@/lib/seminar-applications";
 
@@ -185,24 +186,14 @@ export default async function SeminarDetailPage({ params }: SeminarDetailPagePro
 
           <div>
             <h3 className="mb-4 mt-10 text-2xl font-bold">세미나 소개</h3>
-            <div className="space-y-4">
-              {seminar.description.map((paragraph, i) => (
-                <p key={i} className="text-base leading-relaxed text-[#86868B]">
-                  {paragraph}
-                </p>
-              ))}
-            </div>
+            <SeminarBodyText lines={seminar.description} />
 
-            {seminar.program.length > 0 && (
+            {seminar.program.some((line) => line.trim()) ? (
               <>
                 <h3 className="mb-4 mt-10 text-2xl font-bold">프로그램 안내</h3>
-                <ul className="list-disc space-y-2 pl-5 text-[16px] leading-relaxed text-[#86868B]">
-                  {seminar.program.map((item, i) => (
-                    <li key={i}>{item}</li>
-                  ))}
-                </ul>
+                <SeminarBodyText lines={seminar.program} />
               </>
-            )}
+            ) : null}
           </div>
         </div>
 

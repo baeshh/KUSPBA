@@ -321,8 +321,8 @@ export function serializeSeminarList(items: Array<{
         pricePartner: item.pricePartner,
         priceSpecial: item.priceSpecial ?? 0,
       },
-      description: item.description.split("\n").filter(Boolean),
-      program: item.program.split("\n").filter(Boolean),
+      description: item.description.split(/\r?\n/),
+      program: item.program.split(/\r?\n/),
       ...getSeminarCapacityInfo(item.capacity, appliedCount),
     };
   });

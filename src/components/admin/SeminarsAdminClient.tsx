@@ -266,20 +266,20 @@ function SeminarFormFields({
         </select>
       </label>
       <label className="block md:col-span-2">
-        <span className="mb-1.5 block text-xs font-semibold text-[#8B95A1]">소개 문단(줄바꿈 구분)</span>
+        <span className="mb-1.5 block text-xs font-semibold text-[#8B95A1]">소개 (줄바꿈 그대로 표시, URL은 자동 링크)</span>
         <textarea
           name="description"
           required
-          rows={3}
+          rows={8}
           defaultValue={seminar?.description}
           className={adminInputClass}
         />
       </label>
       <label className="block md:col-span-2">
-        <span className="mb-1.5 block text-xs font-semibold text-[#8B95A1]">프로그램 안내(줄바꿈 구분)</span>
+        <span className="mb-1.5 block text-xs font-semibold text-[#8B95A1]">프로그램 안내 (줄바꿈 그대로 표시, - 또는 * 로 시작하면 목록, URL은 자동 링크)</span>
         <textarea
           name="program"
-          rows={3}
+          rows={10}
           defaultValue={seminar?.program}
           className={adminInputClass}
         />
