@@ -27,6 +27,7 @@ export function toPublicAuthUser(user: {
   department: string | null;
   academicYear: string | null;
   profileCompleted: boolean;
+  grade: string;
 }): PublicAuthUser {
   return {
     id: user.id,
@@ -38,5 +39,6 @@ export function toPublicAuthUser(user: {
     department: user.department,
     academicYear: user.academicYear,
     profileCompleted: user.profileCompleted,
+    grade: user.grade,
   };
 }

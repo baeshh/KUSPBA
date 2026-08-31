@@ -29,7 +29,10 @@ export function ProgramCard({
   remainingSeats = null,
   isFull = false,
 }: ProgramCardProps) {
-  const isClosed = status === "closed" || status === "ended" || isFull;
+  const isEnded = status === "closed" || status === "ended";
+  const isCapacityFull = isFull && !isEnded;
+  const isClosed = isEnded || isCapacityFull;
+  const statusLabel = isEnded ? "마감" : isCapacityFull ? "정원 마감" : "모집 중";
   const localUpload = isLocalUpload(imageUrl);
   const remainingLabel =
     remainingSeats === null
@@ -76,12 +79,14 @@ export function ProgramCard({
         <div className="flex flex-1 flex-col p-5">
           <span
             className={`mb-3 self-start rounded-md px-2.5 py-1 text-xs font-semibold ${
-              isClosed
+              isEnded
                 ? "bg-[#F5F5F7] text-[#A1A1A6]"
-                : "bg-[#427A72]/10 text-[#427A72]"
+                : isCapacityFull
+                  ? "bg-[#FFF4ED] text-[#C2410C]"
+                  : "bg-[#427A72]/10 text-[#427A72]"
             }`}
           >
-            {isClosed ? "마감" : "모집 중"}
+            {statusLabel}
           </span>
           <h3 className={`mb-2 text-[18px] font-semibold leading-snug md:text-xl ${isClosed ? "opacity-60" : ""}`}>
             {title}

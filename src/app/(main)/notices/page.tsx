@@ -5,6 +5,9 @@ import {
   extractNoticeThumbnail,
   isRecentNotice,
 } from "@/lib/notice-thumbnail";
+import { buildPageMetadata } from "@/lib/seo";
+
+export const metadata = buildPageMetadata("notices");
 
 const PAGE_SIZE = 9;
 

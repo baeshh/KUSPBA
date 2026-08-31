@@ -14,6 +14,7 @@ import { RemainingCapacity } from "@/components/seminars/RemainingCapacity";
 import { SeminarBodyText } from "@/components/seminars/SeminarBodyText";
 import { getCurrentUser, toPublicAuthUser } from "@/lib/auth";
 import { findActiveUserApplication } from "@/lib/seminar-applications";
+import { buildSeminarMetadata } from "@/lib/seo";
 
 export const dynamic = "force-dynamic";
 
@@ -24,9 +25,10 @@ interface SeminarDetailPageProps {
 export async function generateMetadata({ params }: SeminarDetailPageProps) {
   const { id } = await params;
   const seminar = await prisma.seminar.findUnique({ where: { id } });
-  return {
-    title: seminar ? `${seminar.title} | KUSPBA` : "프로그램 상세 | KUSPBA",
-  };
+  if (!seminar) {
+    return buildSeminarMetadata({ title: "프로그램 상세", type: "" });
+  }
+  return buildSeminarMetadata({ title: seminar.title, type: seminar.type });
 }
 
 export default async function SeminarDetailPage({ params }: SeminarDetailPageProps) {
@@ -50,10 +52,13 @@ export default async function SeminarDetailPage({ params }: SeminarDetailPagePro
     : null;
   const isClosed = seminar.status === "closed" || seminar.status === "ended";
   const notAccepting = !seminar.acceptingApplications;
+  const isCapacityFull = seminar.isFull && !isClosed;
   const recruitmentClosed = (isClosed || notAccepting || seminar.isFull) && !existingApplication;
   const gradeOptions = buildSeminarGradeOptions(seminar.prices, gradeLabels, seminar.gradeConfig);
   const hasGradePrices = hasSeminarGradePrices(seminar.prices, seminar.gradeConfig);
   const gradePrices = gradeOptions.filter((option) => option.enabled);
+  const userGrade = currentUser?.grade ?? "BASIC";
+  const userGradeLabel = gradeLabels[userGrade as keyof typeof gradeLabels] ?? userGrade;
 
   return (
     <main className="mx-auto max-w-[1200px] px-4 pb-16 pt-[calc(var(--header-offset)+20px)] sm:px-6 md:pb-20 md:pt-[120px]">
@@ -81,12 +86,22 @@ export default async function SeminarDetailPage({ params }: SeminarDetailPagePro
         <div className="order-2 lg:order-none lg:col-start-1 lg:row-start-1">
           <span
             className={`mb-4 inline-block rounded-lg px-3 py-1.5 text-[13px] font-semibold ${
-              recruitmentClosed
+              isClosed
                 ? "bg-[#F5F5F7] text-[#A1A1A6]"
-                : "bg-[#427A72]/10 text-[#427A72]"
+                : isCapacityFull
+                  ? "bg-[#FFF4ED] text-[#C2410C]"
+                  : notAccepting
+                    ? "bg-[#F5F5F7] text-[#A1A1A6]"
+                    : "bg-[#427A72]/10 text-[#427A72]"
             }`}
           >
-            {recruitmentClosed ? "마감" : "모집 중"}
+            {isClosed
+              ? "마감"
+              : isCapacityFull
+                ? "정원 마감"
+                : notAccepting
+                  ? "신청 중지"
+                  : "모집 중"}
           </span>
           <h1 className="mb-5 break-keep text-[26px] font-bold leading-tight md:mb-6 md:text-[40px]">
             {seminar.title}
@@ -177,6 +192,7 @@ export default async function SeminarDetailPage({ params }: SeminarDetailPagePro
             hasFee={hasGradePrices || seminar.fee.includes("원")}
             hasGradePrices={hasGradePrices}
             gradeOptions={gradeOptions}
+            userGradeLabel={userGradeLabel}
             capacity={seminar.capacity}
             appliedCount={seminar.appliedCount}
             remainingSeats={seminar.remainingSeats}

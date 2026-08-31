@@ -17,6 +17,7 @@ export function CompletionCard({
   hasFee,
 }: CompletionCardProps) {
   const [copied, setCopied] = useState(false);
+  const feeAmount = parseInt(amount, 10);
 
   const handleCopy = async () => {
     try {
@@ -46,12 +47,16 @@ export function CompletionCard({
         </svg>
       </div>
 
-      <h1 className="mb-3 break-keep text-[22px] font-bold md:text-[28px]">신청서가 접수되었습니다.</h1>
-      <p className="mb-8 text-base text-[#86868B]">
-        참가비 입금이 완료되어야 최종 신청이 확정됩니다.
+      <h1 className="mb-3 break-keep text-[22px] font-bold md:text-[28px]">
+        신청이 접수되었습니다
+      </h1>
+      <p className="mb-8 text-base leading-relaxed text-[#86868B]">
+        {hasFee && feeAmount > 0
+          ? "아래 계좌로 참가비를 입금해 주시면, 관리자 확인 후 최종 신청이 완료됩니다."
+          : "별도 입금 없이 신청이 접수되었습니다."}
       </p>
 
-        {hasFee && parseInt(amount, 10) > 0 ? (
+      {hasFee && feeAmount > 0 ? (
         <div className="mb-8 rounded-2xl border border-black/[0.08] bg-[#FBFBFD] p-6 text-left">
           <h3 className="mb-4 flex items-center gap-2 text-[15px] font-semibold text-[#427A72]">
             <svg
@@ -65,13 +70,13 @@ export function CompletionCard({
               <rect x="2" y="5" width="20" height="14" rx="2" />
               <line x1="2" y1="10" x2="22" y2="10" />
             </svg>
-            입금 정보 안내
+            입금 안내
           </h3>
           <div className="space-y-3 text-[15px]">
             <div className="flex justify-between">
               <span className="text-[#86868B]">입금할 금액</span>
               <span className="text-lg font-semibold text-[#427A72]">
-                {parseInt(amount, 10).toLocaleString()}원
+                {feeAmount.toLocaleString()}원
               </span>
             </div>
             <div className="border-t border-dashed border-black/[0.08] pt-4">
@@ -112,38 +117,37 @@ export function CompletionCard({
       )}
 
       <ul className="mb-8 rounded-xl bg-[#F5F5F7] p-4 text-left text-[13px] text-[#86868B]">
-        {hasFee && parseInt(amount, 10) > 0 && (
+        {hasFee && feeAmount > 0 && (
           <li className="mb-1.5 ml-4">
             반드시{" "}
             <strong className="text-[#1D1D1F]">
               신청자 본인 명의({applicantName})
             </strong>
-            로 입금해 주시기 바랍니다.
+            로 입금해 주세요.
           </li>
         )}
         <li className="mb-1.5 ml-4">
-          입금 확인은 관리자가 수동으로 진행하며, 1~2일 내에 마이페이지에서
-          &apos;신청 완료&apos; 상태로 변경됩니다.
+          입금 확인은 관리자가 수동으로 진행하며, 마이페이지에서 상태를 확인할 수 있습니다.
         </li>
-        {hasFee && parseInt(amount, 10) > 0 && (
+        {hasFee && feeAmount > 0 && (
           <li className="ml-4">
-            신청 후 24시간 내 미입금 시 신청이 자동 취소될 수 있습니다.
+            입금 확인 전까지는 &apos;입금 대기&apos; 상태로 표시됩니다.
           </li>
         )}
       </ul>
 
       <div className="flex flex-col gap-3 sm:flex-row">
         <Link
-          href="/"
+          href="/mypage"
           className="flex-1 rounded-xl border border-black/[0.08] px-4 py-4 text-center text-[15px] font-semibold transition-colors hover:bg-[#FBFBFD]"
         >
-          메인으로 가기
+          마이페이지 보기
         </Link>
         <Link
           href="/seminars"
           className="flex-1 rounded-xl bg-[#1D1D1F] px-4 py-4 text-center text-[15px] font-semibold text-white transition-colors hover:bg-black"
         >
-          프로그램 목록 보기
+          프로그램 목록
         </Link>
       </div>
     </div>

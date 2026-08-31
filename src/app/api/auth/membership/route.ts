@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
-import { MemberGrade, MembershipClaimStatus } from "@prisma/client";
+import { MemberGrade } from "@prisma/client";
 import { getCurrentUser } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { MEMBER_SELECTABLE_GRADES } from "@/lib/member-grades";
 import { formatAffiliation, isPlaceholderName } from "@/lib/profile";
+import { formatPhone, normalizeEmail } from "@/lib/format";
 
 export async function POST(request: NextRequest) {
   const user = await getCurrentUser();
@@ -17,14 +18,20 @@ export async function POST(request: NextRequest) {
     );
   }
 
+  if (user.gradeRequestedAt) {
+    return NextResponse.json(
+      { error: "회원 등급은 최초 1회 신청 후 변경할 수 없습니다." },
+      { status: 403 },
+    );
+  }
+
   const body = await request.json().catch(() => ({}));
   const name = String(body.name || user.name || "").trim();
   const school = String(body.school || user.school || "").trim();
   const department = String(body.department || user.department || "").trim();
-  const phone = String(body.phone || "").trim();
-  const email = String(body.email || user.email || "").trim();
+  const phone = formatPhone(String(body.phone || "").trim());
+  const email = normalizeEmail(String(body.email || user.email || "").trim());
   const requestedGrade = body.requestedGrade as MemberGrade;
-  const alreadyMember = Boolean(body.alreadyMember);
   const affiliation = formatAffiliation(school, department);
 
   if (isPlaceholderName(name) || name.length < 2) {
@@ -38,22 +45,6 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "신청할 회원 등급을 선택해 주세요." }, { status: 400 });
   }
 
-  const claimedJoinName = alreadyMember ? name : null;
-  const claimedJoinSchool = alreadyMember ? school : null;
-  const claimedJoinDepartment = alreadyMember ? department : null;
-
-  const claimUnchanged =
-    user.alreadyMember &&
-    user.claimedJoinName === claimedJoinName &&
-    user.claimedJoinSchool === claimedJoinSchool &&
-    user.claimedJoinDepartment === claimedJoinDepartment;
-
-  const membershipClaimStatus = alreadyMember
-    ? claimUnchanged && user.membershipClaimStatus === MembershipClaimStatus.VERIFIED
-      ? MembershipClaimStatus.VERIFIED
-      : MembershipClaimStatus.PENDING
-    : MembershipClaimStatus.NONE;
-
   const updated = await prisma.user.update({
     where: { id: user.id },
     data: {
@@ -63,19 +54,20 @@ export async function POST(request: NextRequest) {
       affiliation,
       phone,
       email,
-      requestedGrade,
+      grade: requestedGrade,
+      requestedGrade: null,
       gradeRequestedAt: new Date(),
-      alreadyMember,
-      claimedJoinName,
-      claimedJoinSchool,
-      claimedJoinDepartment,
-      membershipClaimStatus,
+      alreadyMember: false,
+      claimedJoinName: null,
+      claimedJoinSchool: null,
+      claimedJoinDepartment: null,
+      membershipClaimStatus: "NONE",
     },
   });
 
   return NextResponse.json({
     ok: true,
-    requestedGrade: updated.requestedGrade,
-    membershipClaimStatus: updated.membershipClaimStatus,
+    grade: updated.grade,
+    gradeRequestedAt: updated.gradeRequestedAt,
   });
 }

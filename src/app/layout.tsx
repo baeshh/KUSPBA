@@ -1,10 +1,9 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
+import { buildPageMetadata } from "@/lib/seo";
 
 export const metadata: Metadata = {
-  title: "KUSPBA | 한국대학생제약바이오산업협회",
-  description:
-    "전국 유일의 대학생제약바이오산업협회. 세미나 신청, 교육 프로그램, 협회원 관리.",
+  ...buildPageMetadata("home"),
   icons: {
     icon: "/logo-symbol.png",
     apple: "/logo-symbol.png",

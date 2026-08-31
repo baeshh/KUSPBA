@@ -1,10 +1,8 @@
 import Link from "next/link";
 import Image from "next/image";
+import { buildPageMetadata } from "@/lib/seo";
 
-export const metadata = {
-  title: "협회 소개 | KUSPBA",
-  description: "전국 유일의 대학생제약바이오산업협회 KUSPBA. 연결, 개척, 토대의 가치로 세상을 잇습니다.",
-};
+export const metadata = buildPageMetadata("about");
 
 export default function AboutPage() {
   return (
@@ -46,7 +44,7 @@ export default function AboutPage() {
 
       <section className="mb-14 md:mb-24">
         <span className="mb-4 block text-sm font-bold uppercase tracking-wider text-[#427A72]">
-          Our Message
+          Our message
         </span>
         <h2 className="mb-6 font-gangwon text-3xl font-bold tracking-[-0.02em]">
           &quot;우리는 머뭅니다, 당신이 멈추지 않도록&quot;
@@ -65,13 +63,13 @@ export default function AboutPage() {
           <strong className="font-bold text-[#373737]">
             &quot;어떤 존재로 살아갈 것인가&quot;
           </strong>
-          에 대한 질문이자, 대학생인 우리가 그 해답을 만들어가는 여정입니다.
+          에 대한 질문이자, 대학생인 우리가 그 해답을 만들어 가는 여정입니다.
         </p>
       </section>
 
       <section className="mb-14 md:mb-24">
         <span className="mb-4 block text-sm font-bold uppercase tracking-wider text-[#427A72]">
-          Chairperson Message
+          Chairperson message
         </span>
         <div className="grid items-start gap-6 rounded-[24px] border border-black/[0.08] bg-white p-5 md:grid-cols-[200px_1fr] md:gap-8 md:rounded-[28px] md:p-10 lg:grid-cols-[220px_1fr]">
           <div className="mx-auto w-full max-w-[200px] md:mx-0 md:max-w-none">
@@ -139,7 +137,7 @@ export default function AboutPage() {
 
       <section className="mb-14 md:mb-24">
         <span className="mb-4 block text-sm font-bold uppercase tracking-wider text-[#427A72]">
-          Core Values
+          Core values
         </span>
         <h2 className="mb-6 text-[24px] font-bold md:mb-10 md:text-3xl">
           KUSPBA가 추구하는 세 가지 가치
@@ -178,10 +176,10 @@ export default function AboutPage() {
       <section className="mb-14 md:mb-24">
         <div className="rounded-[24px] border border-black/[0.08] bg-white px-5 py-10 text-center shadow-[0_20px_40px_rgba(0,0,0,0.02)] md:rounded-[32px] md:px-14 md:py-14">
           <span className="mb-4 flex justify-center text-sm font-bold uppercase tracking-wider text-[#427A72]">
-            Our Philosophy
+            Our philosophy
           </span>
           <h3 className="mb-5 break-keep text-[22px] font-bold md:text-[28px]">
-            &ldquo;모든 것은 가치에서 출발합니다.&rdquo;
+            모든 것은 가치에서 출발합니다.
           </h3>
           <p className="mb-6 break-keep text-[15px] leading-relaxed text-[#86868B] md:text-base">
             KUSPBA의 마스코트는 모두 협회의 가치에서 태어났습니다.

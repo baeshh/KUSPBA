@@ -8,14 +8,16 @@ import {
   formatAffiliation,
   isPlaceholderName,
 } from "@/lib/profile";
+import { formatPhone, normalizeEmail } from "@/lib/format";
 
 function parseProfileBody(body: Record<string, unknown>) {
   const name = String(body.name || "").trim();
   const school = String(body.school || "").trim();
   const department = String(body.department || "").trim();
   const academicYear = String(body.academicYear || "").trim();
-  const phone = String(body.phone || "").trim();
-  const email = String(body.email || "").trim();
+  const phone = formatPhone(String(body.phone || "").trim());
+  const emailRaw = String(body.email || "").trim();
+  const email = emailRaw ? normalizeEmail(emailRaw) : "";
 
   if (isPlaceholderName(name) || name.length < 2) {
     return { error: "이름을 입력해 주세요." };

@@ -7,10 +7,9 @@ export const ACADEMIC_YEAR_OPTIONS = [
   "2학년",
   "3학년",
   "4학년",
-  "5학년",
-  "6학년",
-  "대학원",
-  "기타",
+  "5학년 이상",
+  "졸업·수료",
+  "휴학",
 ] as const;
 
 export type ProfileFields = {

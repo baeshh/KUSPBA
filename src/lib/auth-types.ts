@@ -8,4 +8,5 @@ export type PublicAuthUser = {
   department: string | null;
   academicYear: string | null;
   profileCompleted: boolean;
+  grade: string;
 };

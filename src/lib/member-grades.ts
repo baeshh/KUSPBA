@@ -34,10 +34,20 @@ export async function ensureMemberGradeSettings() {
   await prisma.memberGradeSetting.updateMany({
     where: {
       grade: MemberGrade.PARTNER,
-      label: { in: ["PARTNER", "협력학과/단과대", "협력학과"] },
+      label: { in: ["PARTNER", "협력학과/단과대", "협력학과", "파트너단과대(경희대 생대)"] },
     },
     data: { label: DEFAULT_GRADE_LABELS.PARTNER },
   });
+
+  for (const grade of MEMBER_GRADE_KEYS) {
+    await prisma.memberGradeSetting.updateMany({
+      where: {
+        grade: grade as MemberGrade,
+        label: { in: ["BASIC", "REGULAR", "VIP", "SPECIAL", "PARTNER"] },
+      },
+      data: { label: DEFAULT_GRADE_LABELS[grade] },
+    });
+  }
 }
 
 export async function getMemberGradeLabels() {

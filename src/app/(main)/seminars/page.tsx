@@ -2,6 +2,8 @@ import Link from "next/link";
 import { SeminarsList } from "@/components/seminars/SeminarsList";
 import { prisma } from "@/lib/db";
 import { seminarActiveApplicationCountInclude, serializeSeminarList } from "@/lib/seminars";
+import { buildPageMetadata, type PageSeoKey } from "@/lib/seo";
+import type { Metadata } from "next";
 
 export const dynamic = "force-dynamic";
 
@@ -10,6 +12,21 @@ const VALUE_LABELS: Record<string, string> = {
   pioneer: "개척",
   foundation: "토대",
 };
+
+const VALUE_SEO: Record<string, PageSeoKey> = {
+  foundation: "didimdol",
+  connection: "jobSeminar",
+};
+
+export async function generateMetadata({
+  searchParams,
+}: {
+  searchParams: Promise<{ value?: string }>;
+}): Promise<Metadata> {
+  const { value } = await searchParams;
+  const key = value ? VALUE_SEO[value] ?? "programs" : "programs";
+  return buildPageMetadata(key);
+}
 
 export default async function SeminarsPage({
   searchParams,

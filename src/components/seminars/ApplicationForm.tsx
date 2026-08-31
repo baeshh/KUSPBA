@@ -17,6 +17,7 @@ interface ApplicationFormProps {
   hasFee?: boolean;
   hasGradePrices?: boolean;
   gradeOptions?: SeminarGradeOption[];
+  userGradeLabel?: string;
   capacity?: string;
   appliedCount?: number;
   remainingSeats?: number | null;
@@ -32,6 +33,7 @@ export function ApplicationForm({
   hasFee = true,
   hasGradePrices = false,
   gradeOptions = [],
+  userGradeLabel = "비협회원",
   capacity = "",
   appliedCount = 0,
   remainingSeats = null,
@@ -41,13 +43,8 @@ export function ApplicationForm({
   existingApplicationId = null,
 }: ApplicationFormProps) {
   const enabledOptions = gradeOptions.filter((option) => option.enabled);
-  const basicOption = enabledOptions.find((option) => option.grade === "BASIC");
-  const memberOptions = enabledOptions.filter((option) => option.grade !== "BASIC");
+  const userGrade = (currentUser?.grade ?? "BASIC") as SeminarMemberGrade;
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isMember, setIsMember] = useState(Boolean(memberOptions.length && !basicOption));
-  const [memberGrade, setMemberGrade] = useState<SeminarMemberGrade>(
-    basicOption ? "BASIC" : (memberOptions[0]?.grade ?? "BASIC"),
-  );
   const [liveAppliedCount, setLiveAppliedCount] = useState(appliedCount);
   const [liveRemainingSeats, setLiveRemainingSeats] = useState(remainingSeats);
   const [liveCapacityLimit, setLiveCapacityLimit] = useState(capacityLimit);
@@ -98,13 +95,16 @@ export function ApplicationForm({
       window.clearInterval(timer);
     };
   }, [seminarId, router]);
-  const selectedOption = enabledOptions.find((option) => option.grade === memberGrade);
+
+  const selectedOption = enabledOptions.find((option) => option.grade === userGrade);
   const amount = hasGradePrices
     ? selectedOption?.price ?? 0
-    : hasFee && !isMember
+    : hasFee
       ? Number(fee.replace(/[^0-9]/g, "") || "10000")
       : 0;
-  const displayFee = hasGradePrices ? formatSeminarPrice(amount) : fee;
+  const displayFee = hasGradePrices
+    ? formatSeminarPrice(amount)
+    : fee;
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -118,14 +118,7 @@ export function ApplicationForm({
     const affiliation = `${school.trim()} ${department.trim()}`.trim();
     const phone = (formData.get("phone") as string) || "";
     const email = (formData.get("email") as string) || "";
-    const submittedIsMember = formData.get("isMember") === "yes";
-    const submittedGrade = (formData.get("memberGrade") as SeminarMemberGrade | null) ?? "BASIC";
-    const submittedOption = enabledOptions.find((option) => option.grade === submittedGrade);
-    const depositAmount = hasGradePrices
-      ? submittedOption?.price ?? 0
-      : hasFee && !submittedIsMember
-        ? Number(fee.replace(/[^0-9]/g, "") || "10000")
-        : 0;
+    const depositAmount = amount;
 
     const response = await fetch("/api/seminar-applications", {
       method: "POST",
@@ -138,8 +131,6 @@ export function ApplicationForm({
         affiliation,
         phone,
         email,
-        isMember: submittedIsMember,
-        memberGrade: submittedGrade,
         depositAmount,
       }),
     });
@@ -329,90 +320,22 @@ export function ApplicationForm({
             placeholder="example@email.com"
             defaultValue={currentUser.email ?? ""}
             required
-            className="w-full rounded-xl border border-black/[0.08] bg-[#FBFBFD] px-4 py-3.5 text-[15px] text-[#1D1D1F] placeholder-[#A1A1A6] transition-all focus:border-[#427A72] focus:bg-white focus:outline-none focus:ring-4 focus:ring-[#427A72]/15"
+            className="w-full rounded-xl border border-black/[0.08] bg-[#FBFBFD] px-4 py-3.5 text-[15px] lowercase text-[#1D1D1F] placeholder-[#A1A1A6] transition-all focus:border-[#427A72] focus:bg-white focus:outline-none focus:ring-4 focus:ring-[#427A72]/15"
           />
         </div>
 
-        <div className="mb-6">
-          <label className="mb-2 block text-sm font-semibold text-[#1D1D1F]">
-            협회원 여부
-          </label>
-          <div className="flex flex-wrap gap-x-5 gap-y-3">
-            {memberOptions.length > 0 ? (
-              <label className="flex min-h-11 cursor-pointer items-center gap-2 text-[15px]">
-                <input
-                  type="radio"
-                  name="isMember"
-                  value="yes"
-                  required
-                  checked={isMember}
-                  onChange={() => {
-                    setIsMember(true);
-                    setMemberGrade(memberOptions[0]?.grade ?? "REGULAR");
-                  }}
-                  className="h-[18px] w-[18px] accent-[#427A72]"
-                />
-                협회원
-              </label>
+        <div className="mb-6 rounded-xl bg-[#F5F5F7] px-4 py-3">
+          <p className="text-[13px] font-medium text-[#86868B]">적용 회원 등급</p>
+          <p className="mt-1 text-[15px] font-bold text-[#1D1D1F]">
+            {userGradeLabel}
+            {hasFee ? (
+              <span className="ml-2 font-semibold text-[#427A72]">({displayFee})</span>
             ) : null}
-            {basicOption ? (
-              <label className="flex min-h-11 cursor-pointer items-center gap-2 text-[15px]">
-                <input
-                  type="radio"
-                  name="isMember"
-                  value="no"
-                  checked={!isMember}
-                  onChange={() => {
-                    setIsMember(false);
-                    setMemberGrade("BASIC");
-                  }}
-                  className="h-[18px] w-[18px] accent-[#427A72]"
-                />
-                {basicOption.label} ({hasGradePrices ? formatSeminarPrice(basicOption.price) : fee})
-              </label>
-            ) : null}
-          </div>
-        </div>
-
-        {isMember && memberOptions.length > 0 && (
-          <label className="mb-6 block">
-            <span className="mb-2 block text-sm font-semibold text-[#1D1D1F]">
-              회원 등급
-            </span>
-            <select
-              name="memberGrade"
-              value={memberGrade}
-              onChange={(event) => setMemberGrade(event.target.value as SeminarMemberGrade)}
-              className="w-full rounded-xl border border-black/[0.08] bg-[#FBFBFD] px-4 py-3.5 text-[15px] text-[#1D1D1F] transition-all focus:border-[#427A72] focus:bg-white focus:outline-none focus:ring-4 focus:ring-[#427A72]/15"
-            >
-              {memberOptions.map((option) => (
-                <option key={option.grade} value={option.grade}>
-                  {option.label} ({formatSeminarPrice(option.price)})
-                </option>
-              ))}
-            </select>
-          </label>
-        )}
-
-        {!isMember && <input type="hidden" name="memberGrade" value="BASIC" />}
-
-        {hasFee && (
-        <div className="mb-6 rounded-xl bg-[#E8F0EE] p-4">
-          <p className="mb-1 text-[13px] font-medium text-[#427A72]">
-            무통장 입금 계좌 ({displayFee})
           </p>
-          <div className="text-[15px] font-bold text-[#1D1D1F]">
-            국민은행 474501-01-178256
-            <br />
-            (예금주: 한국대학생제약바이오산업협회)
-          </div>
-          <p className="mt-2 text-xs font-normal text-[#86868B]">
-            * 폼 제출 후 입금이 확인되어야 최종 신청이 완료됩니다.
-            <br />
-            * 입금자명과 신청자명이 동일해야 확인이 가능합니다.
+          <p className="mt-2 text-xs text-[#86868B]">
+            등급은 마이페이지에서 신청·확인할 수 있습니다.
           </p>
         </div>
-        )}
 
         <button
           type="submit"

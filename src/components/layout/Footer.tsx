@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 function InstagramIcon({ className }: { className?: string }) {
   return (
     <svg viewBox="0 0 24 24" className={className} fill="currentColor" aria-hidden>
@@ -17,7 +19,6 @@ function NaverBlogIcon({ className }: { className?: string }) {
 function NaverCafeIcon({ className }: { className?: string }) {
   return (
     <svg viewBox="0 0 24 24" className={className} fill="currentColor" aria-hidden>
-      {/* 네이버 카페 앱스토어 공식 앱 아이콘 형태, 푸터 모노톤에 맞춤 */}
       <rect x="3" y="3" width="18" height="18" rx="4.5" />
       <path
         d="M7.4 8.2c0-.4.32-.7.72-.7h7.76c.4 0 .72.3.72.7v6.05c0 .4-.32.7-.72.7H12.2L9.7 16.9a.55.55 0 0 1-.9-.43v-1.5H8.12c-.4 0-.72-.3-.72-.7z"
@@ -49,6 +50,12 @@ const socialLinks = [
   },
 ];
 
+const termsLinks = [
+  { href: "/terms/charter", label: "정관" },
+  { href: "/terms/privacy", label: "개인정보처리방침" },
+  { href: "/terms/service", label: "이용약관" },
+];
+
 export function Footer() {
   return (
     <footer className="border-t border-black/5 bg-[#F4F4F5] px-4 py-10 pb-[max(2.5rem,env(safe-area-inset-bottom))] text-[#373737] sm:px-6 md:py-16">
@@ -64,11 +71,18 @@ export function Footer() {
             </a>
           </div>
           <div className="border-b border-black/10 px-1 py-4 sm:px-5 sm:py-5 md:border-b-0 md:border-r">
-            <p className="text-xs text-[#777]">계좌</p>
-            <p className="mt-1 break-keep text-[18px] font-black tracking-[-0.02em] text-[#1D1D1F] md:text-[20px]">
-              국민 474501-01-178256
-            </p>
-            <p className="mt-1 text-xs text-[#777]">예금주 : 한국대학생제약바이오산업협회</p>
+            <p className="text-xs text-[#777]">약관 및 정책</p>
+            <div className="mt-2 flex flex-wrap gap-2">
+              {termsLinks.map((link) => (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className="inline-flex items-center rounded-full border border-black/10 bg-white px-3 py-1.5 text-[13px] font-semibold text-[#373737] transition hover:border-[#C1E4D7] hover:bg-[#F7FFFC]"
+                >
+                  {link.label}
+                </Link>
+              ))}
+            </div>
           </div>
           <div className="px-1 py-4 sm:px-5 sm:py-5">
             <p className="text-xs text-[#777]">소셜미디어</p>

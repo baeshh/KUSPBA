@@ -126,7 +126,7 @@ export default function HomePage() {
     {
       id: "pioneer",
       title: "개척 (Pioneer)",
-      desc: "주체적인 도전 정신으로 우리의 역량을\n산업 전체의 에너지로 확장합니다.",
+      desc: "주체적인 도전 정신으로 내부의 역량을\n산업 전체의 에너지로 확장합니다.",
       image: "/core-value-pioneer.png",
     },
     {
@@ -348,31 +348,27 @@ export default function HomePage() {
                 ) : (
                   <>
                     <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-[#E8F0EE] via-[#F7FFFC] to-white lg:hidden">
-                      <div className="relative h-[92px] w-[92px]">
-                        <Image
-                          src="/logo-symbol.png"
-                          alt="KUSPBA 로고"
-                          fill
-                          sizes="92px"
-                          className="object-contain"
-                          priority
-                        />
-                      </div>
+                      <img
+                        src="/logo-symbol.svg"
+                        alt="KUSPBA 로고"
+                        width={240}
+                        height={240}
+                        className="h-[min(42vw,200px)] w-[min(42vw,200px)] object-contain"
+                        decoding="async"
+                      />
                     </div>
                     <div
                       id="cube3d"
                       className="hero-slide-visual relative hidden h-full w-full overflow-hidden rounded-[34px] border border-black/5 bg-gradient-to-br from-white to-[#F7FFFC] shadow-[0_16px_36px_rgba(0,0,0,0.08)] lg:flex lg:items-center lg:justify-center"
                     >
-                      <div className="relative h-[248px] w-[248px]">
-                        <Image
-                          src="/logo-symbol.png"
-                          alt="KUSPBA 로고"
-                          fill
-                          sizes="248px"
-                          className="object-contain p-4"
-                          priority
-                        />
-                      </div>
+                      <img
+                        src="/logo-symbol.svg"
+                        alt="KUSPBA 로고"
+                        width={420}
+                        height={420}
+                        className="h-[min(72%,420px)] w-[min(72%,420px)] object-contain"
+                        decoding="async"
+                      />
                     </div>
                   </>
                 )}
@@ -626,13 +622,16 @@ export default function HomePage() {
         )}
       </section>
 
+      <section className="mx-auto max-w-[1000px] px-4 pb-4 text-center sm:px-6">
+        <h2 className="break-keep text-[24px] font-black tracking-[-0.03em] text-[#222] md:text-[40px]">
+          우리가 선택한 세 가지 태도
+        </h2>
+      </section>
+
       <section className="bg-[#F8F9FA] px-4 py-14 sm:px-6 md:py-36">
         <div className="mx-auto max-w-[1200px]">
           <div className={`${revealClass} mb-8 text-center md:mb-14`}>
             <p className="mb-2 text-base font-semibold text-[#8ABFB2] md:text-xl">Programs</p>
-            <h2 className="mb-2 break-keep text-[24px] font-bold tracking-[-0.03em] text-[#222] md:mb-3 md:text-[44px]">
-              우리가 선택한 세 가지 태도
-            </h2>
             <p className="mb-3 break-keep text-[24px] font-bold tracking-[-0.03em] text-[#222] md:mb-4 md:text-[44px]">
               학생과 산업을 연결하는 디딤돌
             </p>
@@ -640,7 +639,7 @@ export default function HomePage() {
               모든 프로그램은 KUSPBA의 핵심가치에서 시작됩니다.
             </p>
           </div>
-          <div className="grid gap-4 md:grid-cols-3 md:gap-8">
+          <div className="grid items-stretch gap-4 md:grid-cols-3 md:gap-8">
             {[
               {
                 tag: "모집 중",
@@ -651,9 +650,11 @@ export default function HomePage() {
                 body: (
                   <>
                     <strong className="font-extrabold text-[#222]">직무 세미나</strong>와{" "}
-                    <strong className="font-extrabold text-[#222]">CCP</strong>를 통해 교실 밖 산업 현장과 연결하고,{" "}
+                    <strong className="font-extrabold text-[#222]">CCP</strong>를 통해
                     <br className="hidden md:block" />
-                    사회 공헌 활동을 통해 나와 세상을 연결합니다.
+                    교실 밖 산업 현장과 연결하고,
+                    <br className="hidden md:block" />
+                    <strong className="font-extrabold text-[#222]">봉사활동</strong>을 통해 나와 세상을 연결합니다.
                   </>
                 ),
               },
@@ -837,14 +838,18 @@ export default function HomePage() {
               {[...partnerLogos, ...partnerLogos].map((src, idx) => (
                 <div
                   key={`${src}-${idx}`}
-                  className="mx-2 flex h-[78px] w-[98px] shrink-0 items-center justify-center rounded-[18px] bg-white p-2 shadow-sm ring-1 ring-black/5 md:mx-3 md:h-[92px] md:w-[118px] md:p-3"
+                  className={`mx-2 flex shrink-0 items-center justify-center rounded-[18px] bg-white p-2 shadow-sm ring-1 ring-black/5 md:mx-3 md:p-3 ${
+                    src.includes("skku")
+                      ? "h-[88px] w-[112px] md:h-[104px] md:w-[132px]"
+                      : "h-[78px] w-[98px] md:h-[92px] md:w-[118px]"
+                  }`}
                 >
                   <Image
                     src={src}
                     alt={`협력 대학 로고 ${(idx % partnerLogos.length) + 1}`}
-                    width={92}
-                    height={92}
-                    sizes="92px"
+                    width={src.includes("skku") ? 110 : 92}
+                    height={src.includes("skku") ? 110 : 92}
+                    sizes={src.includes("skku") ? "110px" : "92px"}
                     unoptimized
                     className="h-full w-full object-contain"
                   />

@@ -1,11 +1,7 @@
 import Link from "next/link";
 import { requireCompletedProfile } from "@/lib/profile-server";
 import { prisma } from "@/lib/db";
-import {
-  getMemberGradeLabels,
-  getMemberGradeOptions,
-  MEMBER_SELECTABLE_GRADES,
-} from "@/lib/member-grades";
+import { getMemberGradeLabels, getMemberGradeOptions } from "@/lib/member-grades";
 import { MembershipApplyForm } from "@/components/auth/MembershipApplyForm";
 import { CancelApplicationButton } from "@/components/seminars/CancelApplicationButton";
 
@@ -32,19 +28,12 @@ export default async function MyPage() {
     }),
   ]);
 
-  const selectableGrades = gradeOptions.filter((option) =>
-    (MEMBER_SELECTABLE_GRADES as readonly string[]).includes(option.value),
-  );
   const currentGradeLabel = gradeLabels[user.grade] ?? user.grade;
-  const requestedGradeLabel = user.requestedGrade
-    ? (gradeLabels[user.requestedGrade] ?? user.requestedGrade)
-    : null;
-  const isPending =
-    Boolean(user.requestedGrade) && user.requestedGrade !== user.grade;
+  const gradeLocked = Boolean(user.gradeRequestedAt);
 
   return (
     <div className="mx-auto max-w-[880px] px-4 pb-16 pt-[calc(var(--header-offset)+20px)] sm:px-6 md:pb-24 md:pt-[120px]">
-      <p className="mb-2 text-sm font-bold text-[#8ABFB2]">My Page</p>
+      <p className="mb-2 text-sm font-bold text-[#8ABFB2]">My page</p>
       <h1 className="mb-2 break-keep text-[26px] font-black tracking-[-0.03em] text-[#222] md:text-[40px]">
         {user.name}님, 환영합니다
       </h1>
@@ -55,7 +44,7 @@ export default async function MyPage() {
         </p>
       ) : null}
       <p className="mb-10 text-[#666]">
-        내 신청내역과 회원 등급을 한곳에서 확인하고, 로그인과 함께 등급 신청도 할 수 있습니다.
+        내 신청내역과 회원 등급을 한곳에서 확인하고, 등급 신청도 할 수 있습니다.
       </p>
 
       <section className="mb-8 rounded-[20px] border border-[#C1E4D7]/80 bg-[#F7FFFC] p-5 md:rounded-[24px] md:p-8">
@@ -63,20 +52,11 @@ export default async function MyPage() {
         <p className="text-2xl font-black tracking-[-0.03em] text-[#222]">
           {currentGradeLabel}
         </p>
-        {isPending && requestedGradeLabel ? (
-          <p className="mt-2 text-sm font-medium text-[#427A72]">
-            {requestedGradeLabel} 등급 신청이 접수되어 심사 중입니다.
-          </p>
-        ) : (
-          <p className="mt-2 text-sm text-[#666]">
-            현재 반영된 회원 등급입니다. 프로그램 참가비에 적용됩니다.
-          </p>
-        )}
-        {user.alreadyMember && user.membershipClaimStatus === "PENDING" ? (
-          <p className="mt-2 text-sm font-medium text-[#427A72]">
-            기존 회원 가입 정보는 관리자 확인 대기 중입니다.
-          </p>
-        ) : null}
+        <p className="mt-2 text-sm text-[#666]">
+          {gradeLocked
+            ? "현재 반영된 회원 등급입니다. 프로그램 참가비에 적용됩니다."
+            : "등급을 신청하면 프로그램 참가비에 바로 반영됩니다."}
+        </p>
       </section>
 
       <section className="mb-10">
@@ -86,11 +66,9 @@ export default async function MyPage() {
           phone={user.phone ?? ""}
           school={user.school ?? ""}
           department={user.department ?? ""}
-          alreadyMember={user.alreadyMember}
-          membershipClaimStatus={user.membershipClaimStatus}
-          requestedGrade={user.requestedGrade ?? ""}
-          gradeOptions={selectableGrades}
-          alreadyRequested={Boolean(user.requestedGrade)}
+          grade={user.grade}
+          gradeOptions={gradeOptions}
+          gradeLocked={gradeLocked}
         />
       </section>
 
@@ -121,8 +99,7 @@ export default async function MyPage() {
                       {application.seminar.title}
                     </p>
                     <p className="mt-1 text-sm text-[#666]">
-                      신청일 {application.createdAt.toLocaleDateString("ko-KR")} ·{" "}
-                      {application.isMember ? "협회원" : "일반"}
+                      신청일 {application.createdAt.toLocaleDateString("ko-KR")}
                     </p>
                   </div>
                   <div className="flex flex-wrap items-center gap-2">

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { NoticeRichEditor } from "@/components/NoticeRichEditor";
 import {
   AdminPagination,
@@ -28,12 +28,27 @@ type NoticeItem = {
   createdAtLabel: string;
 };
 
-export function NoticesAdminClient({ notices }: { notices: NoticeItem[] }) {
-  const [mode, setMode] = useState<"list" | "create" | "edit">("list");
+export function NoticesAdminClient({
+  notices,
+  autoOpenCreate = false,
+}: {
+  notices: NoticeItem[];
+  autoOpenCreate?: boolean;
+}) {
+  const [mode, setMode] = useState<"list" | "create" | "edit">(
+    autoOpenCreate ? "create" : "list",
+  );
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const formRef = useRef<HTMLDivElement>(null);
 
   const selected = notices.find((notice) => notice.id === selectedId) ?? null;
   const { page, setPage, totalPages, pageItems, pageSize } = useAdminPagination(notices);
+
+  useEffect(() => {
+    if (mode === "create" && formRef.current) {
+      formRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  }, [mode]);
 
   return (
     <div className="space-y-6">
@@ -111,7 +126,14 @@ export function NoticesAdminClient({ notices }: { notices: NoticeItem[] }) {
                         </StatusBadge>
                       </td>
                       <td className="px-8 py-4" onClick={(event) => event.stopPropagation()}>
-                        <form action={deleteNotice}>
+                        <form
+                          action={deleteNotice}
+                          onSubmit={(event) => {
+                            if (!window.confirm("이 공지사항을 삭제하시겠습니까?")) {
+                              event.preventDefault();
+                            }
+                          }}
+                        >
                           <input type="hidden" name="id" value={notice.id} />
                           <button type="submit" className={adminBtnDangerClass}>
                             삭제
@@ -136,7 +158,7 @@ export function NoticesAdminClient({ notices }: { notices: NoticeItem[] }) {
       </AdminCard>
 
       {mode === "create" ? (
-        <div className="space-y-3">
+        <div ref={formRef} className="space-y-3">
           <div className="flex justify-end">
             <button
               type="button"

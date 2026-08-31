@@ -6,14 +6,8 @@ import { getCurrentUser } from "@/lib/auth";
 import { syncSeminarCapacity } from "@/lib/seminar-capacity-sync";
 import { findActiveUserApplication } from "@/lib/seminar-applications";
 import { formatAffiliation } from "@/lib/profile";
+import { formatPhone, normalizeEmail } from "@/lib/format";
 import { buildSeminarGradeOptions, hasSeminarGradePrices } from "@/lib/seminars";
-
-function memberGrade(value: unknown, isMember: boolean) {
-  if (!isMember) return MemberGrade.BASIC;
-  return Object.values(MemberGrade).includes(value as MemberGrade)
-    ? (value as MemberGrade)
-    : MemberGrade.REGULAR;
-}
 
 function fallbackFeeAmount(fee: string, isMember: boolean, submittedAmount: number) {
   if (isMember) return 0;
@@ -40,10 +34,8 @@ export async function POST(request: NextRequest) {
     const school = String(body.school || "").trim();
     const department = String(body.department || "").trim();
     const affiliation = formatAffiliation(school, department) || String(body.affiliation || "").trim();
-    const phone = String(body.phone || "").trim();
-    const email = String(body.email || "").trim();
-    const isMember = Boolean(body.isMember);
-    const grade = memberGrade(body.memberGrade, isMember);
+    const phone = formatPhone(String(body.phone || "").trim());
+    const email = normalizeEmail(String(body.email || "").trim());
     const submittedAmount = Number(body.depositAmount || 0);
 
     if (!seminarId || !name || !affiliation || !phone || !email) {
@@ -83,6 +75,9 @@ export async function POST(request: NextRequest) {
         throw new ApplicationError(409, "정원이 마감되어 신청할 수 없습니다.", "FULL");
       }
 
+      const grade = sessionUser.grade as MemberGrade;
+      const isMember = grade !== MemberGrade.BASIC;
+
       const prices = {
         priceBasic: seminar.priceBasic,
         priceRegular: seminar.priceRegular,
@@ -109,7 +104,6 @@ export async function POST(request: NextRequest) {
           department: department || undefined,
           affiliation,
           email,
-          grade: sessionUser.grade === "BASIC" ? grade : sessionUser.grade,
         },
       });
 
