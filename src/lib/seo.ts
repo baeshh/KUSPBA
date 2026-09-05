@@ -121,6 +121,17 @@ export const PAGE_SEO: Record<PageSeoKey, PageSeo> = {
   },
 };
 
+/** 카카오톡·SNS 링크 미리보기용 대표 이미지 (영문+로고) */
+export const OG_IMAGE_PATH = "/og-image.png";
+export const OG_IMAGE_URL = `${SITE_URL}${OG_IMAGE_PATH}`;
+
+const OG_IMAGE = {
+  url: OG_IMAGE_URL,
+  width: 1200,
+  height: 630,
+  alt: "KUSPBA — Korea University Students Pharmaceutical & Bio Association",
+} as const;
+
 export function buildPageMetadata(
   key: PageSeoKey,
   overrides?: Partial<PageSeo>,
@@ -133,6 +144,7 @@ export function buildPageMetadata(
     title,
     description,
     keywords: seo.keywords,
+    metadataBase: new URL(SITE_URL),
     openGraph: {
       title,
       description,
@@ -140,6 +152,13 @@ export function buildPageMetadata(
       locale: "ko_KR",
       type: "website",
       url: SITE_URL,
+      images: [OG_IMAGE],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: [OG_IMAGE_URL],
     },
   };
 }
@@ -173,12 +192,20 @@ export function buildSeminarMetadata(input: {
     title,
     description,
     keywords: [...base.keywords, input.title],
+    metadataBase: new URL(SITE_URL),
     openGraph: {
       title,
       description,
       siteName: SITE_NAME,
       locale: "ko_KR",
       type: "website",
+      images: [OG_IMAGE],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: [OG_IMAGE_URL],
     },
   };
 }
