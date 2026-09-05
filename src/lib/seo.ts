@@ -121,12 +121,16 @@ export const PAGE_SEO: Record<PageSeoKey, PageSeo> = {
   },
 };
 
-/** 카카오톡·SNS 링크 미리보기용 대표 이미지 (영문+로고) */
+/** 카카오톡·SNS 링크 미리보기용 대표 이미지 (영문+로고)
+ *  v 쿼리는 카카오 스크랩 캐시를 깨기 위한 버전입니다. 이미지 바꿀 때 숫자를 올려 주세요. */
 export const OG_IMAGE_PATH = "/og-image.png";
-export const OG_IMAGE_URL = `${SITE_URL}${OG_IMAGE_PATH}`;
+export const OG_IMAGE_VERSION = "20260905";
+export const OG_IMAGE_URL = `${SITE_URL}${OG_IMAGE_PATH}?v=${OG_IMAGE_VERSION}`;
 
 const OG_IMAGE = {
   url: OG_IMAGE_URL,
+  secureUrl: OG_IMAGE_URL,
+  type: "image/png",
   width: 1200,
   height: 630,
   alt: "KUSPBA — Korea University Students Pharmaceutical & Bio Association",
