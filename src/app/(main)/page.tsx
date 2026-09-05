@@ -114,6 +114,7 @@ export default function HomePage() {
   const [isHeroHovered, setIsHeroHovered] = useState(false);
   const [isHeroTouching, setIsHeroTouching] = useState(false);
   const [openCoreValue, setOpenCoreValue] = useState<string | null>(null);
+  const [showPartnerLogos, setShowPartnerLogos] = useState(false);
   const heroTouchStart = useRef<{ x: number; y: number } | null>(null);
 
   const coreValues = [
@@ -139,6 +140,10 @@ export default function HomePage() {
 
   const activeCoreValue =
     coreValues.find((value) => value.id === openCoreValue) ?? null;
+
+  useEffect(() => {
+    setShowPartnerLogos(true);
+  }, []);
 
   useEffect(() => {
     if (!openCoreValue) return;
@@ -835,26 +840,29 @@ export default function HomePage() {
 
           <div className="overflow-hidden rounded-[24px] border border-[#C1E4D7]/70 bg-gradient-to-r from-white via-[#F7FFFC] to-white px-2 py-5 shadow-[0_14px_30px_rgba(138,191,178,0.18)]">
             <div className="partner-marquee-track flex w-max items-center">
-              {[...partnerLogos, ...partnerLogos].map((src, idx) => (
-                <div
-                  key={`${src}-${idx}`}
-                  className={`mx-2 flex shrink-0 items-center justify-center rounded-[18px] bg-white p-2 shadow-sm ring-1 ring-black/5 md:mx-3 md:p-3 ${
-                    src.includes("skku")
-                      ? "h-[88px] w-[112px] md:h-[104px] md:w-[132px]"
-                      : "h-[78px] w-[98px] md:h-[92px] md:w-[118px]"
-                  }`}
-                >
-                  <Image
-                    src={src}
-                    alt={`협력 대학 로고 ${(idx % partnerLogos.length) + 1}`}
-                    width={src.includes("skku") ? 110 : 92}
-                    height={src.includes("skku") ? 110 : 92}
-                    sizes={src.includes("skku") ? "110px" : "92px"}
-                    unoptimized
-                    className="h-full w-full object-contain"
-                  />
-                </div>
-              ))}
+              {showPartnerLogos
+                ? [...partnerLogos, ...partnerLogos].map((src, idx) => (
+                    <div
+                      key={`${src}-${idx}`}
+                      className={`mx-2 flex shrink-0 items-center justify-center rounded-[18px] bg-white p-2 shadow-sm ring-1 ring-black/5 md:mx-3 md:p-3 ${
+                        src.includes("skku")
+                          ? "h-[88px] w-[112px] md:h-[104px] md:w-[132px]"
+                          : "h-[78px] w-[98px] md:h-[92px] md:w-[118px]"
+                      }`}
+                    >
+                      <Image
+                        src={src}
+                        alt={`협력 대학 로고 ${(idx % partnerLogos.length) + 1}`}
+                        width={src.includes("skku") ? 110 : 92}
+                        height={src.includes("skku") ? 110 : 92}
+                        sizes={src.includes("skku") ? "110px" : "92px"}
+                        unoptimized
+                        loading="lazy"
+                        className="h-full w-full object-contain"
+                      />
+                    </div>
+                  ))
+                : null}
             </div>
           </div>
         </div>
