@@ -5,8 +5,12 @@ import { buildPageMetadata, OG_IMAGE_URL } from "@/lib/seo";
 export const metadata: Metadata = {
   ...buildPageMetadata("home"),
   icons: {
-    icon: "/logo-symbol.png",
-    apple: "/logo-symbol.png",
+    icon: [
+      { url: "/favicon.ico", sizes: "any" },
+      { url: "/icon.png", type: "image/png", sizes: "512x512" },
+      { url: "/logo-symbol.png", type: "image/png", sizes: "512x512" },
+    ],
+    apple: [{ url: "/apple-icon.png", sizes: "180x180", type: "image/png" }],
   },
 };
 
