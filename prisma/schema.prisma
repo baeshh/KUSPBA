@@ -18,6 +18,8 @@ model User {
   academicYear     String?
   affiliation      String?
   profileCompleted Boolean              @default(false)
+  termsAgreedAt              DateTime?
+  privacyCollectAgreedAt     DateTime?
   memberType       MemberType           @default(ASSOCIATE)
   alreadyMember            Boolean                 @default(false)
   claimedJoinName          String?

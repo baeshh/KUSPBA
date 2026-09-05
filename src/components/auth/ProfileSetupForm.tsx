@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ACADEMIC_YEAR_OPTIONS } from "@/lib/profile";
 
@@ -24,9 +25,16 @@ export function ProfileSetupForm({
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [agreeTerms, setAgreeTerms] = useState(false);
+  const [agreePrivacyCollect, setAgreePrivacyCollect] = useState(false);
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    if (!agreeTerms || !agreePrivacyCollect) {
+      setError("필수 약관에 모두 동의해 주세요.");
+      return;
+    }
+
     setIsSubmitting(true);
     setError(null);
 
@@ -41,6 +49,8 @@ export function ProfileSetupForm({
         academicYear: formData.get("academicYear"),
         phone: formData.get("phone"),
         email: formData.get("email"),
+        agreeTerms: true,
+        agreePrivacyCollect: true,
       }),
     });
 
@@ -135,11 +145,65 @@ export function ProfileSetupForm({
         </label>
       </div>
 
+      <div className="mt-8 rounded-2xl border border-black/8 bg-[#F7FFFC] px-4 py-5 md:px-5">
+        <p className="mb-4 text-sm font-bold text-[#222]">약관 동의</p>
+        <div className="space-y-3">
+          <label className="flex items-start gap-3 text-sm leading-relaxed text-[#444]">
+            <input
+              type="checkbox"
+              checked={agreeTerms}
+              onChange={(event) => setAgreeTerms(event.target.checked)}
+              className="mt-1 h-4 w-4 shrink-0 accent-[#427A72]"
+            />
+            <span>
+              <span className="font-semibold text-[#427A72]">[필수]</span> 홈페이지 이용약관에
+              동의합니다.{" "}
+              <Link
+                href="/terms/service"
+                target="_blank"
+                className="font-semibold text-[#427A72] underline underline-offset-2 hover:text-[#2D6A4F]"
+              >
+                (내용 보기)
+              </Link>
+            </span>
+          </label>
+          <label className="flex items-start gap-3 text-sm leading-relaxed text-[#444]">
+            <input
+              type="checkbox"
+              checked={agreePrivacyCollect}
+              onChange={(event) => setAgreePrivacyCollect(event.target.checked)}
+              className="mt-1 h-4 w-4 shrink-0 accent-[#427A72]"
+            />
+            <span>
+              <span className="font-semibold text-[#427A72]">[필수]</span> 회원가입 개인정보 수집
+              및 이용 안내를 확인했습니다.{" "}
+              <Link
+                href="/terms/signup-privacy"
+                target="_blank"
+                className="font-semibold text-[#427A72] underline underline-offset-2 hover:text-[#2D6A4F]"
+              >
+                (내용 보기)
+              </Link>
+            </span>
+          </label>
+        </div>
+        <p className="mt-4 text-sm text-[#666]">
+          ·{" "}
+          <Link
+            href="/terms/privacy"
+            target="_blank"
+            className="font-semibold text-[#427A72] underline underline-offset-2 hover:text-[#2D6A4F]"
+          >
+            개인정보처리방침 보기
+          </Link>
+        </p>
+      </div>
+
       {error ? <p className="mt-4 text-sm font-medium text-red-600">{error}</p> : null}
 
       <button
         type="submit"
-        disabled={isSubmitting}
+        disabled={isSubmitting || !agreeTerms || !agreePrivacyCollect}
         className="mt-6 inline-flex items-center justify-center rounded-full bg-[#373737] px-6 py-3 text-sm font-bold text-white transition hover:bg-[#222] disabled:opacity-60"
       >
         {isSubmitting ? "저장 중..." : "회원정보 저장하고 계속하기"}

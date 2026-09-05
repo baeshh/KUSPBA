@@ -13,7 +13,8 @@ export type PageSeoKey =
   | "notices"
   | "charter"
   | "privacy"
-  | "service";
+  | "service"
+  | "signupPrivacy";
 
 type PageSeo = {
   title: string;
@@ -118,6 +119,11 @@ export const PAGE_SEO: Record<PageSeoKey, PageSeo> = {
     title: "이용약관 | KUSPBA",
     description: "KUSPBA 웹사이트 이용약관.",
     keywords: ["KUSPBA 이용약관"],
+  },
+  signupPrivacy: {
+    title: "회원가입 개인정보 수집·이용 안내 | KUSPBA",
+    description: "KUSPBA 홈페이지 회원가입을 위한 개인정보 수집·이용 안내.",
+    keywords: ["KUSPBA 개인정보 수집이용", "회원가입 개인정보"],
   },
 };
 

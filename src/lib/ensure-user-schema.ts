@@ -10,6 +10,8 @@ const USER_COLUMNS: Array<[string, string]> = [
   ["claimedJoinSchool", "TEXT"],
   ["claimedJoinDepartment", "TEXT"],
   ["membershipClaimStatus", "TEXT NOT NULL DEFAULT 'NONE'"],
+  ["termsAgreedAt", "DATETIME"],
+  ["privacyCollectAgreedAt", "DATETIME"],
 ];
 
 let pending: Promise<void> | null = null;

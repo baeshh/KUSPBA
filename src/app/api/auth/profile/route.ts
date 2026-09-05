@@ -18,6 +18,8 @@ function parseProfileBody(body: Record<string, unknown>) {
   const phone = formatPhone(String(body.phone || "").trim());
   const emailRaw = String(body.email || "").trim();
   const email = emailRaw ? normalizeEmail(emailRaw) : "";
+  const agreeTerms = body.agreeTerms === true;
+  const agreePrivacyCollect = body.agreePrivacyCollect === true;
 
   if (isPlaceholderName(name) || name.length < 2) {
     return { error: "이름을 입력해 주세요." };
@@ -37,6 +39,11 @@ function parseProfileBody(body: Record<string, unknown>) {
   if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
     return { error: "이메일 형식이 올바르지 않습니다." };
   }
+  if (!agreeTerms || !agreePrivacyCollect) {
+    return { error: "필수 약관에 모두 동의해 주세요." };
+  }
+
+  const agreedAt = new Date();
 
   return {
     data: {
@@ -48,6 +55,8 @@ function parseProfileBody(body: Record<string, unknown>) {
       email: email || null,
       affiliation: formatAffiliation(school, department),
       profileCompleted: true,
+      termsAgreedAt: agreedAt,
+      privacyCollectAgreedAt: agreedAt,
     },
   };
 }

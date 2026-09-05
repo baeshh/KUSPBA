@@ -1,14 +1,11 @@
 import { TermsPageLayout } from "@/components/layout/TermsPageLayout";
 import { TermsBody } from "@/components/layout/TermsBody";
 import { buildPageMetadata } from "@/lib/seo";
-import { BODY, TITLE } from "@/lib/terms/privacy";
+import { BODY, TITLE } from "@/lib/terms/signup-privacy";
 
-export const metadata = buildPageMetadata("privacy", {
-  title: `${TITLE} | KUSPBA`,
-  description: "한국대학생제약바이오산업협회(KUSPBA) 개인정보처리방침.",
-});
+export const metadata = buildPageMetadata("signupPrivacy");
 
-export default function PrivacyPage() {
+export default function SignupPrivacyPage() {
   return (
     <TermsPageLayout title={TITLE}>
       <TermsBody text={BODY} />
